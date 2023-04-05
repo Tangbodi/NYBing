@@ -24,8 +24,8 @@ public class AllArticleController {
     @Autowired
     private AllArticleRepository allArticleRepository;
     @GetMapping("/article/all")
-    public List<Allarticle> display(HttpServletRequest request, Model model){
-        List <Allarticle> all = allArticleService.findAll();
-        return all;
+    public List<Allarticle> fetchAllArticles(){
+        List <Allarticle> allarticleList = allArticleService.getAllArticleList();
+        return allarticleList;
     }
 }

@@ -4,7 +4,8 @@ import com.example.demo.Entity.Allarticle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface AllArticleRepository extends JpaRepository<Allarticle,Long> {
-
 }

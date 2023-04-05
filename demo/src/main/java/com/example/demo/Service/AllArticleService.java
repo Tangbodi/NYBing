@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class AllArticleService implements service {
+public class AllArticleService {
     private static final Logger logger = LoggerFactory.getLogger(AllArticleService.class);
 
     @Autowired
@@ -24,8 +24,4 @@ public class AllArticleService implements service {
         return this.allArticleDAO.findAllArticle();
     }
 
-    @Override
-    public List<Allarticle> findAll() {
-        return allArticleRepository.findAll();
-    }
 }
