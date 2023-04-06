@@ -25,7 +25,7 @@ public class AllArticleController {
     private AllArticleRepository allArticleRepository;
     @GetMapping("/article/all")
     public List<Allarticle> fetchAllArticles(){
-        List <Allarticle> allarticleList = allArticleService.getAllArticleList();
+        List <Allarticle> allarticleList = allArticleService.getAllArticle();
         return allarticleList;
     }
 }

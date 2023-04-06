@@ -19,7 +19,7 @@ public class AllArticleService {
     @Autowired
     private AllArticleRepository allArticleRepository;
 
-    public List<Allarticle> getAllArticleList(){
+    public List<Allarticle> getAllArticle(){
 
         return this.allArticleDAO.findAllArticle();
     }
