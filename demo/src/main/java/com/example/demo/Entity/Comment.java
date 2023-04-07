@@ -1,6 +1,10 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 
@@ -28,13 +32,12 @@ public class Comment {
     @Column(name = "publishAt")
     private Instant publishAt;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "articleId")
+//    @JsonIgnoreProperties("hibernateLazyInitializer")
+    @JsonIgnore
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "articleId", nullable = false)
     private Article article;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "authorId", referencedColumnName = "userId")
-    private Article author;
 
     public Long getId() {
         return id;
@@ -90,14 +93,6 @@ public class Comment {
 
     public void setArticle(Article article) {
         this.article = article;
-    }
-
-    public Article getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(Article author) {
-        this.author = author;
     }
 
 }

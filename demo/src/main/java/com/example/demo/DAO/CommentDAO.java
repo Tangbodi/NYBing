@@ -15,7 +15,11 @@ public class CommentDAO {
 
     @Autowired
     private CommentRepository commentRepository;
-    public List<Comment> getAllCommentsByArticleId(Long articleId){
-       return commentRepository.findById(articleId);
+
+    public Comment saveComment(Comment comment){
+        return this.commentRepository.save(comment);
+    }
+    public List<Comment> findAllCommentByArticleId(Long articleId){
+        return commentRepository.findAllCommentByArticleId(articleId);
     }
 }

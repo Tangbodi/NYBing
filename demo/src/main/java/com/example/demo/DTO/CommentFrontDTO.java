@@ -1,6 +1,5 @@
 package com.example.demo.DTO;
 
-import com.example.demo.Entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -8,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
 
 @Getter
 @Setter
@@ -26,8 +24,5 @@ public class CommentFrontDTO {
     private Long fromId;
 
     private Long toId;
-
-    private Instant publishAt;
-    private User user;
 
 }

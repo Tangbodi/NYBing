@@ -1,10 +1,12 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "articles")
@@ -33,8 +35,11 @@ public class Article {
     @Column(name = "author", length = 20)
     private String author;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId")
+//    @JsonIgnoreProperties("hibernateLazyInitializer")
+    @JsonIgnore
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "userId", nullable = false)
     private User user;
 
     public Long getId() {
@@ -92,6 +97,5 @@ public class Article {
     public void setUser(User user) {
         this.user = user;
     }
-
 
 }

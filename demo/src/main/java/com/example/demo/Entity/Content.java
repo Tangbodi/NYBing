@@ -1,5 +1,7 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -18,6 +20,7 @@ public class Content {
     @Column(name = "images")
     private byte[] images;
 
+    @JsonIgnore
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "articleId", nullable = false)

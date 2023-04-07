@@ -1,15 +1,14 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Entity.Article;
+import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.ArticleRepository;
 import com.example.demo.Service.ArticleService;
 import com.example.demo.Service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -32,13 +31,9 @@ public class ArticleController {
 
         return articleService.saveArticle(article);
     }
-    @GetMapping("/article/{id}")
-    public ModelAndView display(@PathVariable Long id, Model model){
-        ModelAndView mv = new ModelAndView();
-        String str = articleRepository.getById(id).getTextrender();
-        model.addAttribute("render",str);
-        mv.setViewName("forgot_password_form");
-        return mv;
+    @GetMapping("/article/{articleId}")
+    public Article getArticle(@PathVariable Long articleId){
+        return articleService.findArticleById(articleId);
     }
 //    @PostMapping("/images/save")
 //    public Image saveImage(HttpServletRequest request, @RequestParam("image") MultipartFile multipartFile) throws IOException {

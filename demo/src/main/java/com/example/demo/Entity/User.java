@@ -17,7 +17,7 @@ public class User {
 
     @Size(max = 20)
     @NotNull
-    @Column(name = "userName", nullable = false, length = 20,unique = true)
+    @Column(name = "userName", nullable = false, length = 20)
     private String userName;
 
     @Size(max = 20)
@@ -40,9 +40,9 @@ public class User {
     @Column(name = "email", length = 30)
     private String email;
 
-    @Size(max = 255)
+    @Size(max = 60)
     @NotNull
-    @Column(name = "password", nullable = false)
+    @Column(name = "password", nullable = false, length = 60)
     private String password;
 
     @Column(name = "registeredAt")
@@ -56,10 +56,7 @@ public class User {
     private String resetPasswordToken;
 
     @OneToMany(mappedBy = "user")
-    private Set<UserPasswordHistory> userPasswordHistories = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "user")
-    private Set<UserLoginHistory> userLoginHistories = new LinkedHashSet<>();
+    private Set<Article> articles = new LinkedHashSet<>();
 
     public Long getId() {
         return id;
@@ -149,21 +146,12 @@ public class User {
         this.resetPasswordToken = resetPasswordToken;
     }
 
-    public Set<UserPasswordHistory> getUserPasswordHistories() {
-        return userPasswordHistories;
+    public Set<Article> getArticles() {
+        return articles;
     }
 
-    public void setUserPasswordHistories(Set<UserPasswordHistory> userPasswordHistories) {
-        this.userPasswordHistories = userPasswordHistories;
-    }
-
-
-    public Set<UserLoginHistory> getUserLoginHistories() {
-        return userLoginHistories;
-    }
-
-    public void setUserLoginHistories(Set<UserLoginHistory> userLoginHistories) {
-        this.userLoginHistories = userLoginHistories;
+    public void setArticles(Set<Article> articles) {
+        this.articles = articles;
     }
 
 }

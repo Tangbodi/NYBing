@@ -16,12 +16,13 @@ public class ArticleService {
 
     @Autowired
     private ArticleDAO articleDAO;
-    @Autowired
-    private UserService userService;
+
     public Article saveArticle(Article article) throws IOException {
-
-
         article.setPublishAt(Instant.now());
         return articleDAO.saveArticle(article);
+    }
+    public Article findArticleById(Long articleId){
+
+        return articleDAO.findArticleById(articleId);
     }
 }
