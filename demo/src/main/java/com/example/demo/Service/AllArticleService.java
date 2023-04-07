@@ -23,5 +23,8 @@ public class AllArticleService {
 
         return this.allArticleDAO.findAllArticle();
     }
+    public Allarticle updateCommentAndView(Long articleId){
+        return this.allArticleDAO.updateCommentAndViewByArticleId(articleId);
+    }
 
 }
