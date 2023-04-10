@@ -4,33 +4,37 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.Instant;
 
 @Entity
 @Table(name = "user_password_history")
 public class UserPasswordHistory {
-    @EmbeddedId
-    private UserPasswordHistoryId id;
+    @Id
+    @Column(name = "userId", nullable = false)
+    private Long id;
 
-    @MapsId("userId")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "userId", nullable = false)
     private User user;
 
-    @NotNull
-    @Column(name = "startDate", nullable = false)
+    @Size(max = 60)
+    @Column(name = "passwordHash", length = 60)
+    private String passwordHash;
+
+    @Column(name = "startDate")
     private Instant startDate;
 
     @Column(name = "endDate")
     private Instant endDate;
 
-    public UserPasswordHistoryId getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(UserPasswordHistoryId id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -40,6 +44,14 @@ public class UserPasswordHistory {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public Instant getStartDate() {

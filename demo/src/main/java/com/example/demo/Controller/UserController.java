@@ -1,9 +1,14 @@
 package com.example.demo.Controller;
 
+import com.example.demo.DAO.UserPasswordHistoryDAO;
 import com.example.demo.DTO.LoginDTO;
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.UserNotFoundException;
+import com.example.demo.Repository.UserPasswordHistoryRepository;
 import com.example.demo.Repository.UserRepository;
+import com.example.demo.Service.EmailValidatorService;
+import com.example.demo.Service.UserPasswordHistoryService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Util.SessionManagementUtil;
 import com.example.demo.Validator.RegisterUserValidator;
@@ -44,6 +49,21 @@ public class UserController {
     private UserRepository userRepository;
     @Autowired
     private JavaMailSender mailSender;
+    @Autowired
+    private UserPasswordHistoryService userPasswordHistoryService;
+    @Autowired
+    private UserPasswordHistoryDAO userPasswordHistoryDAO;
+    @Autowired
+    private UserPasswordHistoryRepository userPasswordHistoryRepository;
+    @Autowired
+    private EmailValidatorService emailValidatorService;
+    String Token;
+
+    @RequestMapping("/sendEmail")
+    public void sendEmail(String recipientEmail){
+        Token = emailValidatorService.getRandomToken();
+        emailValidatorService.sendSimpleMail();
+    }
     @PostMapping("/user/register")
     public int register (@RequestBody User newUser, BindingResult bindingResult) throws IOException {
         registerUserValidator.validate(newUser, bindingResult);
@@ -51,21 +71,27 @@ public class UserController {
         int res=0;
         if (bindingResult.hasErrors()) {
             res=1;
-            logger.info("Password should be minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character::");
+            logger.info("Password should be minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character::"+newUser.getPassword());
         }
         else if (this.userService.checkIfUserRegistered(newUser)) {
             res=2;
-            logger.info("Oops. An account with this username already exists::");
+            logger.info("Oops. An account with this username already exists::"+newUser.getUserName());
         }
 
         else {
             userService.registerUser(newUser);
+//            userPasswordHistoryService.saveUserPasswordHistory(newUser);
             logger.info("User successfully registered::");
         }
         return res;
     }
-    @PostMapping("/login")
-    public User typeToLogin(@RequestBody LoginDTO login, HttpServletRequest request, HttpServletResponse response)throws IOException {
+    @RequestMapping("/verifyToken")
+    public boolean verifyToken(String input){
+        int res = input.compareTo(Token);
+        return res==0 ? true : false;
+    }
+    @PostMapping("/user/login")
+    public User UserLogin(@RequestBody LoginDTO login, HttpServletRequest request, HttpServletResponse response)throws IOException {
 
         logger.info( login.getUserName());
         logger.info(login.getPassword());
@@ -83,26 +109,33 @@ public class UserController {
         }
         return null;
     }
-    @PutMapping("/user/update/{id}")
-    public User updateUserById(HttpServletRequest request, @RequestBody User newUser, @PathVariable Long id){
+    @PutMapping("/user/update/{userId}")
+    public User updateUserById(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable Long userId){
+        if (!this.sessionManagementUtil.doesSessionExist(request))
+        {
+            logger.info("Please login to access this page");
+//            return null;
+        }
+        logger.info(userDTO.getFirstName());
+        logger.info(userDTO.getLastName());
+        logger.info(userDTO.getEmail());
+        logger.info(userDTO.getPhone());
+        return userService.updateUserById(userDTO,userId);
+    }
+    @GetMapping("/user/info/{userId}")
+    public User getUserById(HttpServletRequest request, @PathVariable Long userId) {
         if (!this.sessionManagementUtil.doesSessionExist(request))
         {
             logger.info("Please login to access this page");
         }
-        return userService.updateUserById(newUser,id);
-    }
-    @GetMapping("/user/{id}")
-    public User getStockById(@PathVariable Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
-    @PostMapping("/forgot_password")
+    @PostMapping("/user/forgot_password")
     public String processForgotPassword(HttpServletRequest request,@RequestBody User user){
 
         String email = user.getEmail();
-        logger.info(email);
         String token = RandomString.make(30);
         String siteURL = request.getRequestURL().toString();
         siteURL.replace(request.getServletPath(),"");

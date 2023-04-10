@@ -1,9 +1,12 @@
 package com.example.demo.Service;
 
 import com.example.demo.DAO.UserDAO;
+import com.example.demo.DAO.UserPasswordHistoryDAO;
 import com.example.demo.DTO.LoginDTO;
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.UserNotFoundException;
+import com.example.demo.Repository.UserPasswordHistoryRepository;
 import com.example.demo.Repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
@@ -22,12 +25,17 @@ public class UserService {
     private UserDAO userDAO;
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private UserPasswordHistoryDAO userPasswordHistoryDAO;
+    @Autowired
+    private UserPasswordHistoryService userPasswordHistoryService;
     public boolean registerUser(User newUser) throws IllegalStateException {
         logger.info("Registering user::");
-        newUser.setPassword(BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt()));
+        String password = BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt());
+        newUser.setPassword(password);
         newUser.setRegisteredAt(Instant.now());
         this.userDAO.saveUser(newUser);
+//        userPasswordHistoryService.saveUserPasswordHistory(newUser);
         return true;
     }
     public boolean checkIfUserRegistered (User newUser)
@@ -72,9 +80,9 @@ public class UserService {
     public User getUserProfileById(Long id){
         return this.userDAO.getUserProfileById(id);
     }
-    public User updateUserById(User newUser, Long id){
-        newUser.setPassword(BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt()));
-        return this.userDAO.updateUserById(newUser,id);
+    public User updateUserById(UserDTO userDTO, Long id){
+
+        return this.userDAO.updateUserById(userDTO,id);
     }
     @Transactional
     public void updateResetPasswordToken(String token, String email){
@@ -96,8 +104,10 @@ public class UserService {
 //        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 //        String encodePassword = passwordEncoder.encode(newPassword);
 //        user.setPassword(encodePassword);
-        user.setPassword(BCrypt.hashpw(newPassword,BCrypt.gensalt()));
+        String password = BCrypt.hashpw(newPassword,BCrypt.gensalt());
+        user.setPassword(password);
         user.setResetPasswordToken(null);
+
         this.userDAO.saveUser(user);
     }
 

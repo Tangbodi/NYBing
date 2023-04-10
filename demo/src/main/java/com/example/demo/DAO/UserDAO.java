@@ -1,5 +1,6 @@
 package com.example.demo.DAO;
 
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.UserRepository;
@@ -30,11 +31,27 @@ public class UserDAO {
 
     public int checkIfUserExists(String userName)
     {
-        logger.info("Checking if user exists::");
+        logger.info("Checking if user exists::"+userName);
         int result = 0;
         try {
             Query query = this.entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.userName = ?1");
             query.setParameter(1, userName);
+            query.setMaxResults(1);
+            Long resultInLong = (Long) query.getSingleResult();
+            result = Math.toIntExact(resultInLong);
+        } catch (Exception e) {
+            logger.error(e.toString());
+            result = 0;
+        }
+
+        return result;
+    }
+    public int checkIfEmailExists(String email){
+        logger.info("Checking if email exists::"+email);
+        int result = 0;
+        try {
+            Query query = this.entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = ?1");
+            query.setParameter(1, email);
             query.setMaxResults(1);
             Long resultInLong = (Long) query.getSingleResult();
             result = Math.toIntExact(resultInLong);
@@ -56,14 +73,14 @@ public class UserDAO {
         logger.info("Getting user from id:: "+id);
         return userRepository.findById(id).orElseThrow(()->new UserNotFoundException(id));
     }
-    public User updateUserById(User newUser, Long id){
+    public User updateUserById(UserDTO userDTO, Long id){
         return userRepository.findById(id).map(user->{
-            user.setEmail(newUser.getEmail());
-            user.setPhone(newUser.getPhone());
-            user.setMiddleName(newUser.getMiddleName());
-            user.setFirstName(newUser.getFirstName());
-            user.setLastName(newUser.getLastName());
-            user.setPassword(newUser.getPassword());
+//            user.setEmail(userDTO.getEmail());
+//            user.setPhone(userDTO.getPhone());
+//            user.setMiddleName(userDTO.getMiddleName());
+            user.setFirstName(userDTO.getFirstName());
+            user.setLastName(userDTO.getLastName());
+//            user.setPassword(userDTO.getPassword());
             user.setModifyTime(Instant.now());
             return userRepository.save(user);
         }).orElseThrow(()-> new UserNotFoundException(id));
