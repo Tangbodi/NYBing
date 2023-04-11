@@ -7,7 +7,7 @@ import com.example.demo.Entity.User;
 import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.UserPasswordHistoryRepository;
 import com.example.demo.Repository.UserRepository;
-import com.example.demo.Service.EmailValidatorService;
+import com.example.demo.Service.EmailValidationService;
 import com.example.demo.Service.UserPasswordHistoryService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Util.SessionManagementUtil;
@@ -16,26 +16,26 @@ import net.bytebuddy.utility.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.repository.query.Param;
 import org.springframework.mail.javamail.JavaMailSender;
 
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.Semaphore;
 
 
 @RestController
 @CrossOrigin(origins = "http://192.168.1.23:3000/")
-public class UserController {
+public class UserController{
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 //    public static final String url = "api";
     @Autowired
@@ -56,40 +56,48 @@ public class UserController {
     @Autowired
     private UserPasswordHistoryRepository userPasswordHistoryRepository;
     @Autowired
-    private EmailValidatorService emailValidatorService;
-    String Token;
+    private EmailValidationService emailValidationService;
 
-    @RequestMapping("/sendEmail")
-    public void sendEmail(String recipientEmail){
-        Token = emailValidatorService.getRandomToken();
-        emailValidatorService.sendSimpleMail();
-    }
+    private final Semaphore permit = new Semaphore(10,true);
+
+
+//    public UserController(String message) {
+//        super(message);
+//    }
+
     @PostMapping("/user/register")
-    public int register (@RequestBody User newUser, BindingResult bindingResult) throws IOException {
+    public User register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException {
         registerUserValidator.validate(newUser, bindingResult);
 
-        int res=0;
-        if (bindingResult.hasErrors()) {
-            res=1;
-            logger.info("Password should be minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character::"+newUser.getPassword());
-        }
-        else if (this.userService.checkIfUserRegistered(newUser)) {
-            res=2;
-            logger.info("Oops. An account with this username already exists::"+newUser.getUserName());
-        }
-
-        else {
-            userService.registerUser(newUser);
+        try{
+            permit.acquire();
+            logger.info("Dealing request=================>");
+            Thread.sleep(2000);
+            if (bindingResult.hasErrors()) {
+                logger.info("Password should be minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character::"+newUser.getPassword());
+//                throw new UserController("Password should be minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character::"+newUser.getPassword());
+            }
+            else if (this.userService.checkIfUserRegistered(newUser)) {
+                logger.info("Oops. An account with this username already exists::"+newUser.getUserName());
+//                throw new UserController("Oops. An account with this username already exists::"+newUser.getUserName());
+            }
+            else {
+                userService.registerUser(newUser);
 //            userPasswordHistoryService.saveUserPasswordHistory(newUser);
-            logger.info("User successfully registered::");
+//            processEmailValidation(request,newUser);
+                logger.info("User successfully registered::");
+//                throw new UserController("User successfully registered::");
+
+            }
+        }catch (Exception e){
+            logger.error("error");
         }
-        return res;
+        finally {
+            permit.release();
+        }
+        return newUser;
     }
-    @RequestMapping("/verifyToken")
-    public boolean verifyToken(String input){
-        int res = input.compareTo(Token);
-        return res==0 ? true : false;
-    }
+
     @PostMapping("/user/login")
     public User UserLogin(@RequestBody LoginDTO login, HttpServletRequest request, HttpServletResponse response)throws IOException {
 
@@ -98,9 +106,9 @@ public class UserController {
 
         if (this.userService.authenticate(login) == true) {
             logger.info("Successfully authenticated::");
-            Long id = userService.getProfileByUserName(login.getUserName()).getId();
-            this.sessionManagementUtil.createNewSessionForUser(request,id);
-            User user = userRepository.findById(id).orElseThrow(()->new UserNotFoundException(id));
+            String userName = userService.getProfileByUserName(login.getUserName()).getUserName();
+            this.sessionManagementUtil.createNewSessionForUser(request,userName);
+            User user = userRepository.findByUserName(userName).orElseThrow(()->new UserNotFoundException(userName));
 
             return user;
         }
@@ -109,8 +117,8 @@ public class UserController {
         }
         return null;
     }
-    @PutMapping("/user/update/{userId}")
-    public User updateUserById(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable Long userId){
+    @PutMapping("/user/update/{userName}")
+    public User updateUserByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName){
         if (!this.sessionManagementUtil.doesSessionExist(request))
         {
             logger.info("Please login to access this page");
@@ -118,61 +126,69 @@ public class UserController {
         }
         logger.info(userDTO.getFirstName());
         logger.info(userDTO.getLastName());
-        logger.info(userDTO.getEmail());
-        logger.info(userDTO.getPhone());
-        return userService.updateUserById(userDTO,userId);
+        return userService.updateUserByUserName(userDTO,userName);
     }
-    @GetMapping("/user/info/{userId}")
-    public User getUserById(HttpServletRequest request, @PathVariable Long userId) {
+    @PutMapping("/user/password/update/{userName}")
+    public Boolean updatePasswordByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName){
+        if (!this.sessionManagementUtil.doesSessionExist(request))
+        {
+            logger.info("Please login to access this page");
+//            return null;
+        }
+        logger.info(userDTO.getInputPassword());
+        logger.info(userDTO.getNewPassword());
+        return userService.updatePasswordByUserName(userDTO,userName);
+    }
+    @GetMapping("/user/info/{userName}")
+    public User getUserByUserName(HttpServletRequest request, @PathVariable String userName) {
         if (!this.sessionManagementUtil.doesSessionExist(request))
         {
             logger.info("Please login to access this page");
         }
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        return userRepository.findByUserName(userName)
+                .orElseThrow(() -> new UserNotFoundException(userName));
+    }
+    public String processEmailValidation(HttpServletRequest request,User user){
+        String email = user.getEmail();
+        String token = RandomString.make(9);
+        String siteURL = request.getRequestURL().toString();
+        siteURL.replace(request.getServletPath(),"");
+        try{
+            userService.updateToken(token,email);
+            String emailValidationLink = siteURL + "/email_validation?token=" + token;
+            emailValidationService.sendEmailValidationLink(email,emailValidationLink);
+            return "We have sent an email validation link to your email. Please check.";
+
+        }catch (UserNotFoundException e){
+            return e.getMessage();
+        }catch (UnsupportedEncodingException | MessagingException ex){
+            return "Error while sending email";
+        }
     }
 
     @PostMapping("/user/forgot_password")
     public String processForgotPassword(HttpServletRequest request,@RequestBody User user){
 
         String email = user.getEmail();
-        String token = RandomString.make(30);
+        String token = RandomString.make(9);
         String siteURL = request.getRequestURL().toString();
         siteURL.replace(request.getServletPath(),"");
 
         try{
-            userService.updateResetPasswordToken(token,email);
+            userService.updateToken(token,email);
             String resetPasswordLink = siteURL + "/reset_password?token=" + token;
-            sendEmail(email,resetPasswordLink);
+            emailValidationService.sendForgotPasswordLink(email,resetPasswordLink);
             return "We have sent a reset password link to your email. Please check.";
 
         }catch (UserNotFoundException e){
-           return e.getMessage();
+            return e.getMessage();
         }catch (UnsupportedEncodingException | MessagingException ex){
             return "Error while sending email";
         }
     }
-    public void sendEmail(String recipientEmail,String link) throws MessagingException,UnsupportedEncodingException{
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
-
-        mimeMessageHelper.setFrom("contact@dummynode.com","DummyNode Support");
-        mimeMessageHelper.setTo(recipientEmail);
-        String subject = "Here's the link to reset your password";
-        String content = "<p>Hello,</p>"
-                + "<p>You have requested to reset your password.</p>"
-                + "<p>Click the link below to change your password:</p>"
-                + "<p><a href=\"" + link + "\">Change my password</a></p>"
-                + "<br>"
-                + "<p>Ignore this email if you do remember your password, "
-                + "or you have not made the request.</p>";
-        mimeMessageHelper.setSubject(subject);
-        mimeMessageHelper.setText(content,true);
-        mailSender.send(message);
-    }
     @GetMapping("forgot_password/reset_password")
     public String showResetPasswordForm(@Param(value="token")String token, Model model){
-        User user = userService.getByResetPasswordToken(token);
+        User user = userService.getByToken(token);
         if(user == null){
             return "Invalid Token";
         }
@@ -180,7 +196,7 @@ public class UserController {
     }
     @PostMapping("forgot_password/reset_password")
     public String enterPassword(@Param(value="token")String token,@RequestBody User user, HttpServletRequest request){
-       user = userService.getByResetPasswordToken(token);
+       user = userService.getByToken(token);
         if(user == null){
             return "Invalid Token";
         }
@@ -202,4 +218,9 @@ public class UserController {
         logger.info("Logging out::");
         request.getSession().invalidate();
     }
+    @PostMapping("/user/delete/{userName}")
+    public void deleteUser(@PathVariable String userName){
+        userService.deleteUser(userName);
+    }
+
 }

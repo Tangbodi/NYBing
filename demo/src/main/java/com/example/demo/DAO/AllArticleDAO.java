@@ -1,7 +1,6 @@
 package com.example.demo.DAO;
 
 import com.example.demo.Entity.Allarticle;
-import com.example.demo.Entity.User;
 import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.AllArticleRepository;
 import org.slf4j.Logger;

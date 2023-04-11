@@ -1,7 +1,6 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Entity.Article;
-import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.ArticleRepository;
 import com.example.demo.Service.ArticleService;
 import com.example.demo.Service.UserService;

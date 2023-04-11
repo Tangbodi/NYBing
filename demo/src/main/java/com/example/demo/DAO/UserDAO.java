@@ -4,6 +4,7 @@ import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.UserRepository;
+import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,28 +65,40 @@ public class UserDAO {
     }
     public User getProfileByUserName(String userName) {
         logger.info("Getting user from username:: " + userName);
-        TypedQuery<User> query = this.entityManager.createQuery("SELECT u FROM User u WHERE u.userName = ?1", User.class);
-        query.setParameter(1, userName);
-        query.setMaxResults(1);
-        return query.getSingleResult();
+        return userRepository.findByUserName(userName).orElseThrow(()->new UserNotFoundException(userName));
     }
-    public User getUserProfileById(Long id){
-        logger.info("Getting user from id:: "+id);
-        return userRepository.findById(id).orElseThrow(()->new UserNotFoundException(id));
-    }
-    public User updateUserById(UserDTO userDTO, Long id){
-        return userRepository.findById(id).map(user->{
+//    public User getUserProfileById(Long id){
+//        logger.info("Getting user from id:: "+id);
+//        return userRepository.findById(id).orElseThrow(()->new UserNotFoundException(id));
+//    }
+    public User updateUserByUserName(UserDTO userDTO, String userName){
+        return userRepository.findByUserName(userName).map(user->{
 //            user.setEmail(userDTO.getEmail());
 //            user.setPhone(userDTO.getPhone());
 //            user.setMiddleName(userDTO.getMiddleName());
             user.setFirstName(userDTO.getFirstName());
             user.setLastName(userDTO.getLastName());
-//            user.setPassword(userDTO.getPassword());
             user.setModifyTime(Instant.now());
             return userRepository.save(user);
-        }).orElseThrow(()-> new UserNotFoundException(id));
+        }).orElseThrow(()-> new UserNotFoundException(userName));
     }
-    public User findByResetPasswordToken(String token){
-        return userRepository.findByResetPasswordToken(token);
+    public User updatePasswordByUserName(UserDTO userDTO, String userName){
+        String newPassword = BCrypt.hashpw(userDTO.getNewPassword(),BCrypt.gensalt());
+        return userRepository.findByUserName(userName).map(user->{
+//            user.setEmail(userDTO.getEmail());
+//            user.setPhone(userDTO.getPhone());
+//            user.setMiddleName(userDTO.getMiddleName());
+//            user.setFirstName(userDTO.getFirstName());
+//            user.setLastName(userDTO.getLastName());
+            user.setPassword(newPassword);
+            user.setModifyTime(Instant.now());
+            return userRepository.save(user);
+        }).orElseThrow(()-> new UserNotFoundException(userName));
+    }
+    public User findByToken(String token){
+        return userRepository.findByToken(token);
+    }
+    public void deleteUser(String userName){
+        userRepository.deleteByUserName(userName);
     }
 }

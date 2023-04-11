@@ -6,7 +6,6 @@ import com.example.demo.DTO.LoginDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.UserNotFoundException;
-import com.example.demo.Repository.UserPasswordHistoryRepository;
 import com.example.demo.Repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
@@ -18,7 +17,6 @@ import javax.transaction.Transactional;
 import java.time.Instant;
 
 @Service
-
 public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     @Autowired
@@ -77,26 +75,41 @@ public class UserService {
     {
         return this.userDAO.getProfileByUserName(userName);
     }
-    public User getUserProfileById(Long id){
-        return this.userDAO.getUserProfileById(id);
-    }
-    public User updateUserById(UserDTO userDTO, Long id){
+//    public User getUserProfileById(Long id){
+//        return this.userDAO.getUserProfileById(id);
+//    }
 
-        return this.userDAO.updateUserById(userDTO,id);
+    public User updateUserByUserName(UserDTO userDTO, String userName){
+        return this.userDAO.updateUserByUserName(userDTO,userName);
+    }
+    public Boolean updatePasswordByUserName(UserDTO userDTO, String userName){
+
+        String curPassword = userDAO.getProfileByUserName(userName).getPassword();
+        Boolean pwdCheck = false;
+
+        if (BCrypt.checkpw(userDTO.getInputPassword(), curPassword)) {
+            pwdCheck = true;
+            logger.info("The password entered is same as current password");
+            this.userDAO.updatePasswordByUserName(userDTO,userName);
+        }
+        else{
+            logger.info("The password entered is not the same as current password");
+        }
+        return pwdCheck;
     }
     @Transactional
-    public void updateResetPasswordToken(String token, String email){
+    public void updateToken(String token, String email){
         User user = userRepository.findByEmail(email);
         if(user != null){
-            user.setResetPasswordToken(token);
+            user.setToken(token);
             this.userDAO.saveUser(user);
         }
         else{
             throw new UserNotFoundException(email);
         }
     }
-    public User getByResetPasswordToken(String token){
-        return userDAO.findByResetPasswordToken(token);
+    public User getByToken(String token){
+        return userDAO.findByToken(token);
     }
 
     @Transactional
@@ -106,9 +119,11 @@ public class UserService {
 //        user.setPassword(encodePassword);
         String password = BCrypt.hashpw(newPassword,BCrypt.gensalt());
         user.setPassword(password);
-        user.setResetPasswordToken(null);
-
+        user.setToken(null);
         this.userDAO.saveUser(user);
     }
-
+    @Transactional
+    public void deleteUser(String userName){
+        userRepository.deleteByUserName(userName);
+    }
 }

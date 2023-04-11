@@ -28,11 +28,11 @@ public class SessionManagementUtil {
         logger.debug("doesSessionExits::FALSE");
         return false;
     }
-    public HttpSession createNewSessionForUser(HttpServletRequest request, Long id){
-        logger.debug("createNewSessionForUser::INSIDE"+id);
+    public HttpSession createNewSessionForUser(HttpServletRequest request, String userName){
+        logger.debug("createNewSessionForUser::INSIDE"+userName);
         if(!doesSessionExist(request)){
             HttpSession session = request.getSession();
-            session.setAttribute("user",id);
+            session.setAttribute("user",userName);
             return session;
         }
         else{

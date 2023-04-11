@@ -4,11 +4,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,12 +49,13 @@ public class User {
     @Column(name = "modifyTime")
     private Instant modifyTime;
 
-    @Size(max = 30)
-    @Column(name = "reset_password_token", length = 30)
-    private String resetPasswordToken;
+    @Size(max = 9)
+    @Column(name = "token", length = 9)
+    private String token;
 
-    @OneToMany(mappedBy = "user")
-    private Set<Article> articles = new LinkedHashSet<>();
+    @Lob
+    @Column(name = "verified")
+    private String verified;
 
     public Long getId() {
         return id;
@@ -138,20 +137,20 @@ public class User {
         this.modifyTime = modifyTime;
     }
 
-    public String getResetPasswordToken() {
-        return resetPasswordToken;
+    public String getToken() {
+        return token;
     }
 
-    public void setResetPasswordToken(String resetPasswordToken) {
-        this.resetPasswordToken = resetPasswordToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    public Set<Article> getArticles() {
-        return articles;
+    public String getVerified() {
+        return verified;
     }
 
-    public void setArticles(Set<Article> articles) {
-        this.articles = articles;
+    public void setVerified(String verified) {
+        this.verified = verified;
     }
 
 }
