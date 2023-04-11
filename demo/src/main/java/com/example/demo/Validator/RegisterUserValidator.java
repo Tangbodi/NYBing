@@ -20,11 +20,11 @@ public class RegisterUserValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors){
         User user = (User)(target);
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors,"email","error.email.required","Email is required");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors,"password","error.password.required","Password is required");
-        if(errors.hasErrors()){
-            return;
-        }
+//        ValidationUtils.rejectIfEmptyOrWhitespace(errors,"email","error.email.required","Email is required");
+//        ValidationUtils.rejectIfEmptyOrWhitespace(errors,"password","error.password.required","Password is required");
+//        if(errors.hasErrors()){
+//            return;
+//        }
         boolean verifyPass = this.verifyPassword(user.getPassword());
         if(!verifyPass){
             errors.rejectValue("password","error.password.required","Password should minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character");

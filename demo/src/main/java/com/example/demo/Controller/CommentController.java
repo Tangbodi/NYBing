@@ -2,8 +2,8 @@ package com.example.demo.Controller;
 
 import com.example.demo.DTO.CommentFrontDTO;
 import com.example.demo.Entity.Comment;
+import com.example.demo.Exception.AuthException;
 import com.example.demo.Repository.ArticleRepository;
-import com.example.demo.Repository.UserRepository;
 import com.example.demo.Service.AllArticleService;
 import com.example.demo.Service.CommentService;
 import com.example.demo.Util.SessionManagementUtil;
@@ -31,19 +31,19 @@ public class CommentController {
     private AllArticleService allArticleService;
     @GetMapping("/comment/{articleId}")
     public List<Comment> getAllComments(HttpServletRequest request, @PathVariable Long articleId, Model model){
-        if (!this.sessionManagementUtil.doesSessionExist(request))
-        {
-            logger.info("Please login to access this page");
-//            return null;
-        }
+//        if (!this.sessionManagementUtil.doesSessionExist(request))
+//        {
+//            logger.info("Please login to access this page::");
+//            throw new AuthException();
+//        }
         return commentService.getAllCommentsByArticleId(articleId);
     }
     @PostMapping("/comment/{articleId}")
     public Comment postComment(@RequestBody CommentFrontDTO commentFrontDTO, @PathVariable Long articleId, HttpServletRequest request){
         if (!this.sessionManagementUtil.doesSessionExist(request))
         {
-            logger.info("Please login to access this page");
-//            return null;
+            logger.info("Please login to access this page::");
+            throw new AuthException();
         }
         allArticleService.updateCommentAndView(articleId);
         return commentService.saveComment(commentFrontDTO,articleId);

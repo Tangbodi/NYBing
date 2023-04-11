@@ -4,7 +4,7 @@ import com.example.demo.DAO.UserPasswordHistoryDAO;
 import com.example.demo.DTO.LoginDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
-import com.example.demo.Exception.UserNotFoundException;
+import com.example.demo.Exception.*;
 import com.example.demo.Repository.UserPasswordHistoryRepository;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.Service.EmailValidationService;
@@ -12,12 +12,14 @@ import com.example.demo.Service.UserPasswordHistoryService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Util.SessionManagementUtil;
 import com.example.demo.Validator.RegisterUserValidator;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import net.bytebuddy.utility.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import org.springframework.ui.Model;
@@ -30,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 
@@ -67,62 +71,55 @@ public class UserController{
 
     @PostMapping("/user/register")
     public User register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException {
-        registerUserValidator.validate(newUser, bindingResult);
 
-        try{
-            permit.acquire();
-            logger.info("Dealing request=================>");
-            Thread.sleep(2000);
+        registerUserValidator.validate(newUser, bindingResult);
+//        try{
+//            permit.acquire();
+//            logger.info("Dealing request=================>");
+//            Thread.sleep(2000);
             if (bindingResult.hasErrors()) {
                 logger.info("Password should be minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character::"+newUser.getPassword());
-//                throw new UserController("Password should be minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character::"+newUser.getPassword());
+                throw new PasswordException(newUser.getPassword());
             }
             else if (this.userService.checkIfUserRegistered(newUser)) {
                 logger.info("Oops. An account with this username already exists::"+newUser.getUserName());
-//                throw new UserController("Oops. An account with this username already exists::"+newUser.getUserName());
+                throw new UserAlreadyExistsException(newUser.getUserName());
             }
             else {
                 userService.registerUser(newUser);
-//            userPasswordHistoryService.saveUserPasswordHistory(newUser);
-//            processEmailValidation(request,newUser);
                 logger.info("User successfully registered::");
-//                throw new UserController("User successfully registered::");
-
             }
-        }catch (Exception e){
-            logger.error("error");
-        }
-        finally {
-            permit.release();
-        }
+//        }catch (Exception e){
+//            logger.error("error");
+//        }
+//        finally {
+//            permit.release();
+//        }
         return newUser;
     }
 
     @PostMapping("/user/login")
     public User UserLogin(@RequestBody LoginDTO login, HttpServletRequest request, HttpServletResponse response)throws IOException {
 
-        logger.info( login.getUserName());
-        logger.info(login.getPassword());
 
         if (this.userService.authenticate(login) == true) {
             logger.info("Successfully authenticated::");
             String userName = userService.getProfileByUserName(login.getUserName()).getUserName();
             this.sessionManagementUtil.createNewSessionForUser(request,userName);
             User user = userRepository.findByUserName(userName).orElseThrow(()->new UserNotFoundException(userName));
-
             return user;
         }
         else{
             logger.info("Username or Password is wrong::");
+            throw new AuthException(login.getUserName(),login.getPassword());
         }
-        return null;
     }
     @PutMapping("/user/update/{userName}")
     public User updateUserByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName){
         if (!this.sessionManagementUtil.doesSessionExist(request))
         {
-            logger.info("Please login to access this page");
-//            return null;
+            logger.info("Please login to access this page::");
+            throw new AuthException();
         }
         logger.info(userDTO.getFirstName());
         logger.info(userDTO.getLastName());
@@ -132,8 +129,8 @@ public class UserController{
     public Boolean updatePasswordByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName){
         if (!this.sessionManagementUtil.doesSessionExist(request))
         {
-            logger.info("Please login to access this page");
-//            return null;
+            logger.info("Please login to access this page::");
+            throw new AuthException();
         }
         logger.info(userDTO.getInputPassword());
         logger.info(userDTO.getNewPassword());
@@ -143,7 +140,8 @@ public class UserController{
     public User getUserByUserName(HttpServletRequest request, @PathVariable String userName) {
         if (!this.sessionManagementUtil.doesSessionExist(request))
         {
-            logger.info("Please login to access this page");
+            logger.info("Please login to access this page::");
+            throw new AuthException();
         }
         return userRepository.findByUserName(userName)
                 .orElseThrow(() -> new UserNotFoundException(userName));
