@@ -12,14 +12,12 @@ import com.example.demo.Service.UserPasswordHistoryService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Util.SessionManagementUtil;
 import com.example.demo.Validator.RegisterUserValidator;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import net.bytebuddy.utility.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import org.springframework.ui.Model;
@@ -32,8 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 
@@ -70,7 +66,7 @@ public class UserController{
 //    }
 
     @PostMapping("/user/register")
-    public User register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException {
+    public ResponseEntity register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException, MessagingException {
 
         registerUserValidator.validate(newUser, bindingResult);
 //        try{
@@ -82,31 +78,59 @@ public class UserController{
                 throw new PasswordException(newUser.getPassword());
             }
             else if (this.userService.checkIfUserRegistered(newUser)) {
-                logger.info("Oops. An account with this username already exists::"+newUser.getUserName());
-                throw new UserAlreadyExistsException(newUser.getUserName());
+                logger.info("Oops. An account with this username already exists::");
+                throw new UserAlreadyExistsException();
+
             }
             else {
                 userService.registerUser(newUser);
                 logger.info("User successfully registered::");
             }
-//        }catch (Exception e){
-//            logger.error("error");
-//        }
+
+                processEmailValidation(request,newUser);
+
 //        finally {
 //            permit.release();
 //        }
-        return newUser;
+        return ResponseEntity.ok().build();
+    }
+
+    public String processEmailValidation(HttpServletRequest request,User user){
+        String email = user.getEmail();
+        String token = RandomString.make(9);
+        String siteURL = request.getRequestURL().toString();
+        siteURL.replace(request.getServletPath(),"");
+        try{
+            userService.updateToken(token,email);
+            String emailValidationLink = siteURL + "/email_validation?token=" + token;
+            emailValidationService.sendEmailValidationLink(email,emailValidationLink);
+            return "We have sent an email validation link to your email. Please check.";
+
+        }catch (NotFoundException e){
+            return e.getMessage();
+        }catch (UnsupportedEncodingException | MessagingException ex){
+            return "Error while sending email";
+        }
+    }
+
+    @GetMapping("/user/register/email_validation")
+    public ResponseEntity showEmailValidationPage(@Param(value="token")String token){
+        User user = userService.getByToken(token);
+        if(user==null){
+            throw new NotFoundException(user.getEmail());
+        }
+        userService.verifyUser(user);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/user/login")
     public User UserLogin(@RequestBody LoginDTO login, HttpServletRequest request, HttpServletResponse response)throws IOException {
 
-
-        if (this.userService.authenticate(login) == true) {
+        if (this.userService.authenticate(login)) {
             logger.info("Successfully authenticated::");
             String userName = userService.getProfileByUserName(login.getUserName()).getUserName();
             this.sessionManagementUtil.createNewSessionForUser(request,userName);
-            User user = userRepository.findByUserName(userName).orElseThrow(()->new UserNotFoundException(userName));
+            User user = userRepository.findByUserName(userName).orElseThrow(()->new NotFoundException(userName));
             return user;
         }
         else{
@@ -144,24 +168,7 @@ public class UserController{
             throw new AuthException();
         }
         return userRepository.findByUserName(userName)
-                .orElseThrow(() -> new UserNotFoundException(userName));
-    }
-    public String processEmailValidation(HttpServletRequest request,User user){
-        String email = user.getEmail();
-        String token = RandomString.make(9);
-        String siteURL = request.getRequestURL().toString();
-        siteURL.replace(request.getServletPath(),"");
-        try{
-            userService.updateToken(token,email);
-            String emailValidationLink = siteURL + "/email_validation?token=" + token;
-            emailValidationService.sendEmailValidationLink(email,emailValidationLink);
-            return "We have sent an email validation link to your email. Please check.";
-
-        }catch (UserNotFoundException e){
-            return e.getMessage();
-        }catch (UnsupportedEncodingException | MessagingException ex){
-            return "Error while sending email";
-        }
+                .orElseThrow(() -> new NotFoundException(userName));
     }
 
     @PostMapping("/user/forgot_password")
@@ -178,7 +185,7 @@ public class UserController{
             emailValidationService.sendForgotPasswordLink(email,resetPasswordLink);
             return "We have sent a reset password link to your email. Please check.";
 
-        }catch (UserNotFoundException e){
+        }catch (NotFoundException e){
             return e.getMessage();
         }catch (UnsupportedEncodingException | MessagingException ex){
             return "Error while sending email";

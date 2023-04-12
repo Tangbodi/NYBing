@@ -5,8 +5,9 @@ import com.example.demo.DAO.UserPasswordHistoryDAO;
 import com.example.demo.DTO.LoginDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
-import com.example.demo.Exception.UserNotFoundException;
+import com.example.demo.Exception.NotFoundException;
 import com.example.demo.Repository.UserRepository;
+import net.bytebuddy.utility.RandomString;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,8 @@ public class UserService {
     private UserPasswordHistoryDAO userPasswordHistoryDAO;
     @Autowired
     private UserPasswordHistoryService userPasswordHistoryService;
+    @Autowired
+    private EmailValidationService emailValidationService;
     public boolean registerUser(User newUser) throws IllegalStateException {
         logger.info("Registering user::");
         String password = BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt());
@@ -40,9 +43,8 @@ public class UserService {
     {
         logger.info("Checking if user exists ::" + newUser.getUserName());
         int result = this.userDAO.checkIfUserExists(newUser.getUserName());
-
-        if (result >0) {
-
+        int res = this.userDAO.checkIfEmailExists(newUser.getEmail());
+        if (result >0 || res >0) {
             return true;
         }
         return false;
@@ -50,7 +52,6 @@ public class UserService {
     public Boolean authenticate(LoginDTO login)
     {
         logger.info("Checking if user exists on the basis of username::" + login.getUserName());
-
         User user = null;
         try {
             user = this.userDAO.getProfileByUserName(login.getUserName());
@@ -63,13 +64,18 @@ public class UserService {
             return false;
         } else {
             Boolean pwdCheck = false;
-
             if (BCrypt.checkpw(login.getPassword(), user.getPassword())) {
-                pwdCheck = true;
+                if(user.getVerified()=="true"){
+                    pwdCheck = true;
+                }
+                else{
+                    String token = RandomString.make(9);
+                    updateToken(token,user.getEmail());
+                    emailValidationService.sendEmailValidationLink(user.getEmail(),link);
+                }
             }
             return pwdCheck;
         }
-
     }
     public User getProfileByUserName (String userName)
     {
@@ -105,8 +111,13 @@ public class UserService {
             this.userDAO.saveUser(user);
         }
         else{
-            throw new UserNotFoundException(email);
+            throw new NotFoundException(email);
         }
+    }
+    @Transactional
+    public void verifyUser(User user){
+        user.setVerified("true");
+        user.setToken(null);
     }
     public User getByToken(String token){
         return userDAO.findByToken(token);

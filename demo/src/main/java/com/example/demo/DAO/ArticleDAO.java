@@ -1,7 +1,7 @@
 package com.example.demo.DAO;
 
 import com.example.demo.Entity.Article;
-import com.example.demo.Exception.UserNotFoundException;
+import com.example.demo.Exception.NotFoundException;
 import com.example.demo.Repository.ArticleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +20,6 @@ public class ArticleDAO {
     }
 
     public Article findArticleById(Long articleId){
-        return articleRepository.findById(articleId).orElseThrow(() -> new UserNotFoundException(articleId));
+        return articleRepository.findById(articleId).orElseThrow(() -> new NotFoundException(articleId));
     }
 }

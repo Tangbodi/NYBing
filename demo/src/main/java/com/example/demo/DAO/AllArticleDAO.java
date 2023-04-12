@@ -1,7 +1,7 @@
 package com.example.demo.DAO;
 
 import com.example.demo.Entity.Allarticle;
-import com.example.demo.Exception.UserNotFoundException;
+import com.example.demo.Exception.NotFoundException;
 import com.example.demo.Repository.AllArticleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +27,6 @@ public class AllArticleDAO {
             article.setLastcomment(Instant.now());
             article.setReviewNcomment(article.getReviewNcomment()+1);
             return allArticleRepository.save(article);
-        }).orElseThrow(()-> new UserNotFoundException(articleId));
+        }).orElseThrow(()-> new NotFoundException(articleId));
     }
 }

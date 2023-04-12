@@ -2,7 +2,7 @@ package com.example.demo.DAO;
 
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
-import com.example.demo.Exception.UserNotFoundException;
+import com.example.demo.Exception.NotFoundException;
 import com.example.demo.Repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import java.time.Instant;
 
 @Component
@@ -65,7 +64,7 @@ public class UserDAO {
     }
     public User getProfileByUserName(String userName) {
         logger.info("Getting user from username:: " + userName);
-        return userRepository.findByUserName(userName).orElseThrow(()->new UserNotFoundException(userName));
+        return userRepository.findByUserName(userName).orElseThrow(()->new NotFoundException(userName));
     }
 //    public User getUserProfileById(Long id){
 //        logger.info("Getting user from id:: "+id);
@@ -80,7 +79,7 @@ public class UserDAO {
             user.setLastName(userDTO.getLastName());
             user.setModifyTime(Instant.now());
             return userRepository.save(user);
-        }).orElseThrow(()-> new UserNotFoundException(userName));
+        }).orElseThrow(()-> new NotFoundException(userName));
     }
     public User updatePasswordByUserName(UserDTO userDTO, String userName){
         String newPassword = BCrypt.hashpw(userDTO.getNewPassword(),BCrypt.gensalt());
@@ -93,7 +92,7 @@ public class UserDAO {
             user.setPassword(newPassword);
             user.setModifyTime(Instant.now());
             return userRepository.save(user);
-        }).orElseThrow(()-> new UserNotFoundException(userName));
+        }).orElseThrow(()-> new NotFoundException(userName));
     }
     public User findByToken(String token){
         return userRepository.findByToken(token);

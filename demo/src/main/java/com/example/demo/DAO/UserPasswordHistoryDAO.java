@@ -2,7 +2,7 @@ package com.example.demo.DAO;
 
 import com.example.demo.Entity.User;
 import com.example.demo.Entity.UserPasswordHistory;
-import com.example.demo.Exception.UserNotFoundException;
+import com.example.demo.Exception.NotFoundException;
 import com.example.demo.Repository.UserPasswordHistoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class UserPasswordHistoryDAO {
             userPasswordHistory.setPasswordHash(newPassword);
             userPasswordHistory.setStartDate(Instant.now());
             return userPasswordHistoryRepository.save(userPasswordHistory);
-        }).orElseThrow(()-> new UserNotFoundException(id));
+        }).orElseThrow(()-> new NotFoundException(id));
     }
     public UserPasswordHistory saveUserPasswordHistory(UserPasswordHistory userPasswordHistory){
         return userPasswordHistoryRepository.save(userPasswordHistory);

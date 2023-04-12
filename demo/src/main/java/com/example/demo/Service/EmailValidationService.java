@@ -35,6 +35,7 @@ public class EmailValidationService {
         mimeMessageHelper.setSubject(subject);
         mimeMessageHelper.setText(content,true);
         javaMailSender.send(message);
+        logger.info("email has been sent out::");
     }
     public void sendForgotPasswordLink(String recipientEmail,String link) throws MessagingException,UnsupportedEncodingException{
         MimeMessage message = javaMailSender.createMimeMessage();
