@@ -66,7 +66,7 @@ public class UserController{
 //    }
 
     @PostMapping("/user/register")
-    public ResponseEntity register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException, MessagingException {
+    public ResponseEntity register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException {
 
         registerUserValidator.validate(newUser, bindingResult);
 //        try{
@@ -80,64 +80,56 @@ public class UserController{
             else if (this.userService.checkIfUserRegistered(newUser)) {
                 logger.info("Oops. An account with this username already exists::");
                 throw new UserAlreadyExistsException();
-
             }
             else {
                 userService.registerUser(newUser);
                 logger.info("User successfully registered::");
             }
-
-                processEmailValidation(request,newUser);
-
+                emailValidationService.processEmailValidation(request,newUser);
 //        finally {
 //            permit.release();
 //        }
         return ResponseEntity.ok().build();
     }
 
-    public String processEmailValidation(HttpServletRequest request,User user){
-        String email = user.getEmail();
-        String token = RandomString.make(9);
-        String siteURL = request.getRequestURL().toString();
-        siteURL.replace(request.getServletPath(),"");
-        try{
-            userService.updateToken(token,email);
-            String emailValidationLink = siteURL + "/email_validation?token=" + token;
-            emailValidationService.sendEmailValidationLink(email,emailValidationLink);
-            return "We have sent an email validation link to your email. Please check.";
-
-        }catch (NotFoundException e){
-            return e.getMessage();
-        }catch (UnsupportedEncodingException | MessagingException ex){
-            return "Error while sending email";
-        }
-    }
-
+    //------------------------------------------------------------------------------------------
+    //user verify his email
     @GetMapping("/user/register/email_validation")
-    public ResponseEntity showEmailValidationPage(@Param(value="token")String token){
-        User user = userService.getByToken(token);
-        if(user==null){
-            throw new NotFoundException(user.getEmail());
+    public ResponseEntity showEmailValidationPageViaRegisterLink(@Param(value="token")String token){
+        try{
+            User user = userService.getByToken(token);
+            userService.verifyUser(user);
+        }catch (NotFoundException e){
+            e.getMessage();
         }
-        userService.verifyUser(user);
         return ResponseEntity.ok().build();
     }
-
+    //------------------------------------------------------------------------------------------
     @PostMapping("/user/login")
-    public User UserLogin(@RequestBody LoginDTO login, HttpServletRequest request, HttpServletResponse response)throws IOException {
-
-        if (this.userService.authenticate(login)) {
+    public User UserLogin(@RequestBody LoginDTO login, HttpServletRequest request)throws IOException {
+        User user = this.userService.authenticate(login,request);
+        if (user!=null) {
             logger.info("Successfully authenticated::");
-            String userName = userService.getProfileByUserName(login.getUserName()).getUserName();
+            String userName = user.getUserName();
             this.sessionManagementUtil.createNewSessionForUser(request,userName);
-            User user = userRepository.findByUserName(userName).orElseThrow(()->new NotFoundException(userName));
             return user;
         }
         else{
-            logger.info("Username or Password is wrong::");
-            throw new AuthException(login.getUserName(),login.getPassword());
+            return null;
         }
     }
+    //------------------------------------------------------------------------------------------
+    @GetMapping("/user/login/email_validation")
+    public ResponseEntity showEmailValidationViaLoginLink(@Param(value="token")String token){
+        try{
+            User user = userService.getByToken(token);
+            userService.verifyUser(user);
+        }catch (NotFoundException e){
+            e.getMessage();
+        }
+        return ResponseEntity.ok().build();
+    }
+    //------------------------------------------------------------------------------------------
     @PutMapping("/user/update/{userName}")
     public User updateUserByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName){
         if (!this.sessionManagementUtil.doesSessionExist(request))
@@ -145,21 +137,25 @@ public class UserController{
             logger.info("Please login to access this page::");
             throw new AuthException();
         }
-        logger.info(userDTO.getFirstName());
-        logger.info(userDTO.getLastName());
-        return userService.updateUserByUserName(userDTO,userName);
-    }
-    @PutMapping("/user/password/update/{userName}")
-    public Boolean updatePasswordByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName){
-        if (!this.sessionManagementUtil.doesSessionExist(request))
-        {
-            logger.info("Please login to access this page::");
-            throw new AuthException();
+        if(userDTO.getNewPassword()==null){
+            return userService.updateUserInfoByUserName(userDTO,userName);
         }
-        logger.info(userDTO.getInputPassword());
-        logger.info(userDTO.getNewPassword());
-        return userService.updatePasswordByUserName(userDTO,userName);
+        else{
+            return userService.updatePasswordByUserName(userDTO,userName);
+        }
     }
+    //------------------------------------------------------------------------------------------
+//    @PutMapping("/user/password/update/{userName}")
+//    public Boolean updatePasswordByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName){
+//        if (!this.sessionManagementUtil.doesSessionExist(request))
+//        {
+//            logger.info("Please login to access this page::");
+//            throw new AuthException();
+//        }
+//
+//        return userService.updatePasswordByUserName(userDTO,userName);
+//    }
+    //------------------------------------------------------------------------------------------
     @GetMapping("/user/info/{userName}")
     public User getUserByUserName(HttpServletRequest request, @PathVariable String userName) {
         if (!this.sessionManagementUtil.doesSessionExist(request))
@@ -170,9 +166,9 @@ public class UserController{
         return userRepository.findByUserName(userName)
                 .orElseThrow(() -> new NotFoundException(userName));
     }
-
+    //------------------------------------------------------------------------------------------
     @PostMapping("/user/forgot_password")
-    public String processForgotPassword(HttpServletRequest request,@RequestBody User user){
+    public ResponseEntity processForgotPassword(HttpServletRequest request,@RequestBody User user){
 
         String email = user.getEmail();
         String token = RandomString.make(9);
@@ -183,46 +179,40 @@ public class UserController{
             userService.updateToken(token,email);
             String resetPasswordLink = siteURL + "/reset_password?token=" + token;
             emailValidationService.sendForgotPasswordLink(email,resetPasswordLink);
-            return "We have sent a reset password link to your email. Please check.";
 
         }catch (NotFoundException e){
-            return e.getMessage();
+            e.getMessage();
         }catch (UnsupportedEncodingException | MessagingException ex){
-            return "Error while sending email";
+            ex.getMessage();
         }
+        return ResponseEntity.ok().build();
     }
+    //------------------------------------------------------------------------------------------
     @GetMapping("forgot_password/reset_password")
-    public String showResetPasswordForm(@Param(value="token")String token, Model model){
+    public ResponseEntity showResetPasswordForm(@Param(value="token")String token){
         User user = userService.getByToken(token);
         if(user == null){
-            return "Invalid Token";
+            throw new NotFoundException();
         }
-        return "successful";
+        return ResponseEntity.ok().build();
     }
+    //------------------------------------------------------------------------------------------
     @PostMapping("forgot_password/reset_password")
-    public String enterPassword(@Param(value="token")String token,@RequestBody User user, HttpServletRequest request){
-       user = userService.getByToken(token);
-        if(user == null){
-            return "Invalid Token";
-        }
-        token = request.getParameter("token");
+    public ResponseEntity enterPassword(@Param(value="token")String token,HttpServletRequest request){
+
+        User user = userService.getByToken(token);
         String password = request.getParameter("password");
-
-        if(user == null){
-            return "Invalid Token";
-        }
-        else{
-            userService.updatePassword(user,password);
-            return "You have successfully changed your password";
-        }
+        userService.ResetPassword(user,password);
+        return ResponseEntity.ok().build();
     }
-
+    //------------------------------------------------------------------------------------------
     @RequestMapping("/logout.html")
-    public void logoutUser(HttpServletRequest request)
+    public void userLogout(HttpServletRequest request)
     {
-        logger.info("Logging out::");
         request.getSession().invalidate();
+        logger.info("Logged out::");
     }
+    //------------------------------------------------------------------------------------------
     @PostMapping("/user/delete/{userName}")
     public void deleteUser(@PathVariable String userName){
         userService.deleteUser(userName);

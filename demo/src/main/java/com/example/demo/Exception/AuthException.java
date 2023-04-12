@@ -11,4 +11,8 @@ public class AuthException extends RuntimeException{
     public AuthException(){
         super("Please login to access this page::");
     }
+
+    public AuthException(String password){
+        super("Current password is not correct::");
+    }
 }

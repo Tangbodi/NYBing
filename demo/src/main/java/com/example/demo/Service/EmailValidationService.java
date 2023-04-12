@@ -1,5 +1,8 @@
 package com.example.demo.Service;
 
+import com.example.demo.Entity.User;
+import com.example.demo.Exception.NotFoundException;
+import net.bytebuddy.utility.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 
 @Service
@@ -19,6 +23,27 @@ public class EmailValidationService {
     @Autowired
     private JavaMailSender javaMailSender;
 
+    @Autowired
+    private UserService userService;
+
+    //------------------------------------------------------------------------------------------
+    //generate a random token then send validation email via 192.168.1.10:8080/api/user/register/email_validation?token=
+    public void processEmailValidation(HttpServletRequest request, User user){
+        String email = user.getEmail();
+        String token = RandomString.make(9);
+        String siteURL = request.getRequestURL().toString();
+        siteURL.replace(request.getServletPath(),"");
+        try{
+            userService.updateToken(token,email);
+            String emailValidationLink = siteURL + "/email_validation?token=" + token;
+            sendEmailValidationLink(email,emailValidationLink);
+            logger.info("already generated link and token::");
+        }catch (NotFoundException e){
+            e.getMessage();
+        }catch (UnsupportedEncodingException | MessagingException ex){
+            ex.getMessage();
+        }
+    }
     public void sendEmailValidationLink(String recipientEmail,String link) throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);

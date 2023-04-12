@@ -62,6 +62,10 @@ public class UserDAO {
 
         return result;
     }
+    public boolean checkIfUserExistsByUsernameAndEmail(String userName,String email){
+        return userRepository.existsByUserNameAndEmail(userName,email);
+    }
+
     public User getProfileByUserName(String userName) {
         logger.info("Getting user from username:: " + userName);
         return userRepository.findByUserName(userName).orElseThrow(()->new NotFoundException(userName));
@@ -72,9 +76,6 @@ public class UserDAO {
 //    }
     public User updateUserByUserName(UserDTO userDTO, String userName){
         return userRepository.findByUserName(userName).map(user->{
-//            user.setEmail(userDTO.getEmail());
-//            user.setPhone(userDTO.getPhone());
-//            user.setMiddleName(userDTO.getMiddleName());
             user.setFirstName(userDTO.getFirstName());
             user.setLastName(userDTO.getLastName());
             user.setModifyTime(Instant.now());
@@ -84,11 +85,6 @@ public class UserDAO {
     public User updatePasswordByUserName(UserDTO userDTO, String userName){
         String newPassword = BCrypt.hashpw(userDTO.getNewPassword(),BCrypt.gensalt());
         return userRepository.findByUserName(userName).map(user->{
-//            user.setEmail(userDTO.getEmail());
-//            user.setPhone(userDTO.getPhone());
-//            user.setMiddleName(userDTO.getMiddleName());
-//            user.setFirstName(userDTO.getFirstName());
-//            user.setLastName(userDTO.getLastName());
             user.setPassword(newPassword);
             user.setModifyTime(Instant.now());
             return userRepository.save(user);

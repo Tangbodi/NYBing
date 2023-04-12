@@ -5,6 +5,7 @@ import com.example.demo.DAO.UserPasswordHistoryDAO;
 import com.example.demo.DTO.LoginDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
+import com.example.demo.Exception.AuthException;
 import com.example.demo.Exception.NotFoundException;
 import com.example.demo.Repository.UserRepository;
 import net.bytebuddy.utility.RandomString;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.Instant;
 
@@ -42,40 +44,38 @@ public class UserService {
     public boolean checkIfUserRegistered (User newUser)
     {
         logger.info("Checking if user exists ::" + newUser.getUserName());
-        int result = this.userDAO.checkIfUserExists(newUser.getUserName());
-        int res = this.userDAO.checkIfEmailExists(newUser.getEmail());
-        if (result >0 || res >0) {
-            return true;
-        }
-        return false;
+        return userDAO.checkIfUserExistsByUsernameAndEmail(newUser.getUserName(),newUser.getEmail());
+
     }
-    public Boolean authenticate(LoginDTO login)
+    public User authenticate(LoginDTO login, HttpServletRequest request)
     {
-        logger.info("Checking if user exists on the basis of username::" + login.getUserName());
+        logger.info("Checking if user authenticate::");
         User user = null;
         try {
             user = this.userDAO.getProfileByUserName(login.getUserName());
         } catch (Exception e) {
-            logger.error(e.toString());
+            e.getMessage();
             user = null;
         }
-
         if (user == null) {
-            return false;
+            throw new NotFoundException();
         } else {
-            Boolean pwdCheck = false;
+//            Boolean pwdCheck = false;
             if (BCrypt.checkpw(login.getPassword(), user.getPassword())) {
                 if(user.getVerified()=="true"){
-                    pwdCheck = true;
+                    return user;
+//                    pwdCheck = true;
                 }
                 else{
-                    String token = RandomString.make(9);
-                    updateToken(token,user.getEmail());
-                    emailValidationService.sendEmailValidationLink(user.getEmail(),link);
+                    //api/user/login/email_validation?token=
+                    emailValidationService.processEmailValidation(request,user);
                 }
             }
-            return pwdCheck;
+            else{
+                throw new AuthException(login.getUserName(),login.getPassword());
+            }
         }
+        return null;
     }
     public User getProfileByUserName (String userName)
     {
@@ -85,33 +85,30 @@ public class UserService {
 //        return this.userDAO.getUserProfileById(id);
 //    }
 
-    public User updateUserByUserName(UserDTO userDTO, String userName){
+    public User updateUserInfoByUserName(UserDTO userDTO, String userName){
         return this.userDAO.updateUserByUserName(userDTO,userName);
     }
-    public Boolean updatePasswordByUserName(UserDTO userDTO, String userName){
+    public User updatePasswordByUserName(UserDTO userDTO, String userName){
 
         String curPassword = userDAO.getProfileByUserName(userName).getPassword();
         Boolean pwdCheck = false;
 
         if (BCrypt.checkpw(userDTO.getInputPassword(), curPassword)) {
             pwdCheck = true;
-            logger.info("The password entered is same as current password");
-            this.userDAO.updatePasswordByUserName(userDTO,userName);
+            return this.userDAO.updatePasswordByUserName(userDTO,userName);
         }
         else{
-            logger.info("The password entered is not the same as current password");
+            throw new AuthException(userDTO.getInputPassword());
         }
-        return pwdCheck;
     }
     @Transactional
     public void updateToken(String token, String email){
-        User user = userRepository.findByEmail(email);
-        if(user != null){
+        try{
+            User user = userRepository.findByEmail(email);
             user.setToken(token);
             this.userDAO.saveUser(user);
-        }
-        else{
-            throw new NotFoundException(email);
+        }catch (NotFoundException e){
+            e.getMessage();
         }
     }
     @Transactional
@@ -124,7 +121,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updatePassword(User user, String newPassword){
+    public void ResetPassword(User user, String newPassword){
 //        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 //        String encodePassword = passwordEncoder.encode(newPassword);
 //        user.setPassword(encodePassword);
