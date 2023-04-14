@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @CrossOrigin(origins = "http://192.168.1.23:3000/")
@@ -23,7 +25,7 @@ public class CategoryController {
     }
 
     @GetMapping("/categories")
-    public List<Category> getAllCategory(){
+    public List<Map<String, Object>> getAllCategory(){
 
 //        return topFiveArticleWithCategoryDAO.listTopFiveArticleWithCategory();
         return categoryRepository.categoryTopFivePost();

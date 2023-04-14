@@ -6,13 +6,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category,Long> {
     List<Category> findAll();
 
-    @Query("SELECT a.id, b.categoryName, a.id, a.title FROM Article a\n" +
-            "LEFT JOIN Category b\n" +
-            "ON a.id = b.id")
-     List<Category> categoryTopFivePost();
+    @Query(value = "SELECT a.category_id, b.categoryName, a.articleId, a.title FROM master.articles a\n" +
+            "LEFT JOIN master.category b\n" +
+            "ON a.category_id = b.categoryId",nativeQuery = true)
+     List<Map<String,Object>> categoryTopFivePost();
 }
