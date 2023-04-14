@@ -62,8 +62,29 @@ public class UserDAO {
 
         return result;
     }
-    public boolean checkIfUserExistsByUsernameAndEmail(String userName,String email){
-        return userRepository.existsByUserNameAndEmail(userName,email);
+    public int checkIfUserExistsByUsernameAndEmail(String userName,String email){
+        logger.info("Checking if user exists");
+        int resEmail = 0;
+        int resUserName=0;
+        try {
+            Query query = this.entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = ?1");
+            Query query1 = this.entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.userName = ?1");
+            query.setParameter(1, email);
+            query1.setParameter(1,userName);
+            query.setMaxResults(1);
+            query1.setMaxResults(1);
+            Long resultInLong = (Long) query.getSingleResult();
+            Long resultInLong1=(Long)query.getSingleResult();
+            resEmail = Math.toIntExact(resultInLong);
+            resUserName= Math.toIntExact(resultInLong1);
+        } catch (Exception e) {
+            logger.error(e.toString());
+            resEmail = 0;
+            resUserName=0;
+        }
+
+        return resEmail+resUserName;
+//        return userRepository.existsByUserNameAndEmail(userName,email);
     }
 
     public User getProfileByUserName(String userName) {

@@ -78,7 +78,7 @@ public class UserController{
                 throw new PasswordException(newUser.getPassword());
             }
             else if (this.userService.checkIfUserRegistered(newUser)) {
-                logger.info("Oops. An account with this username already exists::");
+                logger.info("Oops. An account with this username or email already exists::");
                 throw new UserAlreadyExistsException();
             }
             else {

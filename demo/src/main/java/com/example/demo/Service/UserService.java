@@ -44,7 +44,7 @@ public class UserService {
     public boolean checkIfUserRegistered (User newUser)
     {
         logger.info("Checking if user exists ::" + newUser.getUserName());
-        return userDAO.checkIfUserExistsByUsernameAndEmail(newUser.getUserName(),newUser.getEmail());
+        return userDAO.checkIfUserExistsByUsernameAndEmail(newUser.getUserName(),newUser.getEmail()) >0? true: false;
 
     }
     public User authenticate(LoginDTO login, HttpServletRequest request)
