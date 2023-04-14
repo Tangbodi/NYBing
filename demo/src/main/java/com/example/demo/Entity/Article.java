@@ -1,7 +1,5 @@
 package com.example.demo.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -10,13 +8,8 @@ import java.time.Instant;
 @Entity
 @Table(name = "articles")
 public class Article {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "articleId", nullable = false)
-    private Long id;
-
-    @Column(name = "label_id")
-    private Long labelId;
+    @EmbeddedId
+    private ArticleId id;
 
     @Size(max = 255)
     @Column(name = "title")
@@ -37,26 +30,17 @@ public class Article {
     @Column(name = "author", length = 20)
     private String author;
 
-    @JsonIgnore
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "userId", nullable = false)
     private User user;
 
-    public Long getId() {
+    public ArticleId getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(ArticleId id) {
         this.id = id;
-    }
-
-    public Long getLabelId() {
-        return labelId;
-    }
-
-    public void setLabelId(Long labelId) {
-        this.labelId = labelId;
     }
 
     public String getTitle() {

@@ -28,7 +28,7 @@ public class ArticleController {
     private ArticleRepository articleRepository;
     @Autowired
     private SessionManagementUtil sessionManagementUtil;
-    @PostMapping("/article/writing")
+    @PostMapping("/post/sendpost")
     public Article writeArticle(HttpServletRequest request, @RequestBody Article article) throws IOException {
         if (!this.sessionManagementUtil.doesSessionExist(request))
         {

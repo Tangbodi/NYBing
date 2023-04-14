@@ -152,5 +152,21 @@ public class User {
     public void setVerified(String verified) {
         this.verified = verified;
     }
-
+    @Override
+    public String toString() {
+        return "{" +
+                " id='" + getId() + "'" +
+                ", userName='" + getUserName() + "'" +
+                ", firstName='" + getFirstName() + "'" +
+                ", middleName='" + getMiddleName() + "'" +
+                ", lastName='" + getLastName() + "'" +
+                ", phone='" + getPhone() + "'" +
+                ", email='" + getEmail() + "'" +
+                ", password='" + getPassword() + "'" +
+                ", registeredAt='" + getRegisteredAt() + "'" +
+                ", modifyTime='" + getModifyTime() + "'" +
+                ", token='" + getToken() + "'" +
+                ", verified='" + getVerified() + "'" +
+                "}";
+    }
 }

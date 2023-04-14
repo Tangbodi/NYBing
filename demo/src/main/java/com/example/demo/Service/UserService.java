@@ -62,7 +62,8 @@ public class UserService {
         } else {
 //            Boolean pwdCheck = false;
             if (BCrypt.checkpw(login.getPassword(), user.getPassword())) {
-                if(user.getVerified()=="true"){
+                //cannot use ==
+                if(user.getVerified().equals("true")){
                     return user;
 //                    pwdCheck = true;
                 }

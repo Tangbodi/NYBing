@@ -115,7 +115,7 @@ public class UserController{
             return user;
         }
         else{
-            return null;
+            throw new UnauthorizedException();
         }
     }
     //------------------------------------------------------------------------------------------
