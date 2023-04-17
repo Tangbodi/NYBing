@@ -12,8 +12,8 @@ import java.util.Map;
 public interface CategoryRepository extends JpaRepository<Category,Long> {
     List<Category> findAll();
 
-    @Query(value = "SELECT a.category_id, b.categoryName, a.articleId, a.title FROM master.articles a\n" +
+    @Query(value = "SELECT a.categoryid, b.categoryName, a.postId, a.title, a.textrender FROM master.post a\n" +
             "LEFT JOIN master.category b\n" +
-            "ON a.category_id = b.categoryId",nativeQuery = true)
+            "ON a.categoryid = b.categoryId",nativeQuery = true)
      List<Map<String,Object>> categoryTopFivePost();
 }

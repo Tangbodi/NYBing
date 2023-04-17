@@ -158,11 +158,11 @@ public class UserController{
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/info/{userName}")
     public User getUserByUserName(HttpServletRequest request, @PathVariable String userName) {
-        if (!this.sessionManagementUtil.doesSessionExist(request))
-        {
-            logger.info("Please login to access this page::");
-            throw new AuthException();
-        }
+//        if (!this.sessionManagementUtil.doesSessionExist(request))
+//        {
+//            logger.info("Please login to access this page::");
+//            throw new AuthException();
+//        }
         return userRepository.findByUserName(userName)
                 .orElseThrow(() -> new NotFoundException(userName));
     }
