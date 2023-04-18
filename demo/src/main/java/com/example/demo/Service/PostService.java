@@ -1,21 +1,21 @@
 package com.example.demo.Service;
 
-//@Service
-//public class PostService {
-//    private static final Logger logger = LoggerFactory.getLogger(PostService.class);
-//
-//    @Autowired
-//    private PostDAO postDAO;
-//
-//    @Autowired
-//    private UserService userService;
-//    public Post saveArticle(Post post, User user) throws IOException {
-//        post.setPost_date(Instant.now());
-//        post.setAuthor(user.getUserName());
-//        post.setUser(user);
-//        return postDAO.savePost(post);
-//    }
-//    public Optional<Post> findArticleById(Long postId){
-//        return postDAO.findPostById(postId);
-//    }
-//}
+import com.example.demo.Repository.PostRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class PostService {
+    private static final Logger logger = LoggerFactory.getLogger(PostService.class);
+
+    @Autowired
+    private PostRepository postRepository;
+    public   List<Map<String,Object>> findLatestPostsByCategory() {
+        return postRepository.findLatestPostsByCategory();
+    }
+}

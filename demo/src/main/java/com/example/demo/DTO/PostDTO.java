@@ -6,27 +6,28 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.stereotype.Component;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TopFiveArticleWithCategoryDTO {
+public class PostDTO {
     private Long categoryId;
-    private String categoryName;
-    private Long postId;
     private String title;
-
+    private String textjson;
+    private String textrender;
+    private String author;
 
     @java.lang.Override
     public java.lang.String toString() {
-        return "TopFiveArticleWithCategoryDTO{" +
+        return "TradeDTO{" +
                 " categoryId='" + getCategoryId() + "'" +
-                " categoryName='" + getCategoryName() + "'" +
-                " articleId='" + getPostId() + "'" +
                 " title='" + getTitle() + "'" +
+                " textjson='" + getTextjson() + "'" +
+                " textrender='" + getTextrender() + "'" +
+                " author='" + getAuthor() + "'" +
                 "}";
     }
 }

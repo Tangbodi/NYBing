@@ -1,6 +1,12 @@
 package com.example.demo.Controller;
 
+import com.example.demo.DAO.PostDAO;
+import com.example.demo.DTO.PostDTO;
+import com.example.demo.Entity.Post;
+import com.example.demo.Entity.User;
+import com.example.demo.Exception.AuthException;
 import com.example.demo.Repository.PostRepository;
+import com.example.demo.Service.PostService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Util.SessionManagementUtil;
 import org.slf4j.Logger;
@@ -8,7 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 @RestController
+@CrossOrigin(origins = "http://192.168.1.23:3000/")
 public class PostController {
 
     private static final Logger logger = LoggerFactory.getLogger(PostController.class);
@@ -19,11 +31,15 @@ public class PostController {
     @Autowired
     private PostRepository postRepository;
     @Autowired
+    private PostService postService;
+    @Autowired
     private SessionManagementUtil sessionManagementUtil;
+    @Autowired
+    private PostDAO postDAO;
     //------------------------------------------------------------------------------------------
     //edit post
-//    @PostMapping("post/sendpost")
-//    public Post writeArticle(HttpServletRequest request, @RequestBody Post post) throws IOException {
+    @PostMapping("posts/sendpost")
+    public PostDTO writeArticle(HttpServletRequest request, @RequestBody PostDTO postDTO) throws IOException {
 //        if (!this.sessionManagementUtil.doesSessionExist(request))
 //        {
 //            logger.info("Please login to access this page::");
@@ -31,16 +47,17 @@ public class PostController {
 //        }
 //        String userName = (String) request.getSession().getAttribute("user");
 //        User user = userService.getProfileByUserName(userName);
-//        return postService.saveArticle(post,user);
-//    }
+        postDTO.setTextjson("aasaaaasa");
+        return postDTO;
+//        return postRepository.save(post);
+    }
     //------------------------------------------------------------------------------------------
     //show post page
-//    @GetMapping("/article/{articleId}")
-//    public Post getArticle(@PathVariable Long articleId){
-//
-//        return postService.findArticleById(articleId);
-//    }
 
+    @GetMapping("/posts")
+    public   List<Map<String,Object>> getPosts(){
+        return postService.findLatestPostsByCategory();
+    }
 
 //    @PostMapping("/images/save")
 //    public Image saveImage(HttpServletRequest request, @RequestParam("image") MultipartFile multipartFile) throws IOException {
