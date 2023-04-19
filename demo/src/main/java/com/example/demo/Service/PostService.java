@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.DAO.PostDAO;
 import com.example.demo.Repository.PostRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,13 @@ public class PostService {
 
     @Autowired
     private PostRepository postRepository;
-    public   List<Map<String,Object>> findLatestPostsByCategory() {
-        return postRepository.findLatestPostsByCategory();
+    @Autowired
+    private PostDAO postDAO;
+
+    public List<Map<String, Object>> findPostsByCategoryId(Long categoryId){
+        return postDAO.findPostsByCategoryId(categoryId);
     }
+//    public Optional<Post> findPostByPostId(Long postId){
+//        return postDAO.findPostByPostId(postId);
+//    }
 }

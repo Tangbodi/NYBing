@@ -1,9 +1,12 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
+
 
 @Entity
 @Table(name = "post")
@@ -30,10 +33,12 @@ public class Post {
     @Column(name = "author", length = 20)
     private String author;
 
-    @NotNull
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "userId", nullable = false)
+    @JsonIgnore
     private User user;
+
 
     public PostId getId() {
         return id;

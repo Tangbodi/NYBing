@@ -8,7 +8,6 @@ import com.example.demo.Entity.User;
 import com.example.demo.Exception.AuthException;
 import com.example.demo.Exception.NotFoundException;
 import com.example.demo.Repository.UserRepository;
-import net.bytebuddy.utility.RandomString;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

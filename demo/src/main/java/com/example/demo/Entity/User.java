@@ -4,6 +4,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -56,6 +58,9 @@ public class User {
     @Lob
     @Column(name = "verified")
     private String verified;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Post> posts = new LinkedHashSet<>();
 
     public Long getId() {
         return id;
@@ -152,21 +157,13 @@ public class User {
     public void setVerified(String verified) {
         this.verified = verified;
     }
-    @Override
-    public String toString() {
-        return "{" +
-                " id='" + getId() + "'" +
-                ", userName='" + getUserName() + "'" +
-                ", firstName='" + getFirstName() + "'" +
-                ", middleName='" + getMiddleName() + "'" +
-                ", lastName='" + getLastName() + "'" +
-                ", phone='" + getPhone() + "'" +
-                ", email='" + getEmail() + "'" +
-                ", password='" + getPassword() + "'" +
-                ", registeredAt='" + getRegisteredAt() + "'" +
-                ", modifyTime='" + getModifyTime() + "'" +
-                ", token='" + getToken() + "'" +
-                ", verified='" + getVerified() + "'" +
-                "}";
+
+    public Set<Post> getPosts() {
+        return posts;
     }
+
+    public void setPosts(Set<Post> posts) {
+        this.posts = posts;
+    }
+
 }
