@@ -1,43 +1,49 @@
 package com.example.demo.Entity;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "userId", nullable = false)
-    private Long id;
+    @Size(max = 36)
+    @GeneratedValue(generator = "system_uuid")
+    @GenericGenerator(name="system_uuid",strategy = "uuid")
+    @Column(name = "userId", nullable = false, length = 36)
+    private String id;
 
-    @Size(max = 20)
+    @Size(max = 18)
     @NotNull
-    @Column(name = "userName", nullable = false, length = 20)
+    @Column(name = "userName", nullable = false, length = 18)
     private String userName;
 
-    @Size(max = 20)
-    @Column(name = "firstName", length = 20)
+    @Size(max = 36)
+    @Column(name = "firstName", length = 36)
     private String firstName;
 
-    @Size(max = 20)
-    @Column(name = "middleName", length = 20)
+    @Size(max = 36)
+    @Column(name = "middleName", length = 36)
     private String middleName;
 
-    @Size(max = 20)
-    @Column(name = "lastName", length = 20)
+    @Size(max = 36)
+    @Column(name = "lastName", length = 36)
     private String lastName;
 
     @Size(max = 11)
     @Column(name = "phone", length = 11)
     private String phone;
 
-    @Size(max = 30)
-    @Column(name = "email", length = 30)
+    @Size(max = 45)
+    @NotNull
+    @Column(name = "email", nullable = false, length = 45)
     private String email;
 
     @Size(max = 60)
@@ -48,11 +54,9 @@ public class User {
     @Column(name = "registeredAt")
     private Instant registeredAt;
 
-    @Column(name = "modifyTime")
-    private Instant modifyTime;
 
-    @Size(max = 9)
-    @Column(name = "token", length = 9)
+    @Size(max = 15)
+    @Column(name = "token", length = 15)
     private String token;
 
     @Lob
@@ -60,13 +64,19 @@ public class User {
     private String verified;
 
     @OneToMany(mappedBy = "user")
+    private Set<UserModifyHistory> userModifyHistories = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<UserLoginHistory> userLoginHistories = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user")
     private Set<Post> posts = new LinkedHashSet<>();
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -134,13 +144,6 @@ public class User {
         this.registeredAt = registeredAt;
     }
 
-    public Instant getModifyTime() {
-        return modifyTime;
-    }
-
-    public void setModifyTime(Instant modifyTime) {
-        this.modifyTime = modifyTime;
-    }
 
     public String getToken() {
         return token;
@@ -156,6 +159,22 @@ public class User {
 
     public void setVerified(String verified) {
         this.verified = verified;
+    }
+
+    public Set<UserModifyHistory> getUserModifyHistories() {
+        return userModifyHistories;
+    }
+
+    public void setUserModifyHistories(Set<UserModifyHistory> userModifyHistories) {
+        this.userModifyHistories = userModifyHistories;
+    }
+
+    public Set<UserLoginHistory> getUserLoginHistories() {
+        return userLoginHistories;
+    }
+
+    public void setUserLoginHistories(Set<UserLoginHistory> userLoginHistories) {
+        this.userLoginHistories = userLoginHistories;
     }
 
     public Set<Post> getPosts() {

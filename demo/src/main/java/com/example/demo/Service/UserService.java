@@ -1,7 +1,6 @@
 package com.example.demo.Service;
 
 import com.example.demo.DAO.UserDAO;
-import com.example.demo.DAO.UserPasswordHistoryDAO;
 import com.example.demo.DTO.LoginDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -25,19 +25,16 @@ public class UserService {
     private UserDAO userDAO;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private UserPasswordHistoryDAO userPasswordHistoryDAO;
-    @Autowired
-    private UserPasswordHistoryService userPasswordHistoryService;
+
     @Autowired
     private EmailValidationService emailValidationService;
     public boolean registerUser(User newUser) throws IllegalStateException {
         logger.info("Registering user::");
         String password = BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt());
+
         newUser.setPassword(password);
         newUser.setRegisteredAt(Instant.now());
         this.userDAO.saveUser(newUser);
-//        userPasswordHistoryService.saveUserPasswordHistory(newUser);
         return true;
     }
     public boolean checkIfUserRegistered (User newUser)

@@ -1,7 +1,6 @@
 package com.example.demo.Repository;
 
 import com.example.demo.Entity.Post;
-import com.example.demo.Entity.PostId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, PostId> {
+public interface PostRepository extends JpaRepository<Post, String> {
     @Query(value = "SELECT * FROM Post WHERE categoryId =:categoryId",nativeQuery = true)
     List<Map<String, Object>> findPostByCategoryId(@Param("categoryId") Long categoryId);
 

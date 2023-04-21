@@ -1,18 +1,22 @@
 package com.example.demo.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
-
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "post")
+@Table(name = "posts")
 public class Post {
-    @EmbeddedId
-    private PostId id;
+    @Id
+    @Size(max = 36)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "postId", nullable = false, length = 36)
+    private String id;
+
+    @Column(name = "categoryId")
+    private Integer categoryId;
 
     @Size(max = 255)
     @Column(name = "title")
@@ -29,23 +33,41 @@ public class Post {
     @Column(name = "publishAt")
     private Instant publishAt;
 
-    @Size(max = 20)
-    @Column(name = "author", length = 20)
-    private String author;
+    @Size(max = 18)
+    @Column(name = "userName", length = 18)
+    private String userName;
 
+    @Column(name = "ipvFour", columnDefinition = "INT UNSIGNED")
+    private Long ipvFour;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "userId", nullable = false)
-    @JsonIgnore
+    @Size(max = 16)
+    @Column(name = "ipvSix", length = 16)
+    private String ipvSix;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId")
     private User user;
 
+    @OneToMany(mappedBy = "post")
+    private Set<Comment> comments = new LinkedHashSet<>();
 
-    public PostId getId() {
+    @OneToMany(mappedBy = "post")
+    private Set<PostViewsComment> postViewsComments = new LinkedHashSet<>();
+
+    public String getId() {
         return id;
     }
 
-    public void setId(PostId id) {
+    public void setId(String id) {
         this.id = id;
+    }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getTitle() {
@@ -80,12 +102,28 @@ public class Post {
         this.publishAt = publishAt;
     }
 
-    public String getAuthor() {
-        return author;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public Long getIpvFour() {
+        return ipvFour;
+    }
+
+    public void setIpvFour(Long ipvFour) {
+        this.ipvFour = ipvFour;
+    }
+
+    public String getIpvSix() {
+        return ipvSix;
+    }
+
+    public void setIpvSix(String ipvSix) {
+        this.ipvSix = ipvSix;
     }
 
     public User getUser() {
@@ -94,6 +132,22 @@ public class Post {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Set<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(Set<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public Set<PostViewsComment> getPostViewsComments() {
+        return postViewsComments;
+    }
+
+    public void setPostViewsComments(Set<PostViewsComment> postViewsComments) {
+        this.postViewsComments = postViewsComments;
     }
 
 }

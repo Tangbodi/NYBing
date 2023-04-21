@@ -1,14 +1,11 @@
 package com.example.demo.Controller;
 
-import com.example.demo.DAO.UserPasswordHistoryDAO;
 import com.example.demo.DTO.LoginDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.*;
-import com.example.demo.Repository.UserPasswordHistoryRepository;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.Service.EmailValidationService;
-import com.example.demo.Service.UserPasswordHistoryService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Util.SessionManagementUtil;
 import com.example.demo.Validator.RegisterUserValidator;
@@ -47,12 +44,6 @@ public class UserController{
     private UserRepository userRepository;
     @Autowired
     private JavaMailSender mailSender;
-    @Autowired
-    private UserPasswordHistoryService userPasswordHistoryService;
-    @Autowired
-    private UserPasswordHistoryDAO userPasswordHistoryDAO;
-    @Autowired
-    private UserPasswordHistoryRepository userPasswordHistoryRepository;
     @Autowired
     private EmailValidationService emailValidationService;
 

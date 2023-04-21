@@ -99,7 +99,6 @@ public class UserDAO {
         return userRepository.findByUserName(userName).map(user->{
             user.setFirstName(userDTO.getFirstName());
             user.setLastName(userDTO.getLastName());
-            user.setModifyTime(Instant.now());
             return userRepository.save(user);
         }).orElseThrow(()-> new NotFoundException(userName));
     }
@@ -107,7 +106,6 @@ public class UserDAO {
         String newPassword = BCrypt.hashpw(userDTO.getNewPassword(),BCrypt.gensalt());
         return userRepository.findByUserName(userName).map(user->{
             user.setPassword(newPassword);
-            user.setModifyTime(Instant.now());
             return userRepository.save(user);
         }).orElseThrow(()-> new NotFoundException(userName));
     }

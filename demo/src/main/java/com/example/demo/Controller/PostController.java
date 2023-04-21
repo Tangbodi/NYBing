@@ -3,9 +3,7 @@ package com.example.demo.Controller;
 import com.example.demo.DAO.PostDAO;
 import com.example.demo.DTO.PostDTO;
 import com.example.demo.Entity.Post;
-import com.example.demo.Entity.PostId;
 import com.example.demo.Entity.User;
-import com.example.demo.Exception.AuthException;
 import com.example.demo.Repository.PostRepository;
 import com.example.demo.Service.PostService;
 import com.example.demo.Service.UserService;
@@ -47,17 +45,6 @@ public class PostController {
         {
             String ip = HttpUtils.getRequestIP(request);
 
-            Post post = new Post();
-            User user = new User();
-            user.setId(1L);
-            post.setUser(user);
-            post.setTextrender(postDTO.getTextrender());
-            post.setAuthor(ip);
-            PostId postId = new PostId();
-            postId.setCategoryId(categoryId);
-            post.setId(postId);
-            post.setTitle(postDTO.getTitle());
-            return postRepository.save(post);
 //            logger.info("Please login to access this page::");
 //            throw new AuthException();
         }
@@ -80,17 +67,14 @@ public class PostController {
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("/posts/{categoryId}/{postId}")
-    public Optional<Post> findOnePostByPostId(@PathVariable("categoryId")Integer categoryId,@PathVariable("postId") Long postId){
+    public Optional<Post> findOnePostByPostId(@PathVariable("categoryId")Integer categoryId,@PathVariable("postId") String postId){
         //        if (!this.sessionManagementUtil.doesSessionExist(request))
 //        {
 //            logger.info("Please login to access this page::");
 //            throw new AuthException();
 //        }
 //        return postRepository.findPostByPostIdAndCategoryId(categoryId,postId);
-        PostId CategoryIdAndPostId = new PostId();
-        CategoryIdAndPostId.setPostId(postId);
-        CategoryIdAndPostId.setCategoryId(categoryId);
-        return postRepository.findById(CategoryIdAndPostId);
+        return postRepository.findById(postId);
 //        return postRepository.findPostByPostIdAndCategoryId(postId1.getCategoryId(),postId1.getPostId());
     }
 //    @PostMapping("/images/save")

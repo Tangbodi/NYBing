@@ -1,12 +1,5 @@
 package com.example.demo.Util;
 
-import com.example.demo.Service.AllArticleService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-
-import java.util.Random;
 //@Component
 //public class Task {
 //
