@@ -74,7 +74,7 @@ public class UserController{
                 userService.registerUser(newUser);
                 logger.info("User successfully registered::");
             }
-                emailValidationService.processEmailValidation(request,newUser);
+//                emailValidationService.processEmailValidation(request,newUser);
 //        finally {
 //            permit.release();
 //        }
@@ -121,11 +121,11 @@ public class UserController{
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/update/{userName}")
     public User updateUserByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName){
-        if (!this.sessionManagementUtil.doesSessionExist(request))
-        {
-            logger.info("Please login to access this page::");
-            throw new AuthException();
-        }
+//        if (!this.sessionManagementUtil.doesSessionExist(request))
+//        {
+//            logger.info("Please login to access this page::");
+//            throw new AuthException();
+//        }
         if(userDTO.getNewPassword()==null){
             return userService.updateUserInfoByUserName(userDTO,userName);
         }

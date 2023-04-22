@@ -1,5 +1,7 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -21,6 +23,7 @@ public class UserLoginHistory {
     @Size(max = 16)
     @Column(name = "ipvSix", length = 16)
     private String ipvSix;
+
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

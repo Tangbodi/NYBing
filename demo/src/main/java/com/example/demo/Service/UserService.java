@@ -59,20 +59,20 @@ public class UserService {
 //            Boolean pwdCheck = false;
             if (BCrypt.checkpw(login.getPassword(), user.getPassword())) {
                 //cannot use ==
-                if(user.getVerified().equals("true")){
+//                if(user.getVerified().equals("true")){
                     return user;
-//                    pwdCheck = true;
-                }
-                else{
-                    //api/user/login/email_validation?token=
-                    emailValidationService.processEmailValidation(request,user);
-                }
+////                    pwdCheck = true;
+//                }
+//                else{
+//                    //api/user/login/email_validation?token=
+//                    emailValidationService.processEmailValidation(request,user);
+//                }
             }
             else{
                 throw new AuthException(login.getUserName(),login.getPassword());
             }
         }
-        return null;
+//        return null;
     }
     public User getProfileByUserName (String userName)
     {
@@ -83,10 +83,11 @@ public class UserService {
 //    }
 
     public User updateUserInfoByUserName(UserDTO userDTO, String userName){
+        logger.info("updating info of:: "+userName);
         return this.userDAO.updateUserByUserName(userDTO,userName);
     }
     public User updatePasswordByUserName(UserDTO userDTO, String userName){
-
+        logger.info("updating password of:: "+userName);
         String curPassword = userDAO.getProfileByUserName(userName).getPassword();
         Boolean pwdCheck = false;
 

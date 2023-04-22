@@ -1,5 +1,6 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -63,12 +64,15 @@ public class User {
     @Column(name = "verified")
     private String verified;
 
+    @JsonIgnore //if you don't want to return user with modifyHistory then you can add @JsonIgnore
     @OneToMany(mappedBy = "user")
     private Set<UserModifyHistory> userModifyHistories = new LinkedHashSet<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private Set<UserLoginHistory> userLoginHistories = new LinkedHashSet<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private Set<Post> posts = new LinkedHashSet<>();
 

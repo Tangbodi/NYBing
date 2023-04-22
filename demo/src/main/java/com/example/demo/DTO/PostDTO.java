@@ -14,11 +14,13 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostDTO {
-    private Long categoryId;
+    private Integer categoryId;
     private String title;
     private String textjson;
     private String textrender;
-    private String author;
+    private String userName;
+    private Long ipvFour;
+    private String ipvSix;
 
     @java.lang.Override
     public java.lang.String toString() {
@@ -27,7 +29,9 @@ public class PostDTO {
                 " title='" + getTitle() + "'" +
                 " textjson='" + getTextjson() + "'" +
                 " textrender='" + getTextrender() + "'" +
-                " author='" + getAuthor() + "'" +
+                " userName='" + getUserName() + "'" +
+                " ipvFour='" + getIpvFour() + "'" +
+                " ipvSix='" + getIpvSix() + "'" +
                 "}";
     }
 }

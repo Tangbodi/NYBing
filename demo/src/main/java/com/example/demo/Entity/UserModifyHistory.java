@@ -1,5 +1,7 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -35,6 +37,7 @@ public class UserModifyHistory {
 
     @Column(name = "modifyTime")
     private Instant modifyTime;
+
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
