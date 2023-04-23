@@ -1,5 +1,7 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -11,7 +13,7 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "commentId", nullable = false)
-    private Long id;
+    private Integer commentId;
 
     @Column(name = "categoryId")
     private Integer categoryId;
@@ -38,17 +40,29 @@ public class Comment {
     @Column(name = "from_ipvSix", length = 16)
     private String fromIpvsix;
 
+    @Column(name = "parentId")
+    private Integer parentId;
+
+    @Size(max = 18)
+    @Column(name = "fromName", length = 18)
+    private String fromName;
+
+    @Size(max = 18)
+    @Column(name = "toName", length = 18)
+    private String toName;
+
+    @JsonIgnore
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "postId", nullable = false)
     private Post post;
 
-    public Long getId() {
-        return id;
+    public Integer getCommentId() {
+        return commentId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setCommentId(Integer commentId) {
+        this.commentId = commentId;
     }
 
     public Integer getCategoryId() {
@@ -105,6 +119,30 @@ public class Comment {
 
     public void setFromIpvsix(String fromIpvsix) {
         this.fromIpvsix = fromIpvsix;
+    }
+
+    public Integer getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Integer parentId) {
+        this.parentId = parentId;
+    }
+
+    public String getFromName() {
+        return fromName;
+    }
+
+    public void setFromName(String fromName) {
+        this.fromName = fromName;
+    }
+
+    public String getToName() {
+        return toName;
+    }
+
+    public void setToName(String toName) {
+        this.toName = toName;
     }
 
     public Post getPost() {

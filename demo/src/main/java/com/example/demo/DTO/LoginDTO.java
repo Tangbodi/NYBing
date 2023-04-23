@@ -17,8 +17,9 @@ import java.util.Date;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginDTO {
 
+    @NotEmpty
     private String userName ;
-
+    @NotEmpty
     private String password;
 
     @java.lang.Override

@@ -14,8 +14,8 @@ import java.util.Set;
 public class Post {
     @Id
     @Size(max = 36)
+    @GenericGenerator(name="system_uuid",strategy = "uuid")//hibernate annotation/32 bits UUID
     @GeneratedValue(generator = "system_uuid")
-    @GenericGenerator(name="system_uuid",strategy = "uuid")
     @Column(name = "postId", nullable = false, length = 36)
     private String id;
 
@@ -55,7 +55,6 @@ public class Post {
     @JoinColumn(name = "userId")
     private User user;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "post")
     private Set<Comment> comments = new LinkedHashSet<>();
 

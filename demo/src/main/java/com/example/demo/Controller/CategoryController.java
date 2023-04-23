@@ -26,6 +26,9 @@ public class CategoryController {
     private CategoryService categoryService;
     @Autowired
     private PostService postService;
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     @GetMapping("/categories")
     public List<Object[]> getTopFivePosts(HttpServletRequest request){
 
@@ -35,7 +38,8 @@ public class CategoryController {
     //show all posts under specific category
     @GetMapping("/categories/{categoryId}")
     public List<Map<String, Object>> findAllPostsByCategoryId(@PathVariable Integer categoryId){
-        return postService.findPostsByCategoryId(categoryId);
+        return categoryRepository.allPostsUnderOneCategory(categoryId);
+//        return postService.findPostsByCategoryId(categoryId);
     }
 
 }
