@@ -17,7 +17,7 @@ public class Post {
     @GenericGenerator(name="system_uuid",strategy = "uuid")//hibernate annotation/32 bits UUID
     @GeneratedValue(generator = "system_uuid")
     @Column(name = "postId", nullable = false, length = 36)
-    private String id;
+    private String postId;
 
     @Column(name = "categoryId")
     private Integer categoryId;
@@ -25,10 +25,6 @@ public class Post {
     @Size(max = 255)
     @Column(name = "title")
     private String title;
-
-    @Lob
-    @Column(name = "textjson")
-    private String textjson;
 
     @Lob
     @Column(name = "textrender")
@@ -48,9 +44,8 @@ public class Post {
     @Column(name = "ipvSix", length = 16)
     private String ipvSix;
 
-
-    @JsonIgnore //No serializer found for class org.hibernate.proxy.pojo.bytebuddy.ByteBuddyInterceptor and no properties discovered to create BeanSerializer
-                // (to avoid exception, disable SerializationFeature.FAIL_ON_EMPTY_BEANS) (through reference chain: com.example.demo.Entity.Post["user"]
+    @JsonIgnore//No serializer found for class org.hibernate.proxy.pojo.bytebuddy.ByteBuddyInterceptor and no properties discovered to create BeanSerializer
+    // (to avoid exception, disable SerializationFeature.FAIL_ON_EMPTY_BEANS) (through reference chain: com.example.demo.Entity.Post["user"]
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")
     private User user;
@@ -62,12 +57,12 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private Set<PostViewsComment> postViewsComments = new LinkedHashSet<>();
 
-    public String getId() {
-        return id;
+    public String getPostId() {
+        return postId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setPostId(String postId) {
+        this.postId = postId;
     }
 
     public Integer getCategoryId() {
@@ -84,14 +79,6 @@ public class Post {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getTextjson() {
-        return textjson;
-    }
-
-    public void setTextjson(String textjson) {
-        this.textjson = textjson;
     }
 
     public String getTextrender() {

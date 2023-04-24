@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -16,22 +18,21 @@ import lombok.Setter;
 public class PostDTO {
     private Integer categoryId;
     private String title;
-    private String textjson;
     private String textrender;
     private String userName;
     private Long ipvFour;
     private String ipvSix;
-
+    private Instant publishAt;
     @java.lang.Override
     public java.lang.String toString() {
         return "TradeDTO{" +
                 " categoryId='" + getCategoryId() + "'" +
                 " title='" + getTitle() + "'" +
-                " textjson='" + getTextjson() + "'" +
                 " textrender='" + getTextrender() + "'" +
                 " userName='" + getUserName() + "'" +
                 " ipvFour='" + getIpvFour() + "'" +
                 " ipvSix='" + getIpvSix() + "'" +
+                " publishAt='" + getPublishAt() + "'" +
                 "}";
     }
 }
