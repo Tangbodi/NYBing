@@ -1,7 +1,7 @@
 package com.example.demo.Service;
 
 import com.example.demo.Entity.User;
-import com.example.demo.Exception.NotFoundException;
+import com.example.demo.Exception.UserNotFoundException;
 import net.bytebuddy.utility.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,22 +29,25 @@ public class EmailValidationService {
     //------------------------------------------------------------------------------------------
     //generate a random token then send validation email via 192.168.1.10:8080/api/user/register/email_validation?token=
     public void processEmailValidation(HttpServletRequest request, User user){
+        logger.info("Generating email validation link and token::");
         String email = user.getEmail();
-        String token = RandomString.make(9);
+        String token = RandomString.make(15);
         String siteURL = request.getRequestURL().toString();
         siteURL.replace(request.getServletPath(),"");
         try{
             userService.updateToken(token,email);
             String emailValidationLink = siteURL + "/email_validation?token=" + token;
             sendEmailValidationLink(email,emailValidationLink);
-            logger.info("already generated link and token::");
-        }catch (NotFoundException e){
+
+        }catch (UserNotFoundException e){
             e.getMessage();
         }catch (UnsupportedEncodingException | MessagingException ex){
             ex.getMessage();
         }
     }
     public void sendEmailValidationLink(String recipientEmail,String link) throws MessagingException, UnsupportedEncodingException {
+        logger.info("Editing email sender, receiver, subject, and content::");
+
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
         mimeMessageHelper.setFrom("contact@dummynode.com","DummyNode Support");
@@ -63,9 +66,10 @@ public class EmailValidationService {
         logger.info("email has been sent out::");
     }
     public void sendForgotPasswordLink(String recipientEmail,String link) throws MessagingException,UnsupportedEncodingException{
+        logger.info("Editing email sender, receiver, subject, and content::");
+
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
-
         mimeMessageHelper.setFrom("contact@dummynode.com","DummyNode Support");
         mimeMessageHelper.setTo(recipientEmail);
         String subject = "Here's the link to reset your password";
@@ -79,5 +83,6 @@ public class EmailValidationService {
         mimeMessageHelper.setSubject(subject);
         mimeMessageHelper.setText(content,true);
         javaMailSender.send(message);
+        logger.info("email has been sent out::");
     }
 }

@@ -20,6 +20,8 @@ public class UserDTO {
     private String inputPassword;
     private String newPassword;
 
+    private String email;
+
     @java.lang.Override
     public java.lang.String toString() {
         return "TradeDTO{" +
@@ -28,6 +30,8 @@ public class UserDTO {
                 " middleName='" + getMiddleName() + "'" +
                 " inputPassword='" + getInputPassword() + "'" +
                 " newPassword='" + getNewPassword() + "'" +
+                " email='" + getEmail() + "'" +
+
                 "}";
     }
 }

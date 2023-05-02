@@ -2,7 +2,7 @@ package com.example.demo.DAO;
 
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
-import com.example.demo.Exception.NotFoundException;
+import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import java.time.Instant;
 
 @Component
 public class UserDAO {
@@ -25,7 +24,7 @@ public class UserDAO {
     private EntityManager entityManager;
     public User saveUser(User user)
     {
-        logger.info("Saving user object to database::");
+        logger.info("Saving user into database::");
         return this.userRepository.save(user);
     }
 
@@ -83,13 +82,14 @@ public class UserDAO {
             resUserName=0;
         }
 
+        System.out.println(resEmail+resUserName);
         return resEmail+resUserName;
 //        return userRepository.existsByUserNameAndEmail(userName,email);
     }
 
     public User getProfileByUserName(String userName) {
         logger.info("Getting user from username:: " + userName);
-        return userRepository.findByUserName(userName).orElseThrow(()->new NotFoundException(userName));
+        return userRepository.findByUserName(userName).orElseThrow(()->new UserNotFoundException(userName));
     }
 //    public User getUserProfileById(Long id){
 //        logger.info("Getting user from id:: "+id);
@@ -101,7 +101,7 @@ public class UserDAO {
             user.setFirstName(userDTO.getFirstName());
             user.setLastName(userDTO.getLastName());
             return userRepository.save(user);
-        }).orElseThrow(()-> new NotFoundException(userName));
+        }).orElseThrow(()-> new UserNotFoundException(userName));
     }
     public User updatePasswordByUserName(UserDTO userDTO, String userName){
         logger.info("updating password of:: "+userName);
@@ -109,7 +109,7 @@ public class UserDAO {
         return userRepository.findByUserName(userName).map(user->{
             user.setPassword(newPassword);
             return userRepository.save(user);
-        }).orElseThrow(()-> new NotFoundException(userName));
+        }).orElseThrow(()-> new UserNotFoundException(userName));
     }
     public User findByToken(String token){
         return userRepository.findByToken(token);

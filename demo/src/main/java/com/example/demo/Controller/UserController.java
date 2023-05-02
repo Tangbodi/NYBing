@@ -5,10 +5,12 @@ import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.*;
 import com.example.demo.Repository.UserRepository;
+import com.example.demo.Service.AsyncService;
 import com.example.demo.Service.EmailValidationService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Util.SessionManagementUtil;
 import com.example.demo.Validator.RegisterUserValidator;
+import lombok.Value;
 import net.bytebuddy.utility.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,78 +31,47 @@ import java.util.concurrent.Semaphore;
 
 
 @RestController
-@CrossOrigin(origins = "http://192.168.1.23:3000/")
+@CrossOrigin(origins ="${ORIGINS}")
 public class UserController{
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-//    public static final String url = "api";
     @Autowired
     RegisterUserValidator registerUserValidator;
     @Autowired
     private UserService userService;
-    @Autowired
-    private SessionManagementUtil sessionManagementUtil;
-
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private JavaMailSender mailSender;
     @Autowired
     private EmailValidationService emailValidationService;
+    @Autowired
+    private AsyncService asyncService;
 
-    private final Semaphore permit = new Semaphore(10,true);
-
-
-//    public UserController(String message) {
-//        super(message);
-//    }
 
     @PostMapping("/user/register")
-    public ResponseEntity register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException {
+    public ResponseEntity register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException, InterruptedException {
 
         registerUserValidator.validate(newUser, bindingResult);
-//        try{
-//            permit.acquire();
-//            logger.info("Dealing request=================>");
-//            Thread.sleep(2000);
-            if (bindingResult.hasErrors()) {
-                logger.info("Password should be minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character::"+newUser.getPassword());
-                throw new PasswordException(newUser.getPassword());
-            }
-            else if (this.userService.checkIfUserRegistered(newUser)) {
-                logger.info("Oops. An account with this username or email already exists::");
+
+            if (this.userService.checkIfUserRegistered(newUser)) {
                 throw new UserAlreadyExistsException();
             }
             else {
+                asyncService.MultiExecutor("Registering user::"+newUser.getUserName()+"; "+newUser.getEmail());
                 userService.registerUser(newUser);
                 logger.info("User successfully registered::");
+                emailValidationService.processEmailValidation(request,newUser);
             }
-//                emailValidationService.processEmailValidation(request,newUser);
-//        finally {
-//            permit.release();
-//        }
         return ResponseEntity.ok().build();
     }
 
     //------------------------------------------------------------------------------------------
-    //user verify his email
-    @GetMapping("/user/register/email_validation")
-    public ResponseEntity showEmailValidationPageViaRegisterLink(@Param(value="token")String token){
-        try{
-            User user = userService.getByToken(token);
-            userService.verifyUser(user);
-        }catch (NotFoundException e){
-            e.getMessage();
-        }
-        return ResponseEntity.ok().build();
-    }
-    //------------------------------------------------------------------------------------------
     @PostMapping("/user/login")
     public User UserLogin(@RequestBody LoginDTO login, HttpServletRequest request)throws IOException {
-        User user = this.userService.authenticate(login,request);
-        if (user!=null) {
+
+        if (this.userService.authenticate(login)!=null) {
             logger.info("Successfully authenticated::");
-            String userName = user.getUserName();
-            this.sessionManagementUtil.createNewSessionForUser(request,userName);
+            User user = userService.getProfileByUserName(login.getUserName());
             return user;
         }
         else{
@@ -108,42 +79,29 @@ public class UserController{
         }
     }
     //------------------------------------------------------------------------------------------
+    @GetMapping("/user/register/email_validation")
+    public ResponseEntity showEmailValidationPageViaRegisterLink(@Param(value="token")String token){
+         userService.getByToken(token);
+         return ResponseEntity.ok().build();
+    }
+    //------------------------------------------------------------------------------------------
     @GetMapping("/user/login/email_validation")
-    public ResponseEntity showEmailValidationViaLoginLink(@Param(value="token")String token){
-        try{
-            User user = userService.getByToken(token);
-            userService.verifyUser(user);
-        }catch (NotFoundException e){
-            e.getMessage();
-        }
-        return ResponseEntity.ok().build();
+    public User showEmailValidationViaLoginLink(@Param(value="token")String token){
+        return userService.getByToken(token);
     }
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/update/{userName}")
-    public User updateUserByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName){
-//        if (!this.sessionManagementUtil.doesSessionExist(request))
-//        {
-//            logger.info("Please login to access this page::");
-//            throw new AuthException();
-//        }
+    public User updateUserByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName) throws InterruptedException {
+
         if(userDTO.getNewPassword()==null){
+            asyncService.MultiExecutor("updating firstname, lastname of user:: "+userDTO.getFirstName()+";"+userDTO.getLastName());
             return userService.updateUserInfoByUserName(userDTO,userName);
         }
         else{
+            asyncService.MultiExecutor("updating password of user:: "+userDTO.getInputPassword());
             return userService.updatePasswordByUserName(userDTO,userName);
         }
     }
-    //------------------------------------------------------------------------------------------
-//    @PutMapping("/user/password/update/{userName}")
-//    public Boolean updatePasswordByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName){
-//        if (!this.sessionManagementUtil.doesSessionExist(request))
-//        {
-//            logger.info("Please login to access this page::");
-//            throw new AuthException();
-//        }
-//
-//        return userService.updatePasswordByUserName(userDTO,userName);
-//    }
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/info/{userName}")
     public User getUserByUserName(HttpServletRequest request, @PathVariable String userName) {
@@ -153,14 +111,14 @@ public class UserController{
 //            throw new AuthException();
 //        }
         return userRepository.findByUserName(userName)
-                .orElseThrow(() -> new NotFoundException(userName));
+                .orElseThrow(() -> new UserNotFoundException(userName));
     }
     //------------------------------------------------------------------------------------------
     @PostMapping("/user/forgot_password")
-    public ResponseEntity processForgotPassword(HttpServletRequest request,@RequestBody User user){
+    public ResponseEntity processForgotPassword(HttpServletRequest request,@RequestBody UserDTO userDTO){
 
-        String email = user.getEmail();
-        String token = RandomString.make(9);
+        String email = userDTO.getEmail();
+        String token = RandomString.make(15);
         String siteURL = request.getRequestURL().toString();
         siteURL.replace(request.getServletPath(),"");
 
@@ -169,7 +127,7 @@ public class UserController{
             String resetPasswordLink = siteURL + "/reset_password?token=" + token;
             emailValidationService.sendForgotPasswordLink(email,resetPasswordLink);
 
-        }catch (NotFoundException e){
+        }catch (UserNotFoundException e){
             e.getMessage();
         }catch (UnsupportedEncodingException | MessagingException ex){
             ex.getMessage();
@@ -178,33 +136,15 @@ public class UserController{
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("forgot_password/reset_password")
-    public ResponseEntity showResetPasswordForm(@Param(value="token")String token){
-        User user = userService.getByToken(token);
-        if(user == null){
-            throw new NotFoundException();
-        }
-        return ResponseEntity.ok().build();
+    public User showResetPasswordForm(@Param(value="token")String token){
+        return userService.getByToken(token);
     }
     //------------------------------------------------------------------------------------------
     @PostMapping("forgot_password/reset_password")
-    public ResponseEntity enterPassword(@Param(value="token")String token,HttpServletRequest request){
-
+    public ResponseEntity enterPassword(@Param(value="token")String token,@RequestParam("password")String password, HttpServletRequest request){
         User user = userService.getByToken(token);
-        String password = request.getParameter("password");
         userService.ResetPassword(user,password);
         return ResponseEntity.ok().build();
-    }
-    //------------------------------------------------------------------------------------------
-    @RequestMapping("/logout.html")
-    public void userLogout(HttpServletRequest request)
-    {
-        request.getSession().invalidate();
-        logger.info("Logged out::");
-    }
-    //------------------------------------------------------------------------------------------
-    @PostMapping("/user/delete/{userName}")
-    public void deleteUser(@PathVariable String userName){
-        userService.deleteUser(userName);
     }
 
 }

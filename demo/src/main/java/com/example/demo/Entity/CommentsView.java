@@ -1,23 +1,29 @@
 package com.example.demo.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 
+/**
+ * Mapping for DB view
+ */
 @Getter
 @Setter
 @Entity
-@Table(name = "comments")
-public class Comment {
+@Immutable
+@Table(name = "comments_view")
+public class CommentsView {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotNull
     @Column(name = "commentId", nullable = false)
-    private Integer id;
+    private Integer commentId;
 
     @Column(name = "categoryId")
     private Integer categoryId;
@@ -27,11 +33,11 @@ public class Comment {
     private String commentContent;
 
     @Size(max = 18)
-    @Column(name = "fromId", length = 36)
+    @Column(name = "fromId", length = 18)
     private String fromId;
 
     @Size(max = 18)
-    @Column(name = "toId", length = 36)
+    @Column(name = "toId", length = 18)
     private String toId;
 
     @Column(name = "from_ipvFour", columnDefinition = "INT UNSIGNED")
@@ -55,10 +61,9 @@ public class Comment {
     @Column(name = "publishAt")
     private Instant publishAt;
 
-    @JsonIgnore
+    @Size(max = 36)
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "postId", nullable = false)
-    private Post post;
+    @Column(name = "postId", nullable = false, length = 36)
+    private String postId;
 
 }

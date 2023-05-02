@@ -2,40 +2,71 @@ package com.example.demo.Service;
 
 import com.example.demo.DTO.CommentDTO;
 import com.example.demo.Entity.Comment;
+import com.example.demo.Entity.CommentsView;
+import com.example.demo.Entity.Post;
+import com.example.demo.Exception.IpException;
 import com.example.demo.Repository.CommentRepository;
+import com.example.demo.Repository.ImageRepository;
+import com.example.demo.Repository.PostRepository;
+import com.example.demo.Util.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.time.Instant;
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CommentService {
 
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
-    private final CommentRepository commentRepository;
+    @Autowired
+    private CommentRepository commentRepository;
 
-    public CommentService(CommentRepository commentRepository) {
-        this.commentRepository = commentRepository;
-    }
+    @Autowired
+    private ImageRepository imageRepository;
 
-    //    @Transactional
-//    public List<Comment> getAllCommentsByArticleId(Long articleId){
-//        return commentDAO.findAllCommentByArticleId(articleId);
-//    }
-    public Comment saveComment(CommentDTO commentDTO){
-        logger.info("saving comment::");
-        Comment comment = new Comment();
-        comment.setCategoryId(commentDTO.getCategoryId());
-        comment.setCommentContent(commentDTO.getCommentContent());
-        comment.setFromId(comment.getFromId());
-        comment.setToId(comment.getToId());
-        comment.setFromIpvfour(commentDTO.getIpvFour());
-        comment.setFromIpvsix(comment.getFromIpvsix());
-        comment.setFromName(comment.getFromName());
-        return commentRepository.save(comment);
+    @Autowired
+    private PostService postService;
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    private IpService ipService;
+
+    @Transactional
+    public void saveComment(HttpServletRequest request, Comment comment) throws Exception {
+        logger.info("processing visitorComment::::");
+        String ipStr = HttpUtils.getRequestIP(request);
+
+        if(!ipService.isValidInet4Address(ipStr) && !ipService.isValidInet6Address(ipStr)){
+            throw new IpException();
+        }
+        else{
+            try{
+                String[] ip = ipStr.split("\\.");
+                if(ipService.isValidInet4Address(ipStr) && ipService.isValidInet6Address(ipStr)){
+                    //convert ip from String to Long
+                    Long ipv4 = (Long.valueOf(ip[0])<<24) +(Long.valueOf(ip[1])<<16)+(Long.valueOf(ip[2])<<8)+(Long.valueOf(ip[3]));
+                    comment.setFromIpvfour(ipv4);
+                    comment.setFromIpvsix(ip.toString());
+                }
+                else if(ipService.isValidInet4Address(ipStr)){
+                    Long ipv4 = (Long.valueOf(ip[0])<<24) +(Long.valueOf(ip[1])<<16)+(Long.valueOf(ip[2])<<8)+(Long.valueOf(ip[3]));
+                    comment.setFromIpvfour(ipv4);
+                }
+                else{
+                    comment.setFromIpvsix(ip.toString());
+                }
+                commentRepository.save(comment);
+            }catch (Exception e){
+                e.getMessage();
+            }
+        }
     }
 }
+
