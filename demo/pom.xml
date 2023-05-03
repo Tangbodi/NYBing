@@ -118,7 +118,16 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.15.4</version>
 		</dependency>
+			<!-- other dependencies -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-tomcat</artifactId>
+				<scope>provided</scope>
+			</dependency>
+
 	</dependencies>
+
+	<packaging>war</packaging>
 
 	<build>
 		<plugins>
