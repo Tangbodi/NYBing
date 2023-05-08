@@ -130,11 +130,11 @@
 <!--				<artifactId>spring-boot-starter-tomcat</artifactId>-->
 <!--				<scope>provided</scope>-->
 <!--			</dependency>-->
-					<dependency>
-						<groupId>javax.servlet</groupId>
-						<artifactId>javax.servlet-api</artifactId>
-						<scope>provided</scope>
-					</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 	</dependencies>
 
@@ -147,6 +147,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<finalName>webapp</finalName>
 	</build>
 
 </project>

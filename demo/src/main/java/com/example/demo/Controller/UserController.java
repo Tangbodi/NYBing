@@ -48,6 +48,11 @@ public class UserController{
     private AsyncService asyncService;
 
 
+    @GetMapping("/getData")
+    public String getData(){
+        return "got data from backend";
+    }
+
     @PostMapping("/user/register")
     public ResponseEntity register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException, InterruptedException {
 
