@@ -125,17 +125,16 @@
 			<version>1.15.4</version>
 		</dependency>
 			<!-- other dependencies -->
-<!--			<dependency>-->
-<!--				<groupId>org.springframework.boot</groupId>-->
-<!--				<artifactId>spring-boot-starter-tomcat</artifactId>-->
-<!--				<scope>provided</scope>-->
-<!--			</dependency>-->
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
+			<version>9.0.74</version>
 		</dependency>
 
+<!--		<dependency>-->
+<!--			<groupId>javax.servlet</groupId>-->
+<!--			<artifactId>javax.servlet-api</artifactId>-->
+<!--		</dependency>-->
 	</dependencies>
 
 	<packaging>war</packaging>
@@ -147,7 +146,6 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
-		<finalName>webapp</finalName>
 	</build>
 
 </project>
