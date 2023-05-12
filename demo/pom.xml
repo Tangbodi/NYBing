@@ -124,7 +124,12 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.15.4</version>
 		</dependency>
-			<!-- other dependencies -->
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
+			<version>9.0.74</version>
+		</dependency>
+		<!-- other dependencies -->
 <!--		<dependency>-->
 <!--			<groupId>org.springframework.boot</groupId>-->
 <!--			<artifactId>spring-boot-starter-tomcat</artifactId>-->
