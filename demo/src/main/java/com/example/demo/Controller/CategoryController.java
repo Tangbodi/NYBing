@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-//@CrossOrigin(origins ="http://192.168.1.33:3000/")
+@CrossOrigin(origins ="{ORIGINS}")
 public class CategoryController {
     private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
 

@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 
 @RestController
-//@CrossOrigin(origins ="http://192.168.1.33:3000/")
+@CrossOrigin(origins ="{ORIGINS}")
 public class PostController {
     private static final Logger logger = LoggerFactory.getLogger(PostController.class);
     @Autowired
