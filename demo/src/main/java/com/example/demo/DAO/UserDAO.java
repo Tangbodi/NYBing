@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 
 @Component
 public class UserDAO {
@@ -27,7 +28,7 @@ public class UserDAO {
         logger.info("Saving user into database::");
         return this.userRepository.save(user);
     }
-
+    @Transactional
     public int checkIfUserExists(String userName)
     {
         logger.info("Checking if user exists::"+userName);
@@ -39,12 +40,13 @@ public class UserDAO {
             Long resultInLong = (Long) query.getSingleResult();
             result = Math.toIntExact(resultInLong);
         } catch (Exception e) {
-            logger.error(e.toString());
+            e.printStackTrace();
             result = 0;
         }
 
         return result;
     }
+    @Transactional
     public int checkIfEmailExists(String email){
         logger.info("Checking if email exists::"+email);
         int result = 0;
@@ -55,14 +57,15 @@ public class UserDAO {
             Long resultInLong = (Long) query.getSingleResult();
             result = Math.toIntExact(resultInLong);
         } catch (Exception e) {
-            logger.error(e.toString());
+            e.printStackTrace();
             result = 0;
         }
 
         return result;
     }
+    @Transactional
     public int checkIfUserExistsByUsernameAndEmail(String userName,String email){
-        logger.info("Checking if user exists");
+        logger.info("Checking if user exists::"+userName +"; "+email);
         int resEmail = 0;
         int resUserName=0;
         try {
@@ -77,7 +80,7 @@ public class UserDAO {
             resEmail = Math.toIntExact(resultInLong);
             resUserName= Math.toIntExact(resultInLong1);
         } catch (Exception e) {
-            logger.error(e.toString());
+            e.printStackTrace();
             resEmail = 0;
             resUserName=0;
         }

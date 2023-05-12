@@ -22,7 +22,7 @@ public class NewsService {
     private static final Logger logger = LoggerFactory.getLogger(NewsService.class);
 
     private String NewsType = "新闻";
-    @Value("${NEWS_API_KEY}")
+    @Value("$cb53bd41a74ef445a2d1b7fcfebe6fa0")
     private String NEWS_API_KEY;
     public NewsApiResultDTO getNewsInfo(String page) throws IOException {
 

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -80,9 +81,9 @@ public class UserService {
     {
         return this.userDAO.getProfileByUserName(userName);
     }
-//    public User getUserProfileById(Long id){
-//        return this.userDAO.getUserProfileById(id);
-//    }
+    public Optional<User> getUserProfileById(String id){
+        return userRepository.findById(id);
+    }
 
     public User updateUserInfoByUserName(UserDTO userDTO, String userName){
         logger.info("updating info of:: "+userName);

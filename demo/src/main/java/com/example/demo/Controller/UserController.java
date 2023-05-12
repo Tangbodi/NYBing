@@ -27,11 +27,12 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Optional;
 import java.util.concurrent.Semaphore;
 
 
 @RestController
-@CrossOrigin(origins ="${ORIGINS}")
+//@CrossOrigin(origins ="http://192.168.1.33:3000/")
 public class UserController{
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
@@ -53,6 +54,10 @@ public class UserController{
         return "got data from backend";
     }
 
+    @GetMapping("/getuser/{id}")
+    public Optional<User> getUserProfileById(@PathVariable String id){
+        return userService.getUserProfileById(id);
+    }
     @PostMapping("/user/register")
     public ResponseEntity register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException, InterruptedException {
 

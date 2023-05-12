@@ -18,8 +18,8 @@ import java.util.Set;
 public class Post {
     @Id
     @Size(max = 36)
-    @GeneratedValue(generator = "system_uuid")
-    @GenericGenerator(name="system_uuid",strategy = "uuid")
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name="uuid",strategy = "uuid2")
     @Column(name = "postId", nullable = false, length = 36)
     private String postId;
 
@@ -48,17 +48,18 @@ public class Post {
     @Column(name = "ipvSix", length = 16)
     private String ipvSix;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")
     private User user;
 
-
-    @OneToMany(mappedBy = "post")
+    @JsonIgnore
+    @OneToMany(mappedBy = "post",fetch = FetchType.LAZY)
     @OrderBy("publishAt desc")
     private Set<Comment> comments = new LinkedHashSet<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post",fetch = FetchType.LAZY)
     private Set<PostViewsComment> postViewsComments = new LinkedHashSet<>();
 
 }

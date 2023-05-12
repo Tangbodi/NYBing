@@ -9,15 +9,15 @@ import javax.validation.constraints.Size;
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
+
 
 @Entity
 @Table(name = "users")
 public class User {
     @Id
     @Size(max = 36)
-    @GeneratedValue(generator = "system_uuid")
-    @GenericGenerator(name="system_uuid",strategy = "uuid")
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name="uuid",strategy = "uuid2")
     @Column(name = "userId", nullable = false, length = 36)
     private String id;
 
@@ -65,7 +65,7 @@ public class User {
     private String verified;
 
     @JsonIgnore //if you don't want to return user with modifyHistory then you can add @JsonIgnore
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
     private Set<UserModifyHistory> userModifyHistories = new LinkedHashSet<>();
 
     @JsonIgnore
@@ -73,7 +73,7 @@ public class User {
     private Set<UserLoginHistory> userLoginHistories = new LinkedHashSet<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
     private Set<Post> posts = new LinkedHashSet<>();
 
     public String getId() {

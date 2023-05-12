@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins ="${ORIGINS}")
+//@CrossOrigin(origins ="http://192.168.1.33:3000/")
 public class CategoryController {
     private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
 
@@ -29,20 +29,14 @@ public class CategoryController {
     private SessionManagementUtil sessionManagementUtil;
     @GetMapping("/categories")
     public List<Object[]> getTopFivePosts(HttpServletRequest request){
-        if (!this.sessionManagementUtil.doesSessionExist(request))
-        {
-            logger.info("Please login to access this page");
-        }
+
         return categoryService.getAllTopFivePostsUnderEveryCategory();
     }
     //------------------------------------------------------------------------------------------
     //show all posts under specific category
     @GetMapping("/categories/{categoryId}")
     public List<Map<String, Object>> findAllPostsByCategoryId(HttpServletRequest request,@PathVariable Integer categoryId){
-        if (!this.sessionManagementUtil.doesSessionExist(request))
-        {
-            logger.info("Please login to access this page");
-        }
+
         return categoryRepository.allPostsUnderOneCategory(categoryId);
 //        return postService.findPostsByCategoryId(categoryId);
     }
