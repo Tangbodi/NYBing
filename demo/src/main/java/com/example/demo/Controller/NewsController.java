@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 
 @RestController
-@CrossOrigin(origins ="{ORIGINS}")
+//@CrossOrigin(origins ="http://192.168.1.33:3000/")
 public class NewsController {
     private static final Logger logger = LoggerFactory.getLogger(NewsController.class);
 

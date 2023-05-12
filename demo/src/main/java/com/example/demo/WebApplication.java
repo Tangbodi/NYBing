@@ -7,16 +7,16 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-//@ComponentScan({"com.example.demo","Controller","Service"})
-public class WebApplication {
+@ComponentScan({"com.example.demo","Controller","Service"})
+public class WebApplication extends SpringBootServletInitializer{
 	public static void main(String[] args) {
 
 		SpringApplication.run(WebApplication.class, args);
 
 	}
-//	@Override
-//	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-//		return builder.sources(WebApplication.class);
-//	}
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+		return builder.sources(WebApplication.class);
+	}
 }
 
