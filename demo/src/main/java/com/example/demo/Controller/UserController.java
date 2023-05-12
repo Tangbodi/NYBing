@@ -32,7 +32,7 @@ import java.util.concurrent.Semaphore;
 
 
 @RestController
-//@CrossOrigin(origins ="http://192.168.1.33:3000/")
+//@CrossOrigin(origins ="${ORIGINS}")
 public class UserController{
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
