@@ -1,16 +1,17 @@
 package com.example.demo.Controller;
 
+import com.example.demo.DAO.UserDAO;
 import com.example.demo.DTO.LoginDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.*;
 import com.example.demo.Repository.UserRepository;
-import com.example.demo.Service.AsyncService;
 import com.example.demo.Service.EmailValidationService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Util.SessionManagementUtil;
 import com.example.demo.Validator.RegisterUserValidator;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.utility.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Optional;
 import java.util.concurrent.Semaphore;
 
 
@@ -44,15 +46,18 @@ public class UserController{
     private JavaMailSender mailSender;
     @Autowired
     private EmailValidationService emailValidationService;
+
     @Autowired
-    private AsyncService asyncService;
-
-
+    private UserDAO userDAO;
     @GetMapping("/getData")
     public String getData(){
         return "got data from backend";
     }
 
+    @GetMapping("/getuser/{id}")
+    public Optional<User> getUserProfileById(@PathVariable String id){
+        return userService.getUserProfileById(id);
+    }
     @PostMapping("/user/register")
     public ResponseEntity register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException, InterruptedException {
 
@@ -62,8 +67,7 @@ public class UserController{
                 throw new UserAlreadyExistsException();
             }
             else {
-                asyncService.MultiExecutor("Registering user::"+newUser.getUserName()+"; "+newUser.getEmail());
-                userService.registerUser(newUser);
+                userDAO.registerUser(newUser);
                 logger.info("User successfully registered::");
                 emailValidationService.processEmailValidation(request,newUser);
             }
@@ -99,22 +103,16 @@ public class UserController{
     public User updateUserByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName) throws InterruptedException {
 
         if(userDTO.getNewPassword()==null){
-            asyncService.MultiExecutor("updating firstname, lastname of user:: "+userDTO.getFirstName()+";"+userDTO.getLastName());
             return userService.updateUserInfoByUserName(userDTO,userName);
         }
         else{
-            asyncService.MultiExecutor("updating password of user:: "+userDTO.getInputPassword());
             return userService.updatePasswordByUserName(userDTO,userName);
         }
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/info/{userName}")
     public User getUserByUserName(HttpServletRequest request, @PathVariable String userName) {
-//        if (!this.sessionManagementUtil.doesSessionExist(request))
-//        {
-//            logger.info("Please login to access this page::");
-//            throw new AuthException();
-//        }
+
         return userRepository.findByUserName(userName)
                 .orElseThrow(() -> new UserNotFoundException(userName));
     }

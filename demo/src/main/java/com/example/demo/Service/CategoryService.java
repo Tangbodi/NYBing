@@ -19,6 +19,7 @@ public class CategoryService {
         @Autowired
         private CategoryDAO categoryDAO;
         public List<Object[]> getAllTopFivePostsUnderEveryCategory(){
-            return categoryDAO.getAllTopFivePostsUnderEveryCategory();
+                logger.info("Getting all top five posts under every category:::");
+                return categoryDAO.getAllTopFivePostsUnderEveryCategory();
         }
 }

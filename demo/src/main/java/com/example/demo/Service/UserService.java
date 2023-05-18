@@ -7,15 +7,18 @@ import com.example.demo.Entity.User;
 import com.example.demo.Exception.AuthException;
 import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -27,18 +30,24 @@ public class UserService {
 
     @Autowired
     private EmailValidationService emailValidationService;
-    public boolean registerUser(User newUser) throws IllegalStateException {
-        logger.info("Registering user:: "+ newUser.getUserName()+"; "+newUser.getEmail());
-        String password = BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt());
 
-        newUser.setPassword(password);
-        newUser.setRegisteredAt(Instant.now());
-        this.userDAO.saveUser(newUser);
-        return true;
-    }
+//    public boolean registerUser(User newUser){
+//        logger.info("Registering user:::"+ newUser.getUserName()+"; "+newUser.getEmail());
+//        try{
+//            String password = BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt());
+//            newUser.setPassword(password);
+//            newUser.setRegisteredAt(Instant.now());
+//            this.userDAO.saveUser(newUser);
+//            Thread.sleep(1000);
+//            return true;
+//        } catch (Exception e) {
+//            e.getMessage();
+//        }
+//        return false;
+//    }
     public boolean checkIfUserRegistered (User newUser)
     {
-        logger.info("Checking if user exists :: " + newUser.getUserName());
+        logger.info("Checking if user exists:::" + newUser.getUserName());
         int res = userDAO.checkIfUserExistsByUsernameAndEmail(newUser.getUserName(),newUser.getEmail());
         if(res >0){
             return true;
@@ -47,7 +56,7 @@ public class UserService {
     }
     public User authenticate(LoginDTO login)
     {
-        logger.info("Checking if user authenticate::");
+        logger.info("Checking if user authenticate:::"+login.getUserName());
         User user = null;
         try {
             user = this.userDAO.getProfileByUserName(login.getUserName());
@@ -78,18 +87,20 @@ public class UserService {
     }
     public User getProfileByUserName (String userName)
     {
+        logger.info("Getting user profile by user name:::"+userName);
         return this.userDAO.getProfileByUserName(userName);
     }
-//    public User getUserProfileById(Long id){
-//        return this.userDAO.getUserProfileById(id);
-//    }
+    public Optional<User> getUserProfileById(String id){
+        logger.info("Getting user profile by id:::"+id);
+        return userRepository.findById(id);
+    }
 
     public User updateUserInfoByUserName(UserDTO userDTO, String userName){
-        logger.info("updating info of:: "+userName);
+        logger.info("Updating info of user:::"+userName);
         return this.userDAO.updateUserByUserName(userDTO,userName);
     }
     public User updatePasswordByUserName(UserDTO userDTO, String userName){
-        logger.info("updating password of:: "+userName);
+        logger.info("Updating password of user:::"+userName);
         String curPassword = userDAO.getProfileByUserName(userName).getPassword();
         Boolean pwdCheck = false;
 
@@ -103,7 +114,7 @@ public class UserService {
     }
     @Transactional
     public void updateToken(String token, String email){
-        logger.info("updating token:: ");
+        logger.info("Updating token:::"+token);
         try{
             userRepository.findByEmail(email).map(user->{
                 user.setToken(token);
@@ -115,13 +126,13 @@ public class UserService {
     }
     @Transactional
     public void verifyUser(User user){
-        logger.info("verifying user:: " +user.getUserName());
+        logger.info("Verifying user::" +user.getUserName());
         user.setVerified("true");
         user.setToken(null);
         userRepository.save(user);
     }
     public User getByToken(String token){
-        logger.info("getting user by token:: ");
+        logger.info("Getting user by token:::"+token);
         try{
             User user = userRepository.findByToken(token);
             if(user != null){
@@ -136,6 +147,7 @@ public class UserService {
 
     @Transactional
     public void ResetPassword(User user, String newPassword){
+        logger.info("Resetting password of user:::"+user.getUserName());
 //        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 //        String encodePassword = passwordEncoder.encode(newPassword);
 //        user.setPassword(encodePassword);
@@ -144,8 +156,5 @@ public class UserService {
         user.setToken(null);
         this.userDAO.saveUser(user);
     }
-    @Transactional
-    public void deleteUser(String userName){
-        userRepository.deleteByUserName(userName);
-    }
+
 }

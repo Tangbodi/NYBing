@@ -4,10 +4,12 @@ import com.example.demo.DTO.CommentDTO;
 import com.example.demo.DTO.PostDTO;
 import com.example.demo.Entity.Comment;
 import com.example.demo.Entity.Post;
+import com.example.demo.Entity.PostWithCommentsResponse;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.IpException;
 
 import com.example.demo.Exception.PostNotFoundException;
+import com.example.demo.Repository.CommentRepository;
 import com.example.demo.Repository.PostRepository;
 import com.example.demo.Repository.PostViewsCommentRepository;
 import com.example.demo.Service.*;
@@ -22,6 +24,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins ="${ORIGINS}")
@@ -41,12 +46,20 @@ public class PostController {
     private CommentService commentService;
     @Autowired
     private PostRepository postRepository;
-
     @Autowired
-    private AsyncService asyncService;
+    private PostViewsCommentService postViewsCommentService;
+    @Autowired
+    private CommentRepository commentRepository;
     @GetMapping("/categories/{categoryId}/{postId}")
-    public Post findPostAndCommentByPostId(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId){
-        return postService.getPostData(postId);
+    public PostWithCommentsResponse findPostAndCommentByPostId(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId){
+        postViewsCommentService.updatePostViews(postId);
+        List<Comment> comments = commentRepository.findAllByPostId(postId);
+        Post post = postService.getPostData(postId);
+
+        PostWithCommentsResponse postWithCommentsResponse = new PostWithCommentsResponse();
+        postWithCommentsResponse.setPost(post);
+        postWithCommentsResponse.setComments(comments);
+        return postWithCommentsResponse;
     }
     //------------------------------------------------------------------------------------------
     @PostMapping("/categories/{categoryId}/edit")
@@ -56,12 +69,10 @@ public class PostController {
         if(postDTO.getUserName()!=null){
             User user = userService.getProfileByUserName(postDTO.getUserName());
             postDTO.setUserName(user.getUserName());
-            asyncService.MultiExecutor("setting post for user:: "+user.getUserName());
             postService.settingPost(request,postDTO,user);
         }
         else{
             postDTO.setUserName("visitor");
-            asyncService.MultiExecutor("setting post for user:: visitor");
             postService.settingPost(request,postDTO,null);
         }
         return ResponseEntity.ok().build();
@@ -80,7 +91,6 @@ public class PostController {
             comment.setFromName("visitor");
         }
         comment.setCategoryId(categoryId);
-        asyncService.MultiExecutor("setting comment for user:: "+comment.getFromName());
         try{
             Post post = postRepository.findById(postId).orElseThrow(()->new PostNotFoundException(postId));
             comment.setParentId(0);

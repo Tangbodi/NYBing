@@ -11,8 +11,7 @@ import java.util.Map;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment,Integer> {
-//    @Query(value = "SELECT * FROM master.comments WHERE postId =:postId",nativeQuery = true)
-//    List<Map<String, Object>> findAllCommentsByPostId(@Param("postId") String postId);
+    List<Comment> findAllByPostId(String postId);
     //    @Query(value = "SELECT * FROM posts WHERE categoryId =:categoryId",nativeQuery = true)
 //    List<Map<String, Object>> findPostsByCategoryId(@Param("categoryId") Integer categoryId);
 }

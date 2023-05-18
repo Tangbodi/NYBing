@@ -1,18 +1,24 @@
 package com.example.demo.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.Size;
 import java.time.Instant;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "post_views_comments")
 public class PostViewsComment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+    @Size(max = 36)
+    @Column(name = "postId", nullable = false, length = 36)
+    private String id;
 
     @Column(name = "views")
     private Integer views;
@@ -22,51 +28,5 @@ public class PostViewsComment {
 
     @Column(name = "last_comment")
     private Instant lastComment;
-
-    @JsonIgnore
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "postId", nullable = false)
-    private Post post;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Integer getViews() {
-        return views;
-    }
-
-    public void setViews(Integer views) {
-        this.views = views;
-    }
-
-    public Integer getComments() {
-        return comments;
-    }
-
-    public void setComments(Integer comments) {
-        this.comments = comments;
-    }
-
-    public Instant getLastComment() {
-        return lastComment;
-    }
-
-    public void setLastComment(Instant lastComment) {
-        this.lastComment = lastComment;
-    }
-
-    public Post getPost() {
-        return post;
-    }
-
-    public void setPost(Post post) {
-        this.post = post;
-    }
 
 }

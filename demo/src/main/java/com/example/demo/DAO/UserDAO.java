@@ -4,17 +4,22 @@ import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
+import java.time.Instant;
 
 @Component
+@Slf4j
 public class UserDAO {
     private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
 
@@ -22,15 +27,15 @@ public class UserDAO {
     private UserRepository userRepository;
     @PersistenceContext
     private EntityManager entityManager;
-    public User saveUser(User user)
+    public void saveUser(User user)
     {
-        logger.info("Saving user into database::");
-        return this.userRepository.save(user);
+        logger.info("Saving user into database:::"+user.getUserName());
+        userRepository.save(user);
     }
-
+    @Transactional
     public int checkIfUserExists(String userName)
     {
-        logger.info("Checking if user exists::"+userName);
+        logger.info("Checking if user exists:::"+userName);
         int result = 0;
         try {
             Query query = this.entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.userName = ?1");
@@ -39,14 +44,15 @@ public class UserDAO {
             Long resultInLong = (Long) query.getSingleResult();
             result = Math.toIntExact(resultInLong);
         } catch (Exception e) {
-            logger.error(e.toString());
+            e.printStackTrace();
             result = 0;
         }
 
         return result;
     }
+    @Transactional
     public int checkIfEmailExists(String email){
-        logger.info("Checking if email exists::"+email);
+        logger.info("Checking if email exists:::"+email);
         int result = 0;
         try {
             Query query = this.entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = ?1");
@@ -55,14 +61,15 @@ public class UserDAO {
             Long resultInLong = (Long) query.getSingleResult();
             result = Math.toIntExact(resultInLong);
         } catch (Exception e) {
-            logger.error(e.toString());
+            e.printStackTrace();
             result = 0;
         }
 
         return result;
     }
+    @Transactional
     public int checkIfUserExistsByUsernameAndEmail(String userName,String email){
-        logger.info("Checking if user exists");
+        logger.info("Checking if user exists:::"+userName +"; "+email);
         int resEmail = 0;
         int resUserName=0;
         try {
@@ -77,7 +84,7 @@ public class UserDAO {
             resEmail = Math.toIntExact(resultInLong);
             resUserName= Math.toIntExact(resultInLong1);
         } catch (Exception e) {
-            logger.error(e.toString());
+            e.printStackTrace();
             resEmail = 0;
             resUserName=0;
         }
@@ -88,7 +95,7 @@ public class UserDAO {
     }
 
     public User getProfileByUserName(String userName) {
-        logger.info("Getting user from username:: " + userName);
+        logger.info("Getting user from username:::" + userName);
         return userRepository.findByUserName(userName).orElseThrow(()->new UserNotFoundException(userName));
     }
 //    public User getUserProfileById(Long id){
@@ -96,7 +103,7 @@ public class UserDAO {
 //        return userRepository.findById(id).orElseThrow(()->new UserNotFoundException(id));
 //    }
     public User updateUserByUserName(UserDTO userDTO, String userName){
-        logger.info("updating info of:: "+userName);
+        logger.info("Updating info of:: "+userName);
         return userRepository.findByUserName(userName).map(user->{
             user.setFirstName(userDTO.getFirstName());
             user.setLastName(userDTO.getLastName());
@@ -104,17 +111,26 @@ public class UserDAO {
         }).orElseThrow(()-> new UserNotFoundException(userName));
     }
     public User updatePasswordByUserName(UserDTO userDTO, String userName){
-        logger.info("updating password of:: "+userName);
+        logger.info("Updating password of:: "+userName);
         String newPassword = BCrypt.hashpw(userDTO.getNewPassword(),BCrypt.gensalt());
         return userRepository.findByUserName(userName).map(user->{
             user.setPassword(newPassword);
             return userRepository.save(user);
         }).orElseThrow(()-> new UserNotFoundException(userName));
     }
-    public User findByToken(String token){
-        return userRepository.findByToken(token);
-    }
-    public void deleteUser(String userName){
-        userRepository.deleteByUserName(userName);
+    @Async("MultiExecutor")
+    public Boolean registerUser(User newUser){
+        logger.info("Registering user:::"+ newUser.getUserName()+"; "+newUser.getEmail());
+        try{
+            String password = BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt());
+            newUser.setPassword(password);
+            newUser.setRegisteredAt(Instant.now());
+            saveUser(newUser);
+            Thread.sleep(1000);
+            return true;
+        } catch (Exception e) {
+            e.getMessage();
+        }
+        return false;
     }
 }

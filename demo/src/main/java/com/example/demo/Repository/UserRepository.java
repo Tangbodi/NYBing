@@ -15,8 +15,5 @@ public interface UserRepository extends JpaRepository<User,String>{
 //    @Query("SELECT c FROM User c WHERE c.userName=?1")
 //    public User findByUserName(String userName);
     public User findByToken(String token);
-    Long deleteByUserName(String userName);
-
     Optional<User> findByUserName(String userName);
-//    boolean existsByUserNameAndEmail(String userName, String email);
 }

@@ -19,7 +19,6 @@ public class UserDTO {
     private String middleName;
     private String inputPassword;
     private String newPassword;
-
     private String email;
 
     @java.lang.Override

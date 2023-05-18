@@ -29,7 +29,7 @@ public class EmailValidationService {
     //------------------------------------------------------------------------------------------
     //generate a random token then send validation email via 192.168.1.10:8080/api/user/register/email_validation?token=
     public void processEmailValidation(HttpServletRequest request, User user){
-        logger.info("Generating email validation link and token::");
+        logger.info("Generating email validation link and token:::");
         String email = user.getEmail();
         String token = RandomString.make(15);
         String siteURL = request.getRequestURL().toString();
@@ -46,8 +46,7 @@ public class EmailValidationService {
         }
     }
     public void sendEmailValidationLink(String recipientEmail,String link) throws MessagingException, UnsupportedEncodingException {
-        logger.info("Editing email sender, receiver, subject, and content::");
-
+        logger.info("Editing email sender, receiver, subject, and content:::");
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
         mimeMessageHelper.setFrom("contact@dummynode.com","DummyNode Support");
@@ -63,10 +62,10 @@ public class EmailValidationService {
         mimeMessageHelper.setSubject(subject);
         mimeMessageHelper.setText(content,true);
         javaMailSender.send(message);
-        logger.info("email has been sent out::");
+        logger.info("Email has been sent out:::");
     }
     public void sendForgotPasswordLink(String recipientEmail,String link) throws MessagingException,UnsupportedEncodingException{
-        logger.info("Editing email sender, receiver, subject, and content::");
+        logger.info("Editing email sender, receiver, subject, and content:::");
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
@@ -83,6 +82,6 @@ public class EmailValidationService {
         mimeMessageHelper.setSubject(subject);
         mimeMessageHelper.setText(content,true);
         javaMailSender.send(message);
-        logger.info("email has been sent out::");
+        logger.info("Email has been sent out:::");
     }
 }

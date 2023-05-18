@@ -16,6 +16,7 @@ public class CategoryDAO {
         @PersistenceContext
         private EntityManager entityManager;
         public List<Object[]> getAllTopFivePostsUnderEveryCategory(){
+            logger.info("Getting all top five posts under every category:::");
         try {
             Query query = this.entityManager.createNativeQuery("SELECT p.categoryId, c.categoryName, p.postId, p.title\n" +
                     "FROM (\n" +

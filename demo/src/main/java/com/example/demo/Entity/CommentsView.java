@@ -23,7 +23,7 @@ public class CommentsView {
     @Id
     @NotNull
     @Column(name = "commentId", nullable = false)
-    private Integer commentId;
+    private Integer id;
 
     @Column(name = "categoryId")
     private Integer categoryId;

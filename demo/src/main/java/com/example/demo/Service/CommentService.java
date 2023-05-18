@@ -9,10 +9,13 @@ import com.example.demo.Repository.CommentRepository;
 import com.example.demo.Repository.ImageRepository;
 import com.example.demo.Repository.PostRepository;
 import com.example.demo.Util.HttpUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +24,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 
-@Service
+@Component
+@Slf4j
 public class CommentService {
 
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
@@ -38,16 +42,17 @@ public class CommentService {
     @Autowired
     private IpService ipService;
 
+//    @Async("MultiExecutor")
     @Transactional
     public void saveComment(HttpServletRequest request, Comment comment) throws Exception {
-        logger.info("processing visitorComment::::");
-        String ipStr = HttpUtils.getRequestIP(request);
+        logger.info("Saving comment:::");
 
-        if(!ipService.isValidInet4Address(ipStr) && !ipService.isValidInet6Address(ipStr)){
-            throw new IpException();
-        }
-        else{
-            try{
+            String ipStr = HttpUtils.getRequestIP(request);
+
+            if(!ipService.isValidInet4Address(ipStr) && !ipService.isValidInet6Address(ipStr)){
+                throw new IpException();
+            }
+            else{
                 String[] ip = ipStr.split("\\.");
                 if(ipService.isValidInet4Address(ipStr) && ipService.isValidInet6Address(ipStr)){
                     //convert ip from String to Long
@@ -63,10 +68,9 @@ public class CommentService {
                     comment.setFromIpvsix(ip.toString());
                 }
                 commentRepository.save(comment);
-            }catch (Exception e){
-                e.getMessage();
+                Thread.sleep(1000);
+
             }
-        }
     }
 }
 
