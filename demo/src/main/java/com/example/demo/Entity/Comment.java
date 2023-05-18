@@ -26,11 +26,11 @@ public class Comment {
     @Column(name = "commentContent")
     private String commentContent;
 
-    @Size(max = 18)
+    @Size(max = 36)
     @Column(name = "fromId", length = 36)
     private String fromId;
 
-    @Size(max = 18)
+    @Size(max = 36)
     @Column(name = "toId", length = 36)
     private String toId;
 

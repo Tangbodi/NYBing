@@ -5,12 +5,10 @@ import com.example.demo.Entity.Image;
 import com.example.demo.Entity.Post;
 import com.example.demo.Entity.PostViewsComment;
 import com.example.demo.Entity.User;
-import com.example.demo.Exception.IpException;
 import com.example.demo.Exception.PostNotFoundException;
 import com.example.demo.Repository.ImageRepository;
 import com.example.demo.Repository.PostRepository;
 import com.example.demo.Repository.PostViewsCommentRepository;
-import com.example.demo.Util.HttpUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -37,29 +35,11 @@ public class PostService {
     private PostViewsCommentRepository postViewsCommentRepository;
 
     public void settingPost(HttpServletRequest request, PostDTO postDTO, User user) throws Exception {
-        String ipStr = HttpUtils.getRequestIP(request);
-        if(!ipService.isValidInet4Address(ipStr) && !ipService.isValidInet6Address(ipStr)){
-            throw new IpException();
-        }
-        else{
-            try{
-                String[] ip = ipStr.split("\\.");
-                if(ipService.isValidInet4Address(ipStr) && ipService.isValidInet6Address(ipStr)){
-                    Long ipv4 = (Long.valueOf(ip[0])<<24) +(Long.valueOf(ip[1])<<16)+(Long.valueOf(ip[2])<<8)+(Long.valueOf(ip[3]));
-                    postDTO.setIpvFour(ipv4);
-                    postDTO.setIpvSix(ip.toString());
-                }
-                else if(ipService.isValidInet4Address(ipStr)){
-                    Long ipv4 = (Long.valueOf(ip[0])<<24) +(Long.valueOf(ip[1])<<16)+(Long.valueOf(ip[2])<<8)+(Long.valueOf(ip[3]));
-                    postDTO.setIpvFour(ipv4);
-                }
-                else{
-                    postDTO.setIpvSix(ip.toString());
-                }
-                savePost(postDTO,user);
-            }catch (Exception e){
-                e.getMessage();
-            }
+        logger.info("Setting post:::");
+        try{
+            savePost(postDTO,user);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

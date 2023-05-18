@@ -15,7 +15,7 @@ public class AsyncConfig {
     public Executor MultiExecutor(){
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
 
-        threadPoolTaskExecutor.setCorePoolSize(10);
+        threadPoolTaskExecutor.setCorePoolSize(18);
         threadPoolTaskExecutor.setMaxPoolSize(20);
         threadPoolTaskExecutor.setQueueCapacity(500);
         threadPoolTaskExecutor.setKeepAliveSeconds(60);

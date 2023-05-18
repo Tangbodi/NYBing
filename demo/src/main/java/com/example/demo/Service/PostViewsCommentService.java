@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
-@Component
-@Slf4j
+@Service
+@Async
 public class PostViewsCommentService {
     private static final Logger logger = LoggerFactory.getLogger(PostViewsCommentService.class);
     @Autowired

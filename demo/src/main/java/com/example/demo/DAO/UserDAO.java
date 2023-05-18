@@ -19,7 +19,6 @@ import javax.transaction.Transactional;
 import java.time.Instant;
 
 @Component
-@Slf4j
 public class UserDAO {
     private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
 
@@ -117,20 +116,5 @@ public class UserDAO {
             user.setPassword(newPassword);
             return userRepository.save(user);
         }).orElseThrow(()-> new UserNotFoundException(userName));
-    }
-    @Async("MultiExecutor")
-    public Boolean registerUser(User newUser){
-        logger.info("Registering user:::"+ newUser.getUserName()+"; "+newUser.getEmail());
-        try{
-            String password = BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt());
-            newUser.setPassword(password);
-            newUser.setRegisteredAt(Instant.now());
-            saveUser(newUser);
-            Thread.sleep(1000);
-            return true;
-        } catch (Exception e) {
-            e.getMessage();
-        }
-        return false;
     }
 }

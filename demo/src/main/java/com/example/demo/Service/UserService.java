@@ -12,8 +12,10 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -28,23 +30,25 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Lazy
     @Autowired
     private EmailValidationService emailValidationService;
 
-//    public boolean registerUser(User newUser){
-//        logger.info("Registering user:::"+ newUser.getUserName()+"; "+newUser.getEmail());
-//        try{
-//            String password = BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt());
-//            newUser.setPassword(password);
-//            newUser.setRegisteredAt(Instant.now());
-//            this.userDAO.saveUser(newUser);
-//            Thread.sleep(1000);
-//            return true;
-//        } catch (Exception e) {
-//            e.getMessage();
-//        }
-//        return false;
-//    }
+public Boolean registerUser(User newUser){
+    logger.info("Registering user:::"+ newUser.getUserName()+"; "+newUser.getEmail());
+    try{
+        String password = BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt());
+        newUser.setPassword(password);
+        newUser.setRegisteredAt(Instant.now());
+        newUser.setVerified("false");
+        userDAO.saveUser(newUser);
+        Thread.sleep(1000);
+        return true;
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return false;
+}
     public boolean checkIfUserRegistered (User newUser)
     {
         logger.info("Checking if user exists:::" + newUser.getUserName());
@@ -131,12 +135,13 @@ public class UserService {
         user.setToken(null);
         userRepository.save(user);
     }
+    @Transactional
     public User getByToken(String token){
         logger.info("Getting user by token:::"+token);
         try{
             User user = userRepository.findByToken(token);
             if(user != null){
-                verifyUser(user);
+                this.verifyUser(user);
             }
             return user;
         }catch (UserNotFoundException e){

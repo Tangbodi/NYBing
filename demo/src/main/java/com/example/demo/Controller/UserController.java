@@ -67,7 +67,7 @@ public class UserController{
                 throw new UserAlreadyExistsException();
             }
             else {
-                userDAO.registerUser(newUser);
+                userService.registerUser(newUser);
                 logger.info("User successfully registered::");
                 emailValidationService.processEmailValidation(request,newUser);
             }
