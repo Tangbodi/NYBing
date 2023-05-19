@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.DAO.PostDAO;
 import com.example.demo.DTO.PostDTO;
 import com.example.demo.Entity.Image;
 import com.example.demo.Entity.Post;
@@ -33,6 +34,8 @@ public class PostService {
     private IpService ipService;
     @Autowired
     private PostViewsCommentRepository postViewsCommentRepository;
+    @Autowired
+    private PostDAO postDAO;
 
     public void settingPost(HttpServletRequest request, PostDTO postDTO, User user) throws Exception {
         logger.info("Setting post:::");
@@ -109,5 +112,9 @@ public class PostService {
         logger.info("Getting image data from database:::");
         String base64Image = imageUrl.substring(imageUrl.indexOf(",") + 1);
         return Base64.getDecoder().decode(base64Image);
+    }
+    public List<Object[]> getAllTopFivePostsUnderEveryCategory(){
+        logger.info("Getting all top five posts under every category:::");
+        return postDAO.getAllTopFivePostsUnderEveryCategory();
     }
 }

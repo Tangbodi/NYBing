@@ -16,8 +16,8 @@ import java.util.UUID;
 public class User {
     @Id
     @Size(max = 36)
-    @GeneratedValue(generator = "system_uuid")
-    @GenericGenerator(name="system_uuid",strategy = "uuid")
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name="uuid",strategy = "uuid2")
     @Column(name = "userId", nullable = false, length = 36)
     private String id;
 

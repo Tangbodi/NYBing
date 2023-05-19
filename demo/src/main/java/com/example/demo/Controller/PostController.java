@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins ="${ORIGINS}")
+//@CrossOrigin(origins ="http://192.168.1.13:3000/")
 public class PostController {
     private static final Logger logger = LoggerFactory.getLogger(PostController.class);
     @Autowired
