@@ -42,25 +42,25 @@ public class EmailValidationService {
             sendEmailValidationLink(email,emailValidationLink);
 
         }catch (UserNotFoundException e){
-            e.getMessage();
-        }catch (UnsupportedEncodingException | MessagingException ex){
-            ex.getMessage();
+            logger.error(e.getMessage(),e);
+        }catch (UnsupportedEncodingException | MessagingException e){
+            logger.error(e.getMessage(),e);
         }
     }
     public void sendEmailValidationLink(String recipientEmail,String link) throws MessagingException, UnsupportedEncodingException {
         logger.info("Editing email sender, receiver, subject, and content:::");
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
-        mimeMessageHelper.setFrom("contact@dummynode.com","DummyNode Support");
+        mimeMessageHelper.setFrom("june.wang@junebabee.com","NYBing Support");
         mimeMessageHelper.setTo(recipientEmail);
-        String subject = " Verify your email address so we know it’s really you—and so we can send you important information about your DummyNode account.";
+        String subject = " Verify your email address so we know it’s really you—and so we can send you important information about your NYBing account.";
         String content = "<p>Hello,</p>"
-                + "<p>We're happy you signed up for DummyNode.</p>"
-                + "<p>To start exploring the DummyNode, please confirm your email address.</p>"
+                + "<p>We're happy you signed up for NYBing.</p>"
+                + "<p>To start exploring the NYBing, please confirm your email address.</p>"
                 + "<p><a href=\"" + link + "\">Verify email address</a></p>"
                 + "<br>"
-                + "<p>Welcome to DummyNode! "
-                + "The DummyNode Team</p>";
+                + "<p>Welcome to NYBing! "
+                + "The NYBing Team</p>";
         mimeMessageHelper.setSubject(subject);
         mimeMessageHelper.setText(content,true);
         javaMailSender.send(message);
@@ -71,7 +71,7 @@ public class EmailValidationService {
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
-        mimeMessageHelper.setFrom("contact@dummynode.com","DummyNode Support");
+        mimeMessageHelper.setFrom("june.wang@junebabee.com","NYBing Support");
         mimeMessageHelper.setTo(recipientEmail);
         String subject = "Here's the link to reset your password";
         String content = "<p>Hello,</p>"

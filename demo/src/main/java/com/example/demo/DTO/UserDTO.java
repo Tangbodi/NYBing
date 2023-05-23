@@ -30,7 +30,6 @@ public class UserDTO {
                 " inputPassword='" + getInputPassword() + "'" +
                 " newPassword='" + getNewPassword() + "'" +
                 " email='" + getEmail() + "'" +
-
                 "}";
     }
 }

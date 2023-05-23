@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.sql.SQLException;
 import java.util.List;
 
 @Component
@@ -29,7 +30,7 @@ public class PostDAO {
 
             return query.getResultList();
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error(e.getMessage(),e);
         }
         return null;
     }

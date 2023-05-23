@@ -123,7 +123,7 @@ public Boolean registerUser(User newUser){
                 return userRepository.save(user);
             }).orElseThrow(()-> new UserNotFoundException(email));
         }catch (RuntimeException e){
-            e.getMessage();
+            logger.error(e.getMessage(),e);
         }
     }
     @Transactional

@@ -43,7 +43,7 @@ public class UserDAO {
             Long resultInLong = (Long) query.getSingleResult();
             result = Math.toIntExact(resultInLong);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(),e);
             result = 0;
         }
 
@@ -60,10 +60,9 @@ public class UserDAO {
             Long resultInLong = (Long) query.getSingleResult();
             result = Math.toIntExact(resultInLong);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(),e);
             result = 0;
         }
-
         return result;
     }
     @Transactional
@@ -83,7 +82,7 @@ public class UserDAO {
             resEmail = Math.toIntExact(resultInLong);
             resUserName= Math.toIntExact(resultInLong1);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(),e);
             resEmail = 0;
             resUserName=0;
         }

@@ -16,6 +16,7 @@ import java.util.Set;
 @Entity
 @Table(name = "posts")
 public class Post {
+
     @Id
     @Size(max = 36)
     @GeneratedValue(generator = "uuid")

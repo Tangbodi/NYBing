@@ -13,13 +13,14 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 @RestController
-//@CrossOrigin(origins ="http://192.168.1.13:3000/")
+@CrossOrigin(origins ="http://192.168.1.13:3000/")
 public class XmlProxyController {
     @GetMapping(value = "/rss_xml",produces = "text/plain;charset=UTF-8")
     public ResponseEntity<String> proxyXml() {
         try {
             // Replace the file path with the actual path to your XML file
             String filePath = "C:\\Users\\tangb\\Desktop\\RSS.xml";
+//            String filePath = "/opt/tomcat/webapps/RSS.xml";
 
             // Read the XML file with UTF-8 encoding
             File file = new File(filePath);
@@ -38,7 +39,6 @@ public class XmlProxyController {
             String xmlContent = contentBuilder.toString();
 
             // Return the XML content as the response
-            System.out.println(xmlContent);
             return ResponseEntity.ok().body(xmlContent);
         } catch (Exception e) {
             // Handle any exceptions that occur during file reading

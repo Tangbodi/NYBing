@@ -13,15 +13,12 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "post_views_comments")
-public class PostViewsComment {
+@Table(name = "post_comments")
+public class PostComment {
     @Id
     @Size(max = 36)
     @Column(name = "postId", nullable = false, length = 36)
     private String id;
-
-    @Column(name = "views")
-    private Integer views;
 
     @Column(name = "comments")
     private Integer comments;

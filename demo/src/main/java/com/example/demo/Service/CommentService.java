@@ -1,6 +1,7 @@
 package com.example.demo.Service;
 
 import com.example.demo.Entity.Comment;
+import com.example.demo.Entity.Post;
 import com.example.demo.Repository.CommentRepository;
 import com.example.demo.Repository.ImageRepository;
 import com.example.demo.Repository.PostRepository;
@@ -11,41 +12,39 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import java.time.Instant;
 import java.util.concurrent.Future;
 
 @Service
-@Async
 public class CommentService {
 
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
     @Autowired
     private CommentRepository commentRepository;
-
-    @Autowired
-    private ImageRepository imageRepository;
-
     @Autowired
     private PostService postService;
     @Autowired
-    private PostRepository postRepository;
-    @Autowired
     private IpService ipService;
+    @Autowired
+    private PostCommentService postCommentService;
 
-    @Async("MultiExecutor") //Async has to return a Future
+//    @Async("MultiExecutor") //Async has to return a Future
     @Transactional
-    public Future<String> saveComment(Comment comment) throws Exception {
+    public void saveComment(Comment comment,String postId) throws Exception {
         logger.info("Saving comment:::");
             try{
+                Post post = postService.findPostById(postId);
+                comment.setParentId(0);
+                comment.setPublishAt(Instant.now());
+                comment.setPost(post);
                 commentRepository.save(comment);
                 Thread.sleep(1000);
-
-            }catch (NullPointerException e){
-                e.printStackTrace();
+            }catch (RuntimeException |InterruptedException e){
+                logger.error(e.getMessage(),e);
             }
-            String res = "getFuture return value, delay" + 1000+"ms";
-            return new AsyncResult<String>(res);
+//            String res = "getFuture return value, delay" + 1000+"ms";
+//            return new AsyncResult<String>(res);
     }
 }
 

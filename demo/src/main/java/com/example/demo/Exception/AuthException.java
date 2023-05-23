@@ -6,15 +6,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
 public class AuthException extends RuntimeException{
     public AuthException(String userName, String password){
-        super("Username or Password is wrong::");
+        super("Username or Password is wrong:::");
     }
     public AuthException(){
-
-        super("Please login to access this page::");
+        super("Please login to access this page:::");
     }
 
     public AuthException(String password){
-
-        super("Current password is not correct::");
+        super("Current password is not correct:::");
     }
 }

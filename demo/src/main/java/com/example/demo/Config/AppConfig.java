@@ -18,26 +18,4 @@ public class AppConfig implements WebMvcConfigurer
         registry.addInterceptor(new HeaderInterceptorUtil());
     }
 
-//    public class WebConfig extends WebMvcConfigurerAdapter {
-//
-//        @Override
-//        public void addCorsMappings(CorsRegistry registry) {
-//            registry.addMapping("/**").allowedOrigins("http://192.168.1.23:3000/");
-//        }
-//    }
-
-//    @Override
-//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//        exposeDirectory("user-photos", registry);
-//    }
-
-//    private void exposeDirectory(String dirName, ResourceHandlerRegistry registry) {
-//        Path uploadDir = Paths.get(dirName);
-//        String uploadPath = uploadDir.toFile().getAbsolutePath();
-//
-//        if (dirName.startsWith("../")) dirName = dirName.replace("../", "");
-//
-//        registry.addResourceHandler("/" + dirName + "/**").addResourceLocations("file:/"+ uploadPath + "/");
-//    }
-
 }
