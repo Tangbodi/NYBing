@@ -129,6 +129,12 @@
 			<artifactId>tomcat-embed-core</artifactId>
 			<version>9.0.74</version>
 		</dependency>
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+			<version>5.0.0</version>
+		</dependency>
+
 		<!-- other dependencies -->
 <!--		<dependency>-->
 <!--			<groupId>org.springframework.boot</groupId>-->
