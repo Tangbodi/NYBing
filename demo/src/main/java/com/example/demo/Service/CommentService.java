@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.Future;
 
 @Service
@@ -45,6 +46,9 @@ public class CommentService {
             }
 //            String res = "getFuture return value, delay" + 1000+"ms";
 //            return new AsyncResult<String>(res);
+    }
+    public List<Comment> findAllCommentsByPostId(String postId){
+        return commentRepository.findAllByPostId(postId);
     }
 }
 

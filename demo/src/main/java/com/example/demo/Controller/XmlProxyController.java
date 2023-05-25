@@ -19,8 +19,8 @@ public class XmlProxyController {
     public ResponseEntity<String> proxyXml() {
         try {
             // Replace the file path with the actual path to your XML file
-//            String filePath = "C:\\Users\\tangb\\Desktop\\RSS.xml";
-            String filePath = "/opt/tomcat/webapps/RSS.xml";
+            String filePath = "C:\\Users\\tangb\\Desktop\\RSS.xml";
+//            String filePath = "/opt/tomcat/webapps/RSS.xml";
 
             // Read the XML file with UTF-8 encoding
             File file = new File(filePath);

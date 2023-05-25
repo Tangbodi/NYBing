@@ -162,5 +162,8 @@ public class PostService {
     public Post findPostById(String postId){
         return postRepository.findById(postId).orElseThrow(()->new PostNotFoundException(postId));
     }
-
+    public List<Post> findAllPostByKeyword(String keyword){
+        logger.info(keyword);
+        return postRepository.findByKeyword(keyword);
+    }
 }

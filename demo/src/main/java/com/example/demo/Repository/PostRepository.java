@@ -18,4 +18,8 @@ public interface PostRepository extends JpaRepository<Post, String> {
             "where a.categoryId =:categoryId ORDER BY publishAt DESC",nativeQuery = true)
     List<Map<String,Object>> allPostsUnderOneCategory(@Param("categoryId") Integer categoryId);
 
+    @Query(value = "SELECT * FROM master.posts WHERE textrender LIKE %:keyword% OR title LIKE %:keyword% ORDER BY publishAt DESC",nativeQuery = true)
+    List<Post> findByKeyword(@Param("keyword") String keyword);
+
+
 }

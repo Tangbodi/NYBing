@@ -1,6 +1,7 @@
 package com.example.demo.Controller;
 
 import com.example.demo.DTO.PostDTO;
+import com.example.demo.DTO.PostWithCommentDTO;
 import com.example.demo.Entity.*;
 import com.example.demo.Exception.IpException;
 
@@ -47,14 +48,14 @@ public class PostController {
     @Autowired
     private CommentRepository commentRepository;
     @GetMapping("/categories/{categoryId}/{postId}")
-    public PostWithCommentsResponse findPostAndCommentByPostId(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId){
+    public PostWithCommentDTO findPostAndCommentByPostId(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId){
         postViewService.updatePostViews(postId);
-        List<Comment> comments = commentRepository.findAllByPostId(postId);
+        List<Comment> comments = commentService.findAllCommentsByPostId(postId);
         Post post = postService.getPostData(postId);
-        PostWithCommentsResponse postWithCommentsResponse = new PostWithCommentsResponse();
-        postWithCommentsResponse.setPost(post);
-        postWithCommentsResponse.setComments(comments);
-        return postWithCommentsResponse;
+        PostWithCommentDTO postWithCommentDTO = new PostWithCommentDTO();
+        postWithCommentDTO.setComments(comments);
+        postWithCommentDTO.setPost(post);
+        return postWithCommentDTO;
     }
     //------------------------------------------------------------------------------------------
     @PostMapping("/categories/{categoryId}/edit")

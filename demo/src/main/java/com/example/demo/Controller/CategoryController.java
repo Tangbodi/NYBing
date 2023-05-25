@@ -42,7 +42,6 @@ public class CategoryController {
     }
     @GetMapping("/categories/collection")
     public List<Category> getCategoryCollection(){
-
         return categoryService.findAllCategories();
     }
 }
