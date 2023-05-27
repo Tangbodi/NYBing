@@ -13,13 +13,16 @@ import lombok.Setter;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ItemDTO {
-    private Object[] items;
-
+public class ChargeResDTO {
+    private String id;
+    private String status;
+    private String balance_transaction;
     @java.lang.Override
     public java.lang.String toString() {
-        return "PaymentDTO{" +
-                " items='" + getItems() + "'" +
+        return "ChargeResDTO{" +
+                " id='" + getId() + "'" +
+                " status='" + getStatus() + "'" +
+                " balance_transaction='" + getClass() + "'" +
                 "}";
     }
 }

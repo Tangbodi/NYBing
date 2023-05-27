@@ -23,7 +23,7 @@ public class UserDTO {
 
     @java.lang.Override
     public java.lang.String toString() {
-        return "TradeDTO{" +
+        return "UserDTO{" +
                 " firstName='" + getFirstName() + "'" +
                 " lastName='" + getLastName() + "'" +
                 " middleName='" + getMiddleName() + "'" +

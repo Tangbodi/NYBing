@@ -25,7 +25,7 @@ public class PostDTO {
     private Instant publishAt;
     @java.lang.Override
     public java.lang.String toString() {
-        return "TradeDTO{" +
+        return "PostDTO{" +
                 " categoryId='" + getCategoryId() + "'" +
                 " title='" + getTitle() + "'" +
                 " textrender='" + getTextrender() + "'" +

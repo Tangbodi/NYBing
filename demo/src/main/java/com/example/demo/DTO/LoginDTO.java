@@ -24,7 +24,7 @@ public class LoginDTO {
 
     @java.lang.Override
     public java.lang.String toString() {
-        return "TradeDTO{" +
+        return "LoginDTO{" +
                 " userName='" + getUserName() + "'" +
                 " password='" + getPassword() + "'" +
                 "}";

@@ -28,7 +28,7 @@ public class CommentDTO {
     private String postId;
     @java.lang.Override
     public java.lang.String toString() {
-        return "TradeDTO{" +
+        return "CommentDTO{" +
                 " categoryId='" + getCategoryId() + "'" +
                 " commentContent='" + getCommentContent() + "'" +
                 " fromId='" + getFromId() + "'" +
