@@ -37,8 +37,6 @@ import java.util.concurrent.Semaphore;
 public class UserController{
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
-    RegisterUserValidator registerUserValidator;
-    @Autowired
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
@@ -61,7 +59,6 @@ public class UserController{
     @PostMapping("/user/register")
     public ResponseEntity register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException, InterruptedException {
 
-        registerUserValidator.validate(newUser, bindingResult);
 
             if (this.userService.checkIfUserRegistered(newUser)) {
                 throw new UserAlreadyExistsException();
