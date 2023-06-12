@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins ="http://192.168.1.13:3000/")
+@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class PostController {
     private static final Logger logger = LoggerFactory.getLogger(PostController.class);
     @Autowired
@@ -58,9 +58,9 @@ public class PostController {
         return postWithCommentDTO;
     }
     //------------------------------------------------------------------------------------------
-    @PostMapping("/categories/{categoryId}/edit")
-    public ResponseEntity editPost(HttpServletRequest request, @RequestBody PostDTO postDTO, @PathVariable Integer categoryId) throws Exception {
-
+    @PostMapping(value = "/categories/{categoryId}/edit",produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
+    public Post editPost(HttpServletRequest request, @RequestBody PostDTO postDTO, @PathVariable Integer categoryId) throws Exception {
+        logger.info("controller postDTO:::"+postDTO.getTextrender());
         String ipStr = HttpUtils.getRequestIP(request);
         if(ipService.isValidInet4Address(ipStr) || ipService.isValidInet6Address(ipStr)){
             if(ipService.isValidInet4Address(ipStr)){
@@ -73,14 +73,6 @@ public class PostController {
             else if(ipService.isValidInet6Address(ipStr)){
                 String[] ip = ipStr.split(":");
                 logger.info("ipv6:::"+Arrays.toString(ip));
-//                long[]ipv6 = new long[2];
-//                for(int i=0;i<8;i++){
-//                    String slice = ip[i];
-//                    long num = Long.parseLong(slice,16);
-//                    long right = num<<(16*i);
-//                    int length=i>>2;
-//                    ipv6[length]=ipv6[length] | right;
-//                }
                 postDTO.setIpvSix(ip.toString());
             }
             else{
@@ -91,19 +83,17 @@ public class PostController {
         if(postDTO.getUserName()!=null){
             User user = userService.getProfileByUserName(postDTO.getUserName());
             postDTO.setUserName(user.getUserName());
-            postService.settingPost(request,postDTO,user);
+            return postService.settingPost(request,postDTO,user);
         }
         else{
             postDTO.setUserName("visitor");
-            postService.settingPost(request,postDTO,null);
+            return postService.settingPost(request,postDTO,null);
         }
-        return ResponseEntity.ok().build();
     }
     //------------------------------------------------------------------------------------------
     //edit comment
     @PostMapping("/categories/{categoryId}/{postId}")
-    public ResponseEntity editComment(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId, @RequestBody Comment comment) throws Exception {
-
+    public Comment editComment(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId, @RequestBody Comment comment) throws Exception {
         String ipStr = HttpUtils.getRequestIP(request);
         if(ipService.isValidInet4Address(ipStr) || ipService.isValidInet6Address(ipStr)){
             if(ipService.isValidInet4Address(ipStr)){
@@ -116,14 +106,6 @@ public class PostController {
             else if(ipService.isValidInet6Address(ipStr)){
                 String[] ip = ipStr.split(":");
                 logger.info("ipv6:::"+Arrays.toString(ip));
-//                long[]ipv6 = new long[2];
-//                for(int i=0;i<8;i++){
-//                    String slice = ip[i];
-//                    long num = Long.parseLong(slice,16);
-//                    long right = num<<(16*i);
-//                    int length=i>>2;
-//                    ipv6[length]=ipv6[length] | right;
-//                }
                 comment.setFromIpvsix(ip.toString());
             }
             else{
@@ -139,8 +121,8 @@ public class PostController {
             comment.setFromName("visitor");
         }
         comment.setCategoryId(categoryId);
-        commentService.saveComment(comment,postId);
+
         postCommentService.updatePostComments(postId);
-        return ResponseEntity.ok().build();
+        return commentService.saveComment(comment,postId);
     }
 }

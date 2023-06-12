@@ -32,7 +32,7 @@ public class CommentService {
 
 //    @Async("MultiExecutor") //Async has to return a Future
     @Transactional
-    public void saveComment(Comment comment,String postId) throws Exception {
+    public Comment saveComment(Comment comment,String postId) throws Exception {
         logger.info("Saving comment:::");
             try{
                 Post post = postService.findPostById(postId);
@@ -41,9 +41,11 @@ public class CommentService {
                 comment.setPost(post);
                 commentRepository.save(comment);
                 Thread.sleep(1000);
+                return comment;
             }catch (RuntimeException |InterruptedException e){
                 logger.error(e.getMessage(),e);
             }
+            return null;
 //            String res = "getFuture return value, delay" + 1000+"ms";
 //            return new AsyncResult<String>(res);
     }

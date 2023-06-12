@@ -25,9 +25,11 @@ public class CommentsView {
     @Column(name = "commentId", nullable = false)
     private Integer id;
 
+    @NotNull
     @Column(name = "categoryId")
     private Integer categoryId;
 
+    @NotNull
     @Lob
     @Column(name = "commentContent")
     private String commentContent;
@@ -50,6 +52,7 @@ public class CommentsView {
     @Column(name = "parentId")
     private Integer parentId;
 
+    @NotNull
     @Size(max = 18)
     @Column(name = "fromName", length = 18)
     private String fromName;
@@ -58,6 +61,7 @@ public class CommentsView {
     @Column(name = "toName", length = 18)
     private String toName;
 
+    @NotNull
     @Column(name = "publishAt")
     private Instant publishAt;
 

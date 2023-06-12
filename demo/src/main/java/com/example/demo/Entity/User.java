@@ -52,6 +52,7 @@ public class User {
     @Column(name = "password", nullable = false, length = 60)
     private String password;
 
+    @NotNull
     @Column(name = "registeredAt")
     private Instant registeredAt;
 

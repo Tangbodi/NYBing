@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 import java.util.LinkedHashSet;
@@ -16,28 +17,30 @@ import java.util.Set;
 @Entity
 @Table(name = "posts")
 public class Post {
-
     @Id
     @Size(max = 36)
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name="uuid",strategy = "uuid2")
     @Column(name = "postId", nullable = false, length = 36)
     private String id;
 
+    @NotNull
     @Column(name = "categoryId")
     private Integer categoryId;
 
+    @NotNull
     @Size(max = 255)
     @Column(name = "title")
     private String title;
 
+    @NotNull
     @Lob
     @Column(name = "textrender")
     private String textrender;
 
+    @NotNull
     @Column(name = "publishAt")
     private Instant publishAt;
 
+    @NotNull
     @Size(max = 18)
     @Column(name = "userName", length = 18)
     private String userName;

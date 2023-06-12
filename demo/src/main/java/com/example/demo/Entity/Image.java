@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Getter
@@ -19,14 +20,15 @@ public class Image {
     @Column(name = "imageId", nullable = false, length = 36)
     private String id;
 
+    @NotNull
     @Size(max = 45)
     @Column(name = "imageType", length = 45)
     private String imageType;
-
+    @NotNull
     @Size(max = 90)
     @Column(name = "imagePath", length = 90)
     private String imagePath;
-
+    @NotNull
     @Size(max = 90)
     @Column(name = "imageURL", length = 90)
     private String imageURL;

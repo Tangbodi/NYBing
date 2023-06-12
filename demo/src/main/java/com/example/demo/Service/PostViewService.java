@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 
 @Service
-@Async
 public class PostViewService {
     private static final Logger logger = LoggerFactory.getLogger(PostViewService.class);
     @Autowired

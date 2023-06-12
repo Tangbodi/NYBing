@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins ="http://192.168.1.13:3000/")
+@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class CategoryController {
     private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
 
@@ -42,6 +42,7 @@ public class CategoryController {
     }
     @GetMapping("/categories/collection")
     public List<Category> getCategoryCollection(){
+
         return categoryService.findAllCategories();
     }
 }
