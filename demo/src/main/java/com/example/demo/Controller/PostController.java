@@ -11,6 +11,8 @@ import com.example.demo.Repository.PostRepository;
 import com.example.demo.Service.*;
 import com.example.demo.Util.HttpUtils;
 import com.example.demo.Util.SessionManagementUtil;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,18 +48,20 @@ public class PostController {
     @Autowired
     private CommentRepository commentRepository;
     @GetMapping("/categories/{categoryId}/{postId}")
-    public PostWithCommentDTO findPostAndCommentByPostId(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId){
+    public String findPostAndCommentByPostId(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId){
         postViewService.updatePostViews(postId);
         List<Comment> comments = commentService.findAllCommentsByPostId(postId);
         Post post = postService.getPostData(postId);
         PostWithCommentDTO postWithCommentDTO = new PostWithCommentDTO();
         postWithCommentDTO.setComments(comments);
         postWithCommentDTO.setPost(post);
-        return postWithCommentDTO;
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(postWithCommentDTO);
+        return json;
     }
     //------------------------------------------------------------------------------------------
     @PostMapping(value = "/categories/{categoryId}/edit",produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
-    public Post editPost(HttpServletRequest request, @RequestBody PostDTO postDTO, @PathVariable Integer categoryId) throws Exception {
+    public String editPost(HttpServletRequest request, @RequestBody PostDTO postDTO, @PathVariable Integer categoryId) throws Exception {
         logger.info("controller postDTO:::"+postDTO.getTextrender());
         String ipStr = HttpUtils.getRequestIP(request);
         if(ipService.isValidInet4Address(ipStr) || ipService.isValidInet6Address(ipStr)){
@@ -81,17 +85,23 @@ public class PostController {
         if(postDTO.getUserName()!=null){
             User user = userService.getProfileByUserName(postDTO.getUserName());
             postDTO.setUserName(user.getUserName());
-            return postService.settingPost(request,postDTO,user);
+            Post post = postService.settingPost(request,postDTO,user);
+            Gson gson = new GsonBuilder().create();
+            String json = gson.toJson(post);
+            return json;
         }
         else{
             postDTO.setUserName("visitor");
-            return postService.settingPost(request,postDTO,null);
+            Post post = postService.settingPost(request,postDTO,null);
+            Gson gson = new GsonBuilder().create();
+            String json = gson.toJson(post);
+            return json;
         }
     }
     //------------------------------------------------------------------------------------------
     //edit comment
     @PostMapping("/categories/{categoryId}/{postId}")
-    public Comment editComment(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId, @RequestBody Comment comment) throws Exception {
+    public String editComment(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId, @RequestBody Comment comment) throws Exception {
         String ipStr = HttpUtils.getRequestIP(request);
         if(ipService.isValidInet4Address(ipStr) || ipService.isValidInet6Address(ipStr)){
             if(ipService.isValidInet4Address(ipStr)){
@@ -121,6 +131,9 @@ public class PostController {
         comment.setCategoryId(categoryId);
 
         postCommentService.updatePostComments(postId);
-        return commentService.saveComment(comment,postId);
+        Comment commentRes = commentService.saveComment(comment,postId);
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(commentRes);
+        return json;
     }
 }

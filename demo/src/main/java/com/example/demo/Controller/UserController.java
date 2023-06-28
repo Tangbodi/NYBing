@@ -9,6 +9,8 @@ import com.example.demo.Repository.UserRepository;
 import com.example.demo.Service.EmailValidationService;
 import com.example.demo.Service.UserService;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.bytebuddy.utility.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +51,11 @@ public class UserController{
     }
 
     @GetMapping("/getuser/{id}")
-    public Optional<User> getUserProfileById(@PathVariable String id){
-        return userService.getUserProfileById(id);
+    public String getUserProfileById(@PathVariable String id){
+        Optional<User> user = userService.getUserProfileById(id);
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(user);
+        return json;
     }
     @PostMapping("/user/register")
     public ResponseEntity register (@RequestBody User newUser, BindingResult bindingResult, HttpServletRequest request) throws IOException, InterruptedException {
@@ -64,6 +69,7 @@ public class UserController{
                 logger.info("User successfully registered::");
                 emailValidationService.processEmailValidation(request,newUser);
             }
+
         return ResponseEntity.ok().build();
     }
 
@@ -88,26 +94,38 @@ public class UserController{
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/login/email_validation")
-    public User showEmailValidationViaLoginLink(@Param(value="token")String token){
-        return userService.getByToken(token);
+    public String showEmailValidationViaLoginLink(@Param(value="token")String token){
+        User user = userService.getByToken(token);
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(user);
+        return json;
     }
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/update/{userName}")
-    public User updateUserByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName) throws InterruptedException {
+    public String updateUserByUserName(HttpServletRequest request, @RequestBody UserDTO userDTO, @PathVariable String userName) throws InterruptedException {
 
         if(userDTO.getNewPassword()==null){
-            return userService.updateUserInfoByUserName(userDTO,userName);
+
+            User user = userService.updateUserInfoByUserName(userDTO,userName);
+            Gson gson = new GsonBuilder().create();
+            String json = gson.toJson(user);
+            return json;
         }
         else{
-            return userService.updatePasswordByUserName(userDTO,userName);
+            User user = userService.updatePasswordByUserName(userDTO,userName);
+            Gson gson = new GsonBuilder().create();
+            String json = gson.toJson(user);
+            return json;
         }
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/info/{userName}")
-    public User getUserByUserName(HttpServletRequest request, @PathVariable String userName) {
-
-        return userRepository.findByUserName(userName)
+    public String getUserByUserName(HttpServletRequest request, @PathVariable String userName) {
+        User user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new UserNotFoundException(userName));
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(user);
+        return json;
     }
     //------------------------------------------------------------------------------------------
     @PostMapping("/user/forgot_password")
@@ -132,8 +150,11 @@ public class UserController{
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("forgot_password/reset_password")
-    public User showResetPasswordForm(@Param(value="token")String token){
-        return userService.getByToken(token);
+    public String showResetPasswordForm(@Param(value="token")String token){
+        User user = userService.getByToken(token);
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(user);
+        return json;
     }
     //------------------------------------------------------------------------------------------
     @PostMapping("forgot_password/reset_password")

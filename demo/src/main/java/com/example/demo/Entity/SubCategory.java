@@ -20,6 +20,6 @@ public class SubCategory {
 
     @Size(max = 60)
     @Column(name = "sub_categoryName", length = 60)
-    private String subCategoryname;
+    private String subCategoryName;
 
 }

@@ -7,6 +7,7 @@ import com.example.demo.Entity.SubCategory;
 import com.example.demo.Repository.CategoryRepository;
 import com.example.demo.Repository.CategorySubMapRepository;
 import com.example.demo.Repository.SubCategoryRepository;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,83 +35,26 @@ public class CategoryService {
         }
         public Map<Integer,List<Integer>> getAllCategorySubMapIds() {
                 List<CategorySubMap> categorySubMaps = categorySubMapRepository.findAll();
-                //[
-                //    {
-                //        "id": {
-                //            "categoryId": 1,
-                //            "subCategoryid": 101
-                //        }
-                //    },
-                //        "id": {
-                //            "categoryId": 5,
-                //            "subCategoryid": 530
-                //        }
-                //    }
-                //]
-                List<CategorySubMapId> categorySubMapIds = new ArrayList<>();
-                for (CategorySubMap categorySubMap : categorySubMaps) {
-                        categorySubMapIds.add(categorySubMap.getId());
-                }
-                //[
-                //    {
-                //        "categoryId": 1,
-                //        "subCategoryid": 101
-                //    },
-                //    {
-                //        "categoryId": 1,
-                //        "subCategoryid": 102
-                //    },
-                //]
                 Map<Integer,List<Integer>> subCategoryWithSameCategoryId = new HashMap<>();
-                //{
-                //    "1": [
-                //        101,
-                //        102
-                //    ],
-                //    "2": [
-                //        200,
-                //        201
-                //    ]
-                //}
-                for(CategorySubMapId categorySubMapId : categorySubMapIds){
-                        List<Integer> subCategoryId = new ArrayList<>();
-                        Integer CategoryId = categorySubMapId.getCategoryId(); //"categoryId": 1
-                        Integer SubCategoryId = categorySubMapId.getSubCategoryid();// "subCategoryid": 101
-                        subCategoryId.add(SubCategoryId);
-                        if(subCategoryWithSameCategoryId.containsKey(CategoryId)){
-                               subCategoryWithSameCategoryId.get(CategoryId).add(SubCategoryId);
+                for (CategorySubMap categorySubMap : categorySubMaps) {
+                        List<Integer> list = new ArrayList<>();
+                        Integer categoryId = categorySubMap.getId().getCategoryId(); //1
+                        Integer subCategoryId = categorySubMap.getId().getSubCategoryid();//101
+                        if(!subCategoryWithSameCategoryId.containsKey(categoryId)){
+                                list.add(subCategoryId);
+                                subCategoryWithSameCategoryId.put(categoryId,list);
+                        }else{
+                                subCategoryWithSameCategoryId.get(categoryId).add(subCategoryId);
                         }
-                        else{
-                                subCategoryWithSameCategoryId.put(CategoryId,subCategoryId);
-                        }
-
                 }
-
-//                Map<String,List<String>> res = new HashMap<>();
-//                for(int i=0;i<subCategoryWithSameCategoryId.size();i++){
-//                        //get category id "1"
-//                        Integer key = i+1;
-//                        //get categoryName "Community"
-//                        String category = categoryRepository.findById(key).toString();
-//
-//                        //get subCategoryName list "pets,artists,childcare"
-//                        List<Integer> list = subCategoryWithSameCategoryId.get(i); //[101,102]
-//                        List<String> categoryName = new ArrayList<>();
-//                        for(Integer integer:list){
-//                                Optional<SubCategory> subCategory = subCategoryRepository.findById(integer);
-//                                categoryName.add(subCategory.toString());
-//                        }
-//                        res.put(category,categoryName);
-//
-//                }
-
                 return subCategoryWithSameCategoryId;
         }
-        public Map<String,List<String>> getSubCategory(Map<Integer,List<Integer>> getAllCategorySubMapIds){
+        public Map<String,List<String>>  getSubCategory(Map<Integer,List<Integer>> getAllCategorySubMapIds){
 
                 Map<String,List<String>> subCategoryMap = new HashMap<>();
                 for (Integer categoryId : getAllCategorySubMapIds.keySet()) {
                         List<String> subCategoryNameList = new ArrayList<>();
+                        //find category name by category id
                         Optional<Category> category = categoryRepository.findById(categoryId);
                         String categoryStr = category.get().getCategoryName().toString();
                         List<Integer> subCategoryIds = getAllCategorySubMapIds.get(categoryId);
@@ -118,7 +62,7 @@ public class CategoryService {
                                 Optional<SubCategory> subCategoryOptional = subCategoryRepository.findById(subCategoryId);
                                 if (subCategoryOptional.isPresent()) {
                                         SubCategory subCategory = subCategoryOptional.get();
-                                        String subCategoryName = subCategory.getSubCategoryname();
+                                        String subCategoryName = subCategory.getSubCategoryName();
                                         subCategoryNameList.add(subCategoryName);
                                 } else {
                                         logger.info("Sub-category not found for ID: " + subCategoryId);
@@ -128,5 +72,43 @@ public class CategoryService {
                         subCategoryMap.put(categoryStr,subCategoryNameList);
                 }
                 return subCategoryMap;
+        }
+        public Map<Integer,Map<String, List<SubCategory>>> getAllSubCategory(){
+
+                Map<Integer,List<Integer>> getAllCategorySubMapIds = getAllCategorySubMapIds();
+                List<SubCategory> subCategories = subCategoryRepository.findAll();
+                LinkedList<SubCategory> subCategoryLinkedList = new LinkedList<>(subCategories);
+                Gson gson = new Gson();
+                String json = gson.toJson(subCategories);
+                logger.info("subCategories:::"+json);
+                List<Category> categories = findAllCategories();
+                Map<Integer,Map<String,List<SubCategory>>> res = new HashMap();
+                for(Integer categoryId : getAllCategorySubMapIds.keySet()){
+                        logger.info("categoryId:::"+categoryId);
+                        Integer index = categoryId -1;
+                        String categoryName = categories.get(index).getCategoryName();
+                        logger.info("categoryName:::"+categoryName);
+                        List<Integer> subCategoryIds = getAllCategorySubMapIds.get(categoryId);
+                        logger.info("subCategoryIds:::"+subCategoryIds);
+
+                        Map<String, List<SubCategory>> categoryNameMap = new HashMap<>();
+                        List<SubCategory> subCategoryList= new ArrayList<>();
+
+                        for(Integer subCategoryId: subCategoryIds){
+                                logger.info("subCategoryId:::"+subCategoryId);
+                                for(SubCategory subCategory : subCategoryLinkedList){
+                                        logger.info("subCategory.getId:::"+subCategory.getId());
+                                        if(subCategory.getId().equals(subCategoryId)){
+                                                subCategoryList.add(subCategory);
+                                                logger.info("subCategoryList.add-----------------");
+                                                subCategoryLinkedList.removeFirst();
+                                                break;
+                                        }
+                                }
+                                categoryNameMap.put(categoryName,subCategoryList);
+                        }
+                        res.put(categoryId,categoryNameMap);
+                }
+                return res;
         }
 }
