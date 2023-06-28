@@ -1,18 +1,12 @@
 <form action='/api/charge' method='POST' id='checkout-form' xmlns:th="http://www.w3.org/1999/xhtml">
-  <input type='hidden' th:value='${amount}' name='amount' />
-  <label>Price:<span th:text='${amount/100}' /></label>
   <!-- NOTE: data-key/data-amount/data-currency will be rendered by Thymeleaf -->
-  <script
-          src='https://checkout.stripe.com/checkout.js'
-          class='stripe-button'
-          th:attr='data-key=${stripePublicKey},
-         data-amount=${amount},
-         data-currency=${currency}'
-          data-name='Baeldung'
-          data-description='Spring course checkout'
-          data-image
-                  ='https://www.baeldung.com/wp-content/themes/baeldung/favicon/android-chrome-192x192.png'
-          data-locale='auto'
-          data-zip-code='false'>
+  <script async
+          src="https://js.stripe.com/v3/buy-button.js">
   </script>
+
+  <stripe-buy-button
+          buy-button-id="buy_btn_1NMi7eEeRjQ2hTl6W5FlOBqD"
+          publishable-key="pk_live_51MvAbYEeRjQ2hTl6lemynrbpd4oeFNcakU4dwbNlLLx7EBJzfWnROBBWBUXeiIzcXJMHXSh7y8CqHFLmA6LXDhGy000PtjBrju"
+  >
+  </stripe-buy-button>
 </form>

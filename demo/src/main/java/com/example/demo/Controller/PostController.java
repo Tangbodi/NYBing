@@ -5,7 +5,6 @@ import com.example.demo.DTO.PostWithCommentDTO;
 import com.example.demo.Entity.*;
 import com.example.demo.Exception.IpException;
 
-import com.example.demo.Exception.PostNotFoundException;
 import com.example.demo.Repository.CommentRepository;
 import com.example.demo.Repository.PostCommentsRepository;
 import com.example.demo.Repository.PostRepository;
@@ -19,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 

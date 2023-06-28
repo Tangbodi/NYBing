@@ -11,17 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class XmlProxyController {
+//    @GetMapping(value = "/rss_xml",produces = "text/plain;charset=UTF-8")
     @GetMapping(value = "/rss_xml",produces = "text/plain;charset=UTF-8")
     public ResponseEntity<String> proxyXml() {
-        String rssFeedUrl = "https://rsshub.app/ifeng/news";
-
-            try {
+//        String rssFeedUrl = "https://rsshub.app/ifeng/news";
+        String rssFeedUrl = "https://finance.yahoo.com/rss/topstories";
+        try {
                 org.apache.http.client.HttpClient httpClient = HttpClientBuilder.create().build();
                 HttpGet httpGet = new HttpGet(rssFeedUrl);
                 org.apache.http.HttpResponse response = httpClient.execute(httpGet);
 
                 if (response.getStatusLine().getStatusCode() == HttpStatus.OK.value()) {
-                    String rssFeed = org.apache.http.util.EntityUtils.toString(response.getEntity());
+                    String rssFeed = org.apache.http.util.EntityUtils.toString(response.getEntity(),"UTF-8");
                     return ResponseEntity.ok(rssFeed);
                 } else {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

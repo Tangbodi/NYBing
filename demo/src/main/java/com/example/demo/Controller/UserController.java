@@ -8,10 +8,7 @@ import com.example.demo.Exception.*;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.Service.EmailValidationService;
 import com.example.demo.Service.UserService;
-import com.example.demo.Util.SessionManagementUtil;
-import com.example.demo.Validator.RegisterUserValidator;
-import lombok.Value;
-import lombok.extern.slf4j.Slf4j;
+
 import net.bytebuddy.utility.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Optional;
-import java.util.concurrent.Semaphore;
 
 
 @RestController

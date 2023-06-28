@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
+@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class StripeController {
     private static final Logger logger = LoggerFactory.getLogger(StripeController.class);
     @Autowired
