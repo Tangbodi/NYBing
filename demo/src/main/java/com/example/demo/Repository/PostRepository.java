@@ -11,12 +11,12 @@ import java.util.Map;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, String> {
-    @Query(value = "SELECT a.postId, a.categoryId, title, publishAt, userName, userId, b.views\n" +
+    @Query(value = "SELECT a.postId, a.sub_categoryId, title, publishAt, userName, userId, b.views\n" +
             "FROM master.posts a\n" +
             "LEFT JOIN master.post_views b\n" +
             "ON a.postId = b.postId\n" +
-            "where a.categoryId =:categoryId ORDER BY publishAt DESC",nativeQuery = true)
-    List<Map<String,Object>> allPostsUnderOneCategory(@Param("categoryId") Integer categoryId);
+            "where a.sub_categoryId =:sub_categoryId ORDER BY publishAt DESC",nativeQuery = true)
+    List<Map<String,Object>> allPostsUnderOneCategory(@Param("sub_categoryId") Integer sub_categoryId);
 
     @Query(value = "SELECT * FROM master.posts WHERE textrender LIKE %:keyword% OR title LIKE %:keyword% ORDER BY publishAt DESC",nativeQuery = true)
     List<Post> findByKeyword(@Param("keyword") String keyword);

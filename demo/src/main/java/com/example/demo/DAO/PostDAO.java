@@ -19,13 +19,13 @@ public class PostDAO {
     public List<Object[]> getAllTopFivePostsUnderEveryCategory(){
         logger.info("Getting all top five posts under every category:::");
         try {
-            Query query = this.entityManager.createNativeQuery("SELECT p.categoryId, c.categoryName, p.postId, p.title\n" +
+            Query query = this.entityManager.createNativeQuery("SELECT p.sub_categoryId, c.sub_categoryName, p.postId, p.title\n" +
                     "FROM (\n" +
-                    "  SELECT categoryId, postId, title, \n" +
-                    "  ROW_NUMBER() OVER (PARTITION BY categoryId ORDER BY publishAt DESC) as row_num\n" +
+                    "  SELECT sub_categoryId, postId, title, \n" +
+                    "  ROW_NUMBER() OVER (PARTITION BY sub_categoryId ORDER BY publishAt DESC) as row_num\n" +
                     "  FROM master.posts\n" +
                     ") p\n" +
-                    "JOIN master.category c ON p.categoryId = c.categoryId\n" +
+                    "JOIN master.sub_category c ON p.sub_categoryId = c.sub_categoryId\n" +
                     "WHERE p.row_num <= 5");
 
             return query.getResultList();

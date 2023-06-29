@@ -3,7 +3,6 @@ package com.example.demo.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -19,30 +18,32 @@ import java.util.Set;
 public class Post {
     @Id
     @Size(max = 36)
+    //@GeneratedValue(generator="uuid")
+    //@GenericGenerator(name="uuid",strategy="uuid2")
     @Column(name = "postId", nullable = false, length = 36)
     private String id;
 
     @NotNull
-    @Column(name = "categoryId")
-    private Integer categoryId;
+    @Column(name = "sub_categoryId", nullable = false)
+    private Integer subCategoryid;
 
-    @NotNull
     @Size(max = 255)
-    @Column(name = "title")
+    @NotNull
+    @Column(name = "title", nullable = false)
     private String title;
 
     @NotNull
     @Lob
-    @Column(name = "textrender")
+    @Column(name = "textrender", nullable = false)
     private String textrender;
 
     @NotNull
-    @Column(name = "publishAt")
+    @Column(name = "publishAt", nullable = false)
     private Instant publishAt;
 
-    @NotNull
     @Size(max = 18)
-    @Column(name = "userName", length = 18)
+    @NotNull
+    @Column(name = "userName", nullable = false, length = 18)
     private String userName;
 
     @Column(name = "ipvFour", columnDefinition = "INT UNSIGNED")
@@ -52,56 +53,13 @@ public class Post {
     @Column(name = "ipvSix", length = 16)
     private String ipvSix;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")
     private User user;
 
     @JsonIgnore
-    //@OrderBy("publishAt desc")
+    //@OrderBy("publishAtdesc")
     @OneToMany(mappedBy = "post")
     private Set<Comment> comments = new LinkedHashSet<>();
 
 }
-
-//   @Id
-//    @Size(max = 36)
-//    @GeneratedValue(generator = "uuid")
-//    @GenericGenerator(name="uuid",strategy = "uuid2")
-//    @Column(name = "postId", nullable = false, length = 36)
-//    private String id;
-//
-//    @Column(name = "categoryId")
-//    private Integer categoryId;
-//
-//    @Size(max = 255)
-//    @Column(name = "title")
-//    private String title;
-//
-//    @Lob
-//    @Column(name = "textrender")
-//    private String textrender;
-//
-//    @Column(name = "publishAt")
-//    private Instant publishAt;
-//
-//    @Size(max = 18)
-//    @Column(name = "userName", length = 18)
-//    private String userName;
-//
-//    @Column(name = "ipvFour", columnDefinition = "INT UNSIGNED")
-//    private Long ipvFour;
-//
-//    @Size(max = 16)
-//    @Column(name = "ipvSix", length = 16)
-//    private String ipvSix;
-//
-//    @JsonIgnore
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "userId")
-//    private User user;
-//
-//    @JsonIgnore
-//    @OneToMany(mappedBy = "post",fetch = FetchType.LAZY)
-////    @OrderBy("publishAt desc")
-//    private Set<Comment> comments = new LinkedHashSet<>();

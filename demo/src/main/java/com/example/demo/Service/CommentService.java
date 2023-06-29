@@ -3,19 +3,14 @@ package com.example.demo.Service;
 import com.example.demo.Entity.Comment;
 import com.example.demo.Entity.Post;
 import com.example.demo.Repository.CommentRepository;
-import com.example.demo.Repository.ImageRepository;
-import com.example.demo.Repository.PostRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.Future;
 
 @Service
 public class CommentService {

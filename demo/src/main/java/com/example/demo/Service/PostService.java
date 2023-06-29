@@ -123,7 +123,7 @@ public class PostService {
         post.setIpvFour(postDTO.getIpvFour());
         post.setIpvSix(postDTO.getIpvSix());
         post.setUserName(postDTO.getUserName());
-        post.setCategoryId(postDTO.getCategoryId());
+        post.setSubCategoryid(postDTO.getCategoryId());
         logger.info("Saving post:::");
         postRepository.save(post);
         //--------------------postView------------------

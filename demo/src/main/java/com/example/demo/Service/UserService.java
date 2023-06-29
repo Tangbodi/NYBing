@@ -5,6 +5,7 @@ import com.example.demo.DTO.LoginDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.AuthException;
+import com.example.demo.Exception.UnauthorizedException;
 import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.UserRepository;
 
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Lazy;
 
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.Optional;
@@ -56,36 +58,36 @@ public Boolean registerUser(User newUser){
         }
         return false;
     }
-    public User authenticate(LoginDTO login)
+    public Integer authenticate(LoginDTO login, HttpServletRequest request)
     {
         logger.info("Checking if user authenticate:::"+login.getUserName());
         User user = null;
         try {
             user = this.userDAO.getProfileByUserName(login.getUserName());
         } catch (Exception e) {
-            e.getMessage();
+            logger.error(e.getMessage(),e);
             user = null;
         }
         if (user == null) {
-            throw new UserNotFoundException(null);
+            return -1;
         } else {
 //            Boolean pwdCheck = false;
             if (BCrypt.checkpw(login.getPassword(), user.getPassword())) {
                 //cannot use ==
-//                if(user.getVerified().equals("true")){
-                    return user;
-////                    pwdCheck = true;
-//                }
-//                else{
-//                    //api/user/login/email_validation?token=
-//                    emailValidationService.processEmailValidation(request,user);
-//                }
+                if(user.getVerified().equals("true")){
+                    return 1;
+//                    pwdCheck = true;
+                }
+                else{
+                    //api/user/login/email_validation?token=
+                    emailValidationService.processEmailValidation(request,user);
+                    return 0;
+                }
             }
             else{
-                throw new AuthException(login.getUserName(),login.getPassword());
+                return 2;
             }
         }
-//        return null;
     }
     public User getProfileByUserName (String userName)
     {

@@ -2,11 +2,12 @@ package com.example.demo.Controller;
 
 import com.example.demo.Entity.Post;
 import com.example.demo.Service.PostService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.example.demo.Util.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,19 +18,24 @@ public class SearchController {
     private static final Logger logger = LoggerFactory.getLogger(SearchController.class);
     @Autowired
     private PostService postService;
-    @GetMapping("/search/{keyword}")
-    public String findAllPostByKeyword(@PathVariable String keyword){
+    @PostMapping("/search/{keyword}")
+    public ResponseEntity<ApiResponse<List<Post>>> findAllPostByKeyword(@PathVariable String keyword){
         if (keyword.trim().isEmpty()) {
-            throw new IllegalArgumentException("Keyword cannot be empty or contain only spaces:::");
+            ApiResponse errorResponse = ApiResponse.error(400 , "Keyword cannot be empty or contain only spaces", "Bad Request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
         keyword = keyword.trim();
         if (!keyword.matches("^[\\p{L}\\p{N}\\s]*$")){
-            throw new IllegalArgumentException("Keyword cannot contain special characters or emojis:::");
+            ApiResponse errorResponse = ApiResponse.error(400 , "Keyword cannot contain special characters or emojis", "Bad Request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
-        List<Post> postList = postService.findAllPostByKeyword(keyword);
-        Gson gson = new GsonBuilder().create();
-        String json = gson.toJson(postList);
-
-        return json;
+        try{
+            List<Post> postList = postService.findAllPostByKeyword(keyword);
+            ApiResponse<List<Post>> apiResponse = ApiResponse.success(postList);
+            return ResponseEntity.ok(apiResponse);
+        }catch (Exception e){
+            ApiResponse<List<Post>> errorResponse = ApiResponse.error(500, "Internal Server Error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 }

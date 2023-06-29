@@ -1,17 +1,19 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Entity.Category;
-import com.example.demo.Entity.CategorySubMap;
-import com.example.demo.Entity.CategorySubMapId;
+
 import com.example.demo.Entity.SubCategory;
 import com.example.demo.Repository.PostRepository;
 import com.example.demo.Service.CategoryService;
 import com.example.demo.Service.PostService;
+import com.example.demo.Util.ApiResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,12 +31,19 @@ public class CategoryController {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private ApiResponse apiResponse;
     @GetMapping("/categories")
-    public String getAllCategory(){
-        Gson gson = new GsonBuilder().create();
-        List<Category> categoryList = categoryService.findAllCategories();
-        String json = gson.toJson(categoryList);
-        return json;
+    public ResponseEntity<ApiResponse< List<Object[]>>> getAllCategory(){
+        try {
+            List<Object[]> res= postService.getAllTopFivePostsUnderEveryCategory();
+            ApiResponse< List<Object[]>> list = apiResponse = ApiResponse.success(res);
+            return ResponseEntity.ok(apiResponse);
+
+        } catch (Exception e) {
+            ApiResponse< List<Object[]>> errorResponse = ApiResponse.error(500, "Internal Server Error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
     //  public List<Object[]> getTopFivePosts(HttpServletRequest request){
     //
@@ -42,13 +51,16 @@ public class CategoryController {
     //    }
     //------------------------------------------------------------------------------------------
     //show all posts under specific category
-    @GetMapping("/categories/{categoryId}")
-    public String findAllPostsByCategoryId(HttpServletRequest request,@PathVariable Integer categoryId){
-        Gson gson = new GsonBuilder().create();
-        List<Map<String, Object>> list = postRepository.allPostsUnderOneCategory(categoryId);
-        String json = gson.toJson(list);
-        return json;
-//        return postService.findPostsByCategoryId(categoryId);
+    @GetMapping("/categories/{sub_categoryId}")
+    public ResponseEntity<ApiResponse< List<Map<String, Object>>>> findAllPostsByCategoryId(HttpServletRequest request,@PathVariable Integer sub_categoryId){
+        try {
+            List<Map<String, Object>> list = postRepository.allPostsUnderOneCategory(sub_categoryId);
+            ApiResponse<List<Map<String, Object>>> apiResponse = ApiResponse.success(list);
+            return ResponseEntity.ok(apiResponse);
+        } catch (Exception e) {
+            ApiResponse<List<Map<String, Object>>> errorResponse =ApiResponse.error(500, "Internal Server Error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
     @GetMapping("/categories/getSubCategory")
     public Map<String,List<String>>  getSubCategory(){
@@ -56,15 +68,22 @@ public class CategoryController {
         return categoryService.getSubCategory(getAllCategorySubMapIds);
     }
     @GetMapping("/categories/getAllCategorySubMapIds")
-    public Map<Integer,List<Integer>> getAllCategorySubMapIds(){
-        return categoryService.getAllCategorySubMapIds();
+    public String getAllCategorySubMapIds(){
+        Map<Integer,List<Integer>> map = categoryService.getAllCategorySubMapIds();
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(map);
+        return json;
     }
 
     @GetMapping("/category/sub_category")
-    public String getAllSubCategory(){
-        Map<Integer,Map<String, List<SubCategory>>> res = categoryService.getAllSubCategory();
-        Gson gson = new GsonBuilder().create();
-        String json = gson.toJson(res);
-        return json;
+    public ResponseEntity<ApiResponse<Map<Integer, Map<String, List<SubCategory>>>>> getAllSubCategory() {
+        try {
+            Map<Integer, Map<String, List<SubCategory>>> res = categoryService.getAllSubCategory();
+            ApiResponse<Map<Integer, Map<String, List<SubCategory>>>> apiResponse = ApiResponse.success(res);
+            return ResponseEntity.ok(apiResponse);
+        } catch (Exception e) {
+            ApiResponse<Map<Integer, Map<String, List<SubCategory>>>> errorResponse = ApiResponse.error(500, "Internal Server Error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 }
