@@ -20,17 +20,19 @@ public class Image {
     @Column(name = "imageId", nullable = false, length = 36)
     private String id;
 
-    @NotNull
     @Size(max = 45)
-    @Column(name = "imageType", length = 45)
+    @NotNull
+    @Column(name = "imageType", nullable = false, length = 45)
     private String imageType;
-    @NotNull
+
     @Size(max = 90)
-    @Column(name = "imagePath", length = 90)
+    @NotNull
+    @Column(name = "imagePath", nullable = false, length = 90)
     private String imagePath;
-    @NotNull
+
     @Size(max = 90)
-    @Column(name = "imageURL", length = 90)
+    @NotNull
+    @Column(name = "imageURL", nullable = false, length = 90)
     private String imageURL;
 
 }

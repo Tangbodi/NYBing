@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 @Getter
 @Setter
 @Entity
-@Table(name = "sub_category")
+@Table(name = "sub_categories")
 public class SubCategory {
     @Id
     @Column(name = "sub_categoryId", nullable = false)
@@ -20,6 +20,6 @@ public class SubCategory {
 
     @Size(max = 60)
     @Column(name = "sub_categoryName", length = 60)
-    private String subCategoryName;
+    private String subCategoryname;
 
 }

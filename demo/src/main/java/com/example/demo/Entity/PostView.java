@@ -21,7 +21,7 @@ public class PostView {
     private String id;
 
     @NotNull
-    @Column(name = "views")
+    @Column(name = "views", nullable = false)
     private Integer views;
 
 }

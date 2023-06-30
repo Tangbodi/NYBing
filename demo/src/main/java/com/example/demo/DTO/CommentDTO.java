@@ -7,6 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.Lob;
+import javax.validation.constraints.Size;
+import java.time.Instant;
+
 
 @Getter
 @Setter
@@ -17,15 +21,19 @@ import lombok.Setter;
 public class CommentDTO {
     private Long commentId;
     private Integer categoryId;
+    @Lob
     private String commentContent;
     private String fromId;
     private String toId;
+    @Size(min = 1,max = 18)
     private String fromName;
+    @Size(min = 1,max = 18)
     private String toName;
     private Long ipvFour;
     private String ipvSix;
     private Integer parentId;
     private String postId;
+    private Instant PublishAt;
     @java.lang.Override
     public java.lang.String toString() {
         return "CommentDTO{" +
@@ -39,6 +47,7 @@ public class CommentDTO {
                 " ipvSix='" + getIpvSix() + "'" +
                 " parentId='" + getParentId() + "'" +
                 " postId='" + getPostId() + "'" +
+                " PublishAt='" + getPublishAt() + "'" +
                 "}";
     }
 }

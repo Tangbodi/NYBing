@@ -1,7 +1,5 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Entity.Category;
-
 import com.example.demo.Entity.SubCategory;
 import com.example.demo.Repository.PostRepository;
 import com.example.demo.Service.CategoryService;

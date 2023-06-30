@@ -5,10 +5,10 @@ import com.example.demo.DTO.PostDTO;
 import com.example.demo.Entity.*;
 import com.example.demo.Exception.PostNotFoundException;
 import com.example.demo.Repository.ImageRepository;
-import com.example.demo.Repository.PostCommentsRepository;
 import com.example.demo.Repository.PostRepository;
 
 import com.example.demo.Repository.PostViewsRepository;
+import com.example.demo.Repository.PostsCommentsViewRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -38,133 +38,186 @@ public class PostService {
     @Autowired
     private IpService ipService;
     @Autowired
-    private PostCommentsRepository postCommentsRepository;
+    private PostsCommentsViewRepository postsCommentsViewRepository;
     @Autowired
     private PostViewsRepository postViewsRepository;
     @Autowired
     private PostDAO postDAO;
 
-    public Post settingPost(HttpServletRequest request, PostDTO postDTO, User user) throws Exception {
-        logger.info("Setting post:::");
-        logger.info("postDTO:::"+postDTO.getTextrender());
+    public Post savePost(HttpServletRequest request, PostDTO postDTO, User user) throws Exception {
             try{
-                return savePost(postDTO,user,request);
+                logger.info("Setting post:::");
+                logger.info("postDTO:::"+postDTO.getTextrender());
+                return settingPost(postDTO,user,request);
             }catch (Exception e){
                 logger.error(e.getMessage(),e);
             }
             return null;
     }
 
-    public Post savePost(PostDTO postDTO, User user, HttpServletRequest request) throws IOException {
+    public Post settingPost(PostDTO postDTO, User user, HttpServletRequest request) throws IOException {
 //        String input = "<p><strong><span style=\"color: #e03e2d;\">adfasdf</span></strong></p>\n" +
 //                " <p><img src=\"data:image/png;base64,
 //                FIPtyYnMEp4AAAAASUVORK5CYII=\" alt=\"\" /></p>";
-        logger.info("Saving post into database:::");
-        //parsing post content, convert string to html to parse
-        Document document = Jsoup.parse(postDTO.getTextrender());
-        logger.info("document:::"+document);
-        for(Element imageElement:document.select("img")){
-            Image image = new Image();
-            //get image info from src
-            String imageCode = imageElement.attr("src");
-            //get image type, for example "data:image/png;base64,"
-            //data:image/jpeg;base64, -> jpeg
-            String imageType = imageCode.substring(0,imageCode.indexOf(",")+1);
-            image.setImageType(imageType);
-            logger.info(imageType);
-            logger.info("Saving image data into database:::");
-            byte[] imageData = getImageData(imageCode);
-            //Generate UUID for image
-            String imageId = UUID.randomUUID().toString();
-            image.setId(imageId);
-            // Generate a unique filename
-            String filename = imageId+"."+imageType.substring(11,imageType.indexOf(";")); //1efc15fc-fe83-4ef1-9f1a-420ecd408f20.jpeg
+        try{
+            logger.info("Saving post into database:::");
+            boolean finished = false;
+            //parsing post content, convert string to html to parse
+            Document document = Jsoup.parse(postDTO.getTextrender());
+            logger.info("parsing document:::"+document);
+            for(Element imageElement:document.select("img")){
+                Image image = new Image();
+                //get image info from src
+                String imageCode = imageElement.attr("src");
+                //get image type, for example "data:image/png;base64,"
+                //data:image/jpeg;base64, -> jpeg
+                String imageType = imageCode.substring(0,imageCode.indexOf(",")+1);
+                image.setImageType(imageType);
+                logger.info(imageType);
+                logger.info("Saving image data into database:::");
+                byte[] imageData = getImageData(imageCode);
+                //Generate UUID for image
+                String imageId = UUID.randomUUID().toString();
+                image.setId(imageId);
+                // Generate a unique filename
+                String filename = imageId+"."+imageType.substring(11,imageType.indexOf(";")); //1efc15fc-fe83-4ef1-9f1a-420ecd408f20.jpeg
 //            String filename = imageId+".png";
-            System.out.println(filename);
+//                System.out.println(filename);
 //            image.setImageName(filename);
-            Path imagePath = Paths.get(IMAGE_FOLDER_PATH, filename);
-            System.out.println("imagePath:::"+imagePath);
-            image.setImagePath(imagePath.toString());
-            try (FileOutputStream fos = new FileOutputStream(imagePath.toFile())) {
+                Path imagePath = Paths.get(IMAGE_FOLDER_PATH, filename);
+//                System.out.println("imagePath:::"+imagePath);
+                image.setImagePath(imagePath.toString());
+                FileOutputStream fos = new FileOutputStream(imagePath.toFile());
                 fos.write(imageData);
-            } catch (IOException e) {
-                logger.error(e.getMessage(),e);
-            }
-            //http://31.220.21.110:8080
+                //http://31.220.21.110:8080
 //            String requestPath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort();
-            ///api/1efc15fc-fe83-4ef1-9f1a-420ecd408f20.jpeg
-            String imageURL = IMAGE_URL+filename;
-            image.setImageURL(imageURL);
-            imageRepository.save(image);
-            imageElement.attr("src",imageURL);
-        }
-        String updatedHTML = document.html();
-        logger.info("updatedHTML:::"+updatedHTML);
-        logger.info("Creating UUID for post, and post views entity:::");
-
-        UUID uuid = UUID.randomUUID();
-        String uuId = uuid.toString();
-        //--------------------post-----------------
-        logger.info("Setting Post:::"+uuId);
-        Post post = new Post();
-        post.setId(uuId.toString());
-        post.setTitle(postDTO.getTitle());
+                ///api/1efc15fc-fe83-4ef1-9f1a-420ecd408f20.jpeg
+                String imageURL = IMAGE_URL+filename;
+                image.setImageURL(imageURL);
+                Image ima = imageRepository.save(image);
+                if(ima!=null){
+                    logger.info("Image saved successfully:::");
+                    imageElement.attr("src",imageURL);
+                    finished = true;
+                }else {
+                    logger.info("Image not saved:::");
+                    return null;
+                }
+            }
+            logger.info("Image completely saved:::");
+            String updatedHTML = document.html();
+            logger.info("updatedHTML:::"+updatedHTML);
+            logger.info("Creating UUID for post, and post views entity:::");
+            UUID uuid = UUID.randomUUID();
+            String uuId = uuid.toString();
+            //--------------------post-----------------
+            logger.info("Setting Post:::"+uuId);
+            Post post = new Post();
+            post.setId(uuId.toString());
+            post.setTitle(postDTO.getTitle());
 //        post.setTextrender(postDTO.getTextrender());
 //        keep the content between only <body> tag
-        int start = updatedHTML.indexOf("<body>")+6;
-        int end = updatedHTML.lastIndexOf("</body>");
-        updatedHTML = updatedHTML.substring(start,end);
-        logger.info("Removed tags from updatedHTML:::"+updatedHTML);
-        post.setTextrender(updatedHTML);
-        Instant time = Instant.now();
-        logger.info("Time:::"+time);
-        post.setPublishAt(time);
-        post.setUser(user);
-        post.setIpvFour(postDTO.getIpvFour());
-        post.setIpvSix(postDTO.getIpvSix());
-        post.setUserName(postDTO.getUserName());
-        post.setSubCategoryid(postDTO.getCategoryId());
-        logger.info("Saving post:::");
-        postRepository.save(post);
-        //--------------------postView------------------
-        logger.info("Setting PostView:::"+uuId);
-        PostView postView = new PostView();
-        //Setting PostView entity
-        postView.setId(uuId.toString());
-        postView.setViews(1);
-        logger.info("Saving post views:::");
-        postViewsRepository.save(postView);
-        //-----------------postComment------------------
-        logger.info("Setting PostComment:::"+uuId);
-        PostComment postComment = new PostComment();
-        postComment.setId(uuId.toString());
-        postComment.setLastComment(time);
-        logger.info("Saving post comments:::");
-        postCommentsRepository.save(postComment);
-
-        return post;
+            int start = updatedHTML.indexOf("<body>")+6;
+            int end = updatedHTML.lastIndexOf("</body>");
+            updatedHTML = updatedHTML.substring(start,end);
+            logger.info("Removed tags from updatedHTML:::"+updatedHTML);
+            post.setTextrender(updatedHTML);
+            Instant time = Instant.now();
+            logger.info("Time:::"+time);
+            post.setPublishAt(time);
+            post.setUserId(user.getId());
+            post.setIpvFour(postDTO.getIpvFour());
+            post.setIpvSix(postDTO.getIpvSix());
+            post.setUserName(postDTO.getUserName());
+            post.setSubCategoryid(postDTO.getCategoryId());
+            logger.info("Saving post:::");
+            Post savedPost = postRepository.save(post);
+            if(savedPost!=null){
+                logger.info("Post saved successfully:::");
+            }else{
+                logger.info("Post not saved:::");
+                return null;
+            }
+            //--------------------postView------------------
+            logger.info("Setting PostView:::"+uuId);
+            PostView postView = new PostView();
+            //Setting PostView entity
+            postView.setId(uuId.toString());
+            postView.setViews(1);
+            PostView savedPostview = postViewsRepository.save(postView);
+            if(savedPostview!=null){
+                logger.info("PostView saved successfully:::");
+            }else{
+                logger.info("PostView not saved:::");
+                return null;
+            }
+            //-----------------postComment------------------
+            logger.info("Setting PostComment:::"+uuId);
+            PostsCommentsView postsCommentsView = new PostsCommentsView();
+            postsCommentsView.setId(uuId.toString());
+            postsCommentsView.setLastCommentAt(time);
+            PostsCommentsView savedPostsCommentsView = postsCommentsViewRepository.save(postsCommentsView);
+            if (savedPostsCommentsView!=null){
+                logger.info("PostComment saved successfully:::");
+            }else{
+                logger.info("PostComment not saved:::");
+                return null;
+            }
+            return savedPost;
+        }catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
     }
     public Post getPostData(String postId){
-        logger.info("Getting data of post:::" + postId);
-        Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
-        logger.info(post.getTextrender());
-
-        return post;
+        try{
+            logger.info("Getting data of post:::" + postId);
+            Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
+            logger.info(post.getTextrender());
+            return post;
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+        }
+        return null;
     }
     private byte[] getImageData(String imageCode) throws IOException {
-        logger.info("Parsing image data:::");
-        String base64Image = imageCode.substring(imageCode.indexOf(",") + 1);
-        return Base64.getDecoder().decode(base64Image);
+        try{
+            logger.info("Parsing image data:::");
+            String base64Image = imageCode.substring(imageCode.indexOf(",") + 1);
+            return Base64.getDecoder().decode(base64Image);
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+        }
+        return null;
     }
     public List<Object[]> getAllTopFivePostsUnderEveryCategory(){
-        logger.info("Getting all top five posts under every category:::");
-        return postDAO.getAllTopFivePostsUnderEveryCategory();
+        try{
+            logger.info("Getting all top five posts under every category:::");
+            List<Object[]> postList = postDAO.getAllTopFivePostsUnderEveryCategory();
+            return postList;
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+        }
+        return null;
     }
     public Post findPostById(String postId){
-        return postRepository.findById(postId).orElseThrow(()->new PostNotFoundException(postId));
+        try{
+            logger.info("Getting post by id:::"+postId);
+            Post post = postRepository.findById(postId).orElseThrow(()->new PostNotFoundException(postId));
+            return post;
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+        }
+        return null;
     }
     public List<Post> findAllPostByKeyword(String keyword){
-        logger.info(keyword);
-        return postRepository.findByKeyword(keyword);
+        try{
+            logger.info("Search post via keyword:::"+keyword);
+            List<Post> list = postRepository.findByKeyword(keyword);
+            return list;
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+        }
+        return null;
     }
 }

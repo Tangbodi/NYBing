@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.DTO.CommentDTO;
 import com.example.demo.Entity.Comment;
 import com.example.demo.Entity.Post;
 import com.example.demo.Repository.CommentRepository;
@@ -27,13 +28,19 @@ public class CommentService {
 
 //    @Async("MultiExecutor") //Async has to return a Future
     @Transactional
-    public Comment saveComment(Comment comment,String postId) throws Exception {
-        logger.info("Saving comment:::");
+    public Comment saveComment(CommentDTO commentDTO, String postId) throws Exception {
             try{
-                Post post = postService.findPostById(postId);
-                comment.setParentId(0);
+                logger.info("Saving comment:::");
+                Comment comment = new Comment();
+                comment.setCommentContent(commentDTO.getCommentContent());
+                comment.setFromId(commentDTO.getFromId());
+                comment.setToId(commentDTO.getToId());
+                comment.setFromIpvfour(commentDTO.getIpvFour());
+                comment.setFromIpvsix(commentDTO.getIpvSix());
+                comment.setFromName(commentDTO.getFromName());
+                comment.setToName(commentDTO.getToName());
                 comment.setPublishAt(Instant.now());
-                comment.setPost(post);
+                comment.setPostId(postId);
                 commentRepository.save(comment);
                 Thread.sleep(1000);
                 return comment;
@@ -45,7 +52,12 @@ public class CommentService {
 //            return new AsyncResult<String>(res);
     }
     public List<Comment> findAllCommentsByPostId(String postId){
-        return commentRepository.findAllByPostId(postId);
+        try{
+           return commentRepository.findAllByPostId(postId);
+        }catch (RuntimeException e){
+            logger.error(e.getMessage(),e);
+        }
+        return null;
     }
 }
 

@@ -1,8 +1,8 @@
 package com.example.demo.Service;
 
-import com.example.demo.Entity.PostComment;
+import com.example.demo.Entity.PostsCommentsView;
 import com.example.demo.Exception.PostNotFoundException;
-import com.example.demo.Repository.PostCommentsRepository;
+import com.example.demo.Repository.PostsCommentsViewRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +17,16 @@ import java.time.Instant;
 public class PostCommentService {
     private static final Logger logger = LoggerFactory.getLogger(PostViewService.class);
     @Autowired
-    private PostCommentsRepository postCommentsRepository;
+    private PostsCommentsViewRepository postsCommentsViewRepository;
 
     @Async("MultiExecutor")
     @Transactional
-    public void updatePostComments(String postId){
+    public PostsCommentsView updatePostComments(String postId){
         try{
-            postCommentsRepository.findById(postId).map(postComments->{
-                postComments.setComments(postComments.getComments()+1);
-                postComments.setLastComment(Instant.now());
-                return postCommentsRepository.save(postComments);
+            postsCommentsViewRepository.findById(postId).map(postsCommentsView->{
+                postsCommentsView.setComments(postsCommentsView.getComments()+1);
+                postsCommentsView.setLastCommentAt(Instant.now());
+                return postsCommentsViewRepository.save(postsCommentsView);
             }).orElseThrow(()-> new PostNotFoundException(postId));
             Thread.sleep(1000);
         } catch (InterruptedException | RuntimeException e) {
@@ -36,6 +36,7 @@ public class PostCommentService {
         //}
             //logger.error("Failed to format {}", s, e);
         }
+        return null;
     }
 
 }

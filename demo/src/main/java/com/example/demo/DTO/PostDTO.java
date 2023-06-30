@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.Lob;
+import javax.validation.constraints.Size;
 import java.time.Instant;
 
 @Getter
@@ -17,7 +19,9 @@ import java.time.Instant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostDTO {
     private Integer categoryId;
+    @Size(min = 1,max = 255)
     private String title;
+    @Lob
     private String textrender;
     private String userName;
     private Long ipvFour;

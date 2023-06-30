@@ -1,6 +1,5 @@
 package com.example.demo.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,16 +14,12 @@ import java.time.Instant;
 @Table(name = "comments")
 public class Comment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "commentId", nullable = false)
     private Integer id;
 
     @NotNull
-    @Column(name = "categoryId")
-    private Integer categoryId;
-    @NotNull
     @Lob
-    @Column(name = "commentContent")
+    @Column(name = "commentContent", nullable = false)
     private String commentContent;
 
     @Size(max = 36)
@@ -42,24 +37,22 @@ public class Comment {
     @Column(name = "from_ipvSix", length = 16)
     private String fromIpvsix;
 
-    @Column(name = "parentId")
-    private Integer parentId;
-    @NotNull
     @Size(max = 18)
-    @Column(name = "fromName", length = 18)
+    @NotNull
+    @Column(name = "fromName", nullable = false, length = 18)
     private String fromName;
 
     @Size(max = 18)
     @Column(name = "toName", length = 18)
     private String toName;
+
     @NotNull
-    @Column(name = "publishAt")
+    @Column(name = "publishAt", nullable = false)
     private Instant publishAt;
 
-    @JsonIgnore
+    @Size(max = 36)
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "postId", nullable = false)
-    private Post post;
+    @Column(name = "postId", nullable = false, length = 36)
+    private String postId;
 
 }

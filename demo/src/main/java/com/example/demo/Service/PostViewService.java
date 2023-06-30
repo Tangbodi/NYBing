@@ -19,8 +19,8 @@ public class PostViewService {
     @Async("MultiExecutor")
     @Transactional
     public void updatePostViews(String postId){
-        logger.info("updating views of post:::" + postId);
         try{
+            logger.info("updating views of post:::" + postId);
             postViewsRepository.findById(postId).map(postViews->{
             postViews.setViews(postViews.getViews()+1);
             return postViewsRepository.save(postViews);

@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.DTO.SearchKeywordDTO;
 import com.example.demo.Entity.Post;
 import com.example.demo.Service.PostService;
 import com.example.demo.Util.ApiResponse;
@@ -18,24 +19,24 @@ public class SearchController {
     private static final Logger logger = LoggerFactory.getLogger(SearchController.class);
     @Autowired
     private PostService postService;
-    @PostMapping("/search/{keyword}")
-    public ResponseEntity<ApiResponse<List<Post>>> findAllPostByKeyword(@PathVariable String keyword){
-        if (keyword.trim().isEmpty()) {
-            ApiResponse errorResponse = ApiResponse.error(400 , "Keyword cannot be empty or contain only spaces", "Bad Request");
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<List<Post>>> findAllPostByKeyword(@RequestBody SearchKeywordDTO keyword){
+
+        if (keyword.getKeyword().trim().isEmpty()) {
+            ApiResponse errorResponse = ApiResponse.error(400 , "Keyword Cannot Be Empty Or Contain Only Spaces", "Bad Request");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
-        keyword = keyword.trim();
-        if (!keyword.matches("^[\\p{L}\\p{N}\\s]*$")){
-            ApiResponse errorResponse = ApiResponse.error(400 , "Keyword cannot contain special characters or emojis", "Bad Request");
+        if (!keyword.getKeyword().trim().matches("^[\\p{L}\\p{N}\\s]*$")){
+            ApiResponse errorResponse = ApiResponse.error(400 , "Keyword Cannot Contain Special Characters Or Emojis", "Bad Request");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
-        try{
-            List<Post> postList = postService.findAllPostByKeyword(keyword);
+        List<Post> postList = postService.findAllPostByKeyword(keyword.getKeyword().trim());
+        if(postList==null){
+            ApiResponse errorResponse = ApiResponse.error(404 , "No Post Found", "Not Found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }else {
             ApiResponse<List<Post>> apiResponse = ApiResponse.success(postList);
             return ResponseEntity.ok(apiResponse);
-        }catch (Exception e){
-            ApiResponse<List<Post>> errorResponse = ApiResponse.error(500, "Internal Server Error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 }

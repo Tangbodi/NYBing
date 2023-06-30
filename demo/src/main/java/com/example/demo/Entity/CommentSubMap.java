@@ -10,10 +10,10 @@ import javax.persistence.Table;
 @Getter
 @Setter
 @Entity
-@Table(name = "category_sub_map")
-public class CategorySubMap {
+@Table(name = "comment_sub_map")
+public class CommentSubMap {
     @EmbeddedId
-    private CategorySubMapId id;
+    private CommentSubMapId id;
 
     //TODO [JPA Buddy] generate columns from DB
 }
