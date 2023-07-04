@@ -13,28 +13,28 @@ import java.util.Objects;
 @Getter
 @Setter
 @Embeddable
-public class CategorySubMapId implements Serializable {
-    private static final long serialVersionUID = -9116303929862410768L;
+public class CategoriesSubCategoriesMapId implements Serializable {
+    private static final long serialVersionUID = -7883908919098044998L;
     @NotNull
     @Column(name = "categoryId", nullable = false)
     private Integer categoryId;
 
     @NotNull
     @Column(name = "sub_categoryId", nullable = false)
-    private Integer subCategoryid;
+    private Integer subCategoryId;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        CategorySubMapId entity = (CategorySubMapId) o;
-        return Objects.equals(this.subCategoryid, entity.subCategoryid) &&
+        CategoriesSubCategoriesMapId entity = (CategoriesSubCategoriesMapId) o;
+        return Objects.equals(this.subCategoryId, entity.subCategoryId) &&
                 Objects.equals(this.categoryId, entity.categoryId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(subCategoryid, categoryId);
+        return Objects.hash(subCategoryId, categoryId);
     }
 
 }

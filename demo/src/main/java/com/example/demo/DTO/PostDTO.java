@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Lob;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 
@@ -18,11 +19,17 @@ import java.time.Instant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostDTO {
+
     private Integer categoryId;
+
+    private Integer subCategoryId;
+    @NotBlank
     @Size(min = 1,max = 255)
     private String title;
+    @NotBlank
     @Lob
     private String textrender;
+
     private String userName;
     private Long ipvFour;
     private String ipvSix;

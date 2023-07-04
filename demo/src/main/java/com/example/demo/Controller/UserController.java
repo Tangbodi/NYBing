@@ -27,6 +27,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.UUID;
 
 
 @RestController
@@ -61,15 +62,16 @@ public class UserController{
         }
     }
     @PostMapping("/user/register")
-    public ResponseEntity<ApiResponse<User>> register (@RequestBody User newUser, HttpServletRequest request){
-                if(userService.checkIfUserRegistered(newUser)){
+    public ResponseEntity register (@RequestBody UserDTO userDTO, HttpServletRequest request){
+        String encodedEmail = org.springframework.web.util.HtmlUtils.htmlEscape(userDTO.getEmail());
+        userDTO.setEmail(encodedEmail);
+        if(userService.checkIfUserRegistered(userDTO)){
                     ApiResponse<User> errorResponse = ApiResponse.error(409, "User Already Exists", "CONFLICT");
                     return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
                 }else {
-                    if(emailValidationService.processEmailValidation(request,newUser)){
-                        userService.registerUser(newUser);
-                        logger.info("User successfully registered::");
-                        ApiResponse<User> apiResponse = ApiResponse.success(newUser);
+                    if(emailValidationService.processEmailValidation(request,userDTO)){
+                        userService.registerUser(userDTO);
+                        logger.info("User successfully registered:::");
                         return ResponseEntity.ok().build();
                     }else{
                         ApiResponse<User> errorResponse = ApiResponse.error(500, "Verification Link Couldn't Send", "Internal Server Error");
@@ -128,18 +130,19 @@ public class UserController{
     }
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/update/{userName}")
-    public ResponseEntity updateUserInfo(@RequestBody UserDTO userDTO, @PathVariable String userName){
+    public ResponseEntity<ApiResponse<User>> updateUserInfo(@RequestBody UserDTO userDTO, @PathVariable String userName){
             User user = userService.updateUserInfoByUserName(userDTO,userName);
             if(user == null){
-                ApiResponse errorResponse = ApiResponse.error(400, "No Changes Were Found", "Bad Request");
+                ApiResponse<User> errorResponse = ApiResponse.error(400, "No Changes Were Found", "Bad Request");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
             }else{
-                return ResponseEntity.ok().build();
+                ApiResponse<User> apiResponse = ApiResponse.success(user);
+                return ResponseEntity.ok(apiResponse);
             }
     }
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/password/update/{userName}")
-    public ResponseEntity updateUserPassword(@RequestBody UserPasswordDTO userPasswordDTO, @PathVariable String userName){
+    public ResponseEntity<ApiResponse<User>> updateUserPassword(@RequestBody UserPasswordDTO userPasswordDTO, @PathVariable String userName){
         logger.error("userPasswordDTO::"+userPasswordDTO);
         if(userPasswordDTO.getNewPassword().isBlank() || userPasswordDTO.getInputPassword().isBlank()){
             ApiResponse errorResponse = ApiResponse.error(400, "Old Password Or New Password Is Empty", "Bad Request");
@@ -150,7 +153,8 @@ public class UserController{
                 ApiResponse errorResponse = ApiResponse.error(400, "Wrong Old Password", "Bad Request");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
             }else{
-                return ResponseEntity.ok().build();
+                ApiResponse<User> apiResponse = ApiResponse.success(user);
+                return ResponseEntity.ok(apiResponse);
             }
         }
     }
@@ -170,20 +174,19 @@ public class UserController{
     //------------------------------------------------------------------------------------------
     @PostMapping("/user/forgot_password")
     public ResponseEntity processForgotPassword(HttpServletRequest request,@RequestBody UserDTO userDTO){
-        String email = userDTO.getEmail();
-        String token = RandomString.make(15);
+        String encodedEmail = org.springframework.web.util.HtmlUtils.htmlEscape(userDTO.getEmail());
+        UUID uuid = UUID.randomUUID();
+        String token = uuid.toString();
         String siteURL = request.getRequestURL().toString();
         siteURL.replace(request.getServletPath(),"");
 
-        if(!userService.updateToken(token,email)) {
+        if(!userService.updateToken(token,encodedEmail)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }else{
             try{
                 String resetPasswordLink = siteURL + "/reset_password?token=" + token;
-                if(emailValidationService.sendForgotPasswordLink(email,resetPasswordLink)){
+                if(emailValidationService.sendForgotPasswordLink(encodedEmail,resetPasswordLink)){
                     return ResponseEntity.ok().build();
-                }else{
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                 }
             }catch (UserNotFoundException e){
                 logger.error(e.getMessage(),e);

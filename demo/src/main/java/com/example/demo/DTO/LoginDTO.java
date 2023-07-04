@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.Date;
 @Getter
 @Setter
@@ -18,8 +19,10 @@ import java.util.Date;
 public class LoginDTO {
 
     @NotEmpty
+    @Size(max = 18)
     private String userName ;
     @NotEmpty
+    @Size(max = 60)
     private String password;
 
     @java.lang.Override

@@ -32,10 +32,13 @@ public class UserService {
     @Autowired
     private EmailValidationService emailValidationService;
 
-public Boolean registerUser(User newUser){
+public Boolean registerUser(UserDTO userDTO){
     try{
-        logger.info("Registering user:::"+ newUser.getUserName()+"; "+newUser.getEmail());
-        String password = BCrypt.hashpw( newUser.getPassword(), BCrypt.gensalt());
+        logger.info("Registering user:::"+ userDTO.getUserName()+"; "+userDTO.getEmail());
+        String password = BCrypt.hashpw(userDTO.getPassword(), BCrypt.gensalt());
+        User newUser = new User();
+        newUser.setUserName(userDTO.getUserName());
+        newUser.setEmail(userDTO.getEmail());
         newUser.setPassword(password);
         newUser.setRegisteredAt(Instant.now());
         newUser.setVerified("false");
@@ -47,11 +50,16 @@ public Boolean registerUser(User newUser){
     }
     return false;
 }
-    public boolean checkIfUserRegistered (User newUser) {
-        logger.info("Checking if user exists:::" + newUser.getUserName());
-        int res = userDAO.checkIfUserExistsByUsernameAndEmail(newUser.getUserName(),newUser.getEmail());
-        if(res >0){
-            return true;
+    public boolean checkIfUserRegistered (UserDTO userDTO) {
+        try {
+            logger.info("Checking if user exists:::" + userDTO.getUserName());
+            logger.info("encodedEmail:::" + userDTO.getEmail());
+            int res = userDAO.checkIfUserExistsByUsernameAndEmail(userDTO.getUserName(), userDTO.getEmail());
+            if (res > 0) {
+                return true;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
         }
         return false;
     }
@@ -61,6 +69,7 @@ public Boolean registerUser(User newUser){
         try {
             logger.info("Checking if user authenticate:::"+login.getUserName());
             user = userRepository.findByUserName(login.getUserName()).orElseThrow(() -> new UserNotFoundException(login.getUserName()));
+
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
         }
@@ -76,7 +85,9 @@ public Boolean registerUser(User newUser){
                 }
                 else{
                     //api/user/login/email_validation?token=
-                    emailValidationService.processEmailValidation(request,user);
+                    UserDTO userDTO = new UserDTO();
+                    userDTO.setEmail(user.getEmail());
+                    emailValidationService.processEmailValidation(request,userDTO);
                     return 0;
                 }
             }
@@ -111,20 +122,20 @@ public Boolean registerUser(User newUser){
         try{
             logger.info("Updating info of user:::"+userName);
             User user = userRepository.findByUserName(userName).orElseThrow(() -> new UserNotFoundException(userName));
-            boolean allEmpty=false;
+            boolean valid =false;
             if(!userDTO.getFirstName().isBlank()){
                 user.setFirstName(userDTO.getFirstName());
-                allEmpty = true;
+                valid = true;
             }
             if(!userDTO.getLastName().isBlank()){
                 user.setLastName(userDTO.getLastName());
-                allEmpty = true;
+                valid = true;
             }
             if(!userDTO.getPhone().isBlank()){
                 user.setPhone(userDTO.getPhone());
-                allEmpty = true;
+                valid = true;
             }
-            if(allEmpty == false){
+            if(valid == false){
                 return null;
             }else{
                 return userRepository.save(user);

@@ -7,21 +7,26 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.Instant;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "post_views")
-public class PostView {
+@Table(name = "post_comments_views")
+public class PostCommentsView {
     @Id
     @Size(max = 36)
     @Column(name = "postId", nullable = false, length = 36)
     private String id;
 
-    @NotNull
-    @Column(name = "views", nullable = false)
+    @Column(name = "views")
     private Integer views;
+
+    @Column(name = "last_comment_at")
+    private Instant lastCommentAt;
+
+    @Column(name = "comments")
+    private Integer comments;
 
 }

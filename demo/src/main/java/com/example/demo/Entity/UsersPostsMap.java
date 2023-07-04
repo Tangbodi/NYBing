@@ -8,22 +8,19 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
-import java.time.Instant;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "posts_comments_view")
-public class PostsCommentsView {
+@Table(name = "users_posts_map")
+public class UsersPostsMap {
     @Id
     @Size(max = 36)
-    @Column(name = "postId", nullable = false, length = 36)
+    @Column(name = "userId", nullable = false, length = 36)
     private String id;
 
-    @Column(name = "comments")
-    private Integer comments;
-
-    @Column(name = "last_comment_at")
-    private Instant lastCommentAt;
+    @Size(max = 36)
+    @Column(name = "postId", length = 36)
+    private String postId;
 
 }

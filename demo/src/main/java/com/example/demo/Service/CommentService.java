@@ -2,7 +2,6 @@ package com.example.demo.Service;
 
 import com.example.demo.DTO.CommentDTO;
 import com.example.demo.Entity.Comment;
-import com.example.demo.Entity.Post;
 import com.example.demo.Repository.CommentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,7 @@ public class CommentService {
     @Autowired
     private IpService ipService;
     @Autowired
-    private PostCommentService postCommentService;
+    private PostCommentsViewService postCommentsViewService;
 
 //    @Async("MultiExecutor") //Async has to return a Future
     @Transactional
@@ -53,7 +52,7 @@ public class CommentService {
     }
     public List<Comment> findAllCommentsByPostId(String postId){
         try{
-           return commentRepository.findAllByPostId(postId);
+            return commentRepository.findAllByPostId(postId);
         }catch (RuntimeException e){
             logger.error(e.getMessage(),e);
         }

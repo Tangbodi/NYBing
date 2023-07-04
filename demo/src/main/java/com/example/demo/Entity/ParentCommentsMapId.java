@@ -7,27 +7,30 @@ import org.hibernate.Hibernate;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Objects;
 
 @Getter
 @Setter
 @Embeddable
-public class CommentSubMapId implements Serializable {
-    private static final long serialVersionUID = 7960666428906835074L;
+public class ParentCommentsMapId implements Serializable {
+    private static final long serialVersionUID = -8103057199701225076L;
+    @Size(max = 36)
     @NotNull
-    @Column(name = "parent_commentId", nullable = false)
-    private Integer parentCommentid;
+    @Column(name = "parent_commentId", nullable = false, length = 36)
+    private String parentCommentid;
 
+    @Size(max = 36)
     @NotNull
-    @Column(name = "child_commentId", nullable = false)
-    private Integer childCommentid;
+    @Column(name = "child_commentId", nullable = false, length = 36)
+    private String childCommentid;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        CommentSubMapId entity = (CommentSubMapId) o;
+        ParentCommentsMapId entity = (ParentCommentsMapId) o;
         return Objects.equals(this.childCommentid, entity.childCommentid) &&
                 Objects.equals(this.parentCommentid, entity.parentCommentid);
     }

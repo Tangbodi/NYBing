@@ -1,10 +1,10 @@
 package com.example.demo.Service;
 
+import com.example.demo.Entity.CategoriesSubCategoriesMap;
 import com.example.demo.Entity.Category;
-import com.example.demo.Entity.CategorySubMap;
 import com.example.demo.Entity.SubCategory;
 import com.example.demo.Repository.CategoryRepository;
-import com.example.demo.Repository.CategorySubMapRepository;
+import com.example.demo.Repository.CategorySubCategoryMapRepository;
 import com.example.demo.Repository.SubCategoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ import java.util.*;
 public class CategoryService {
         private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
         @Autowired
-        private CategorySubMapRepository categorySubMapRepository;
+        private CategorySubCategoryMapRepository categorySubCategoryMapRepository;
         @Autowired
         private CategoryRepository categoryRepository;
         @Autowired
@@ -32,12 +32,12 @@ public class CategoryService {
                 return null;
         }
         public Map<Integer,List<Integer>> getAllCategorySubMapIds() {
-                List<CategorySubMap>categorySubMaps = categorySubMapRepository.findAll();
+                List<CategoriesSubCategoriesMap>categorySubMaps = categorySubCategoryMapRepository.findAll();
                 Map<Integer,List<Integer>> subCategoryWithSameCategoryId = new HashMap<>();
-                for (CategorySubMap categorySubMap : categorySubMaps) {
+                for (CategoriesSubCategoriesMap categorySubMap : categorySubMaps) {
                         List<Integer> list = new ArrayList<>();
                         Integer categoryId = categorySubMap.getId().getCategoryId(); //1
-                        Integer subCategoryId = categorySubMap.getId().getSubCategoryid();//101
+                        Integer subCategoryId = categorySubMap.getId().getSubCategoryId();//101
                         if(!subCategoryWithSameCategoryId.containsKey(categoryId)){
                                 list.add(subCategoryId);
                                 subCategoryWithSameCategoryId.put(categoryId,list);
@@ -60,7 +60,7 @@ public class CategoryService {
                                 Optional<SubCategory> subCategoryOptional = subCategoryRepository.findById(subCategoryId);
                                 if (subCategoryOptional.isPresent()) {
                                         SubCategory subCategory = subCategoryOptional.get();
-                                        String subCategoryName = subCategory.getSubCategoryname();
+                                        String subCategoryName = subCategory.getSubCategoryName();
                                         subCategoryNameList.add(subCategoryName);
                                 } else {
                                         logger.info("Sub-category not found for ID: " + subCategoryId);

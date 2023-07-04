@@ -2,6 +2,7 @@ package com.example.demo.Entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -14,8 +15,11 @@ import java.time.Instant;
 @Table(name = "comments")
 public class Comment {
     @Id
-    @Column(name = "commentId", nullable = false)
-    private Integer id;
+    @Size(max = 36)
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name="uuid",strategy = "uuid2")
+    @Column(name = "commentId", nullable = false, length = 36)
+    private String id;
 
     @NotNull
     @Lob

@@ -13,14 +13,8 @@ import java.time.Instant;
 @Entity
 @Table(name = "posts")
 public class Post {
-    @Id
-    @Size(max = 36)
-    @Column(name = "postId", nullable = false, length = 36)
-    private String id;
-
-    @NotNull
-    @Column(name = "sub_categoryId", nullable = false)
-    private Integer subCategoryid;
+    @EmbeddedId
+    private PostId id;
 
     @Size(max = 255)
     @NotNull
@@ -47,9 +41,5 @@ public class Post {
     @Size(max = 16)
     @Column(name = "ipvSix", length = 16)
     private String ipvSix;
-
-    @Size(max = 36)
-    @Column(name = "userId", length = 36)
-    private String userId;
 
 }

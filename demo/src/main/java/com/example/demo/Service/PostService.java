@@ -7,7 +7,6 @@ import com.example.demo.Exception.PostNotFoundException;
 import com.example.demo.Repository.ImageRepository;
 import com.example.demo.Repository.PostRepository;
 
-import com.example.demo.Repository.PostViewsRepository;
 import com.example.demo.Repository.PostsCommentsViewRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -39,8 +38,6 @@ public class PostService {
     private IpService ipService;
     @Autowired
     private PostsCommentsViewRepository postsCommentsViewRepository;
-    @Autowired
-    private PostViewsRepository postViewsRepository;
     @Autowired
     private PostDAO postDAO;
 
@@ -112,8 +109,12 @@ public class PostService {
             String uuId = uuid.toString();
             //--------------------post-----------------
             logger.info("Setting Post:::"+uuId);
+            //set postId and subCategoryId
             Post post = new Post();
-            post.setId(uuId.toString());
+            PostId postId = new PostId();
+            postId.setPostId(uuId);
+            postId.setSubCategoryId(postDTO.getSubCategoryId());
+            post.setId(postId);
             post.setTitle(postDTO.getTitle());
 //        post.setTextrender(postDTO.getTextrender());
 //        keep the content between only <body> tag
@@ -125,11 +126,11 @@ public class PostService {
             Instant time = Instant.now();
             logger.info("Time:::"+time);
             post.setPublishAt(time);
-            post.setUserId(user.getId());
+
             post.setIpvFour(postDTO.getIpvFour());
             post.setIpvSix(postDTO.getIpvSix());
             post.setUserName(postDTO.getUserName());
-            post.setSubCategoryid(postDTO.getCategoryId());
+
             logger.info("Saving post:::");
             Post savedPost = postRepository.save(post);
             if(savedPost!=null){
@@ -138,29 +139,19 @@ public class PostService {
                 logger.info("Post not saved:::");
                 return null;
             }
-            //--------------------postView------------------
+            //--------------------postCommentView------------------
             logger.info("Setting PostView:::"+uuId);
-            PostView postView = new PostView();
+            PostCommentsView postCommentsView = new PostCommentsView();
             //Setting PostView entity
-            postView.setId(uuId.toString());
-            postView.setViews(1);
-            PostView savedPostview = postViewsRepository.save(postView);
-            if(savedPostview!=null){
-                logger.info("PostView saved successfully:::");
+            postCommentsView.setId(uuId.toString());
+            postCommentsView.setViews(1);
+            postCommentsView.setLastCommentAt(time);
+            postCommentsView.setComments(0);
+            PostCommentsView savedPostCommentsView = postsCommentsViewRepository.save(postCommentsView);
+            if(savedPostCommentsView!=null){
+                logger.info("PostCommentsView saved successfully:::");
             }else{
-                logger.info("PostView not saved:::");
-                return null;
-            }
-            //-----------------postComment------------------
-            logger.info("Setting PostComment:::"+uuId);
-            PostsCommentsView postsCommentsView = new PostsCommentsView();
-            postsCommentsView.setId(uuId.toString());
-            postsCommentsView.setLastCommentAt(time);
-            PostsCommentsView savedPostsCommentsView = postsCommentsViewRepository.save(postsCommentsView);
-            if (savedPostsCommentsView!=null){
-                logger.info("PostComment saved successfully:::");
-            }else{
-                logger.info("PostComment not saved:::");
+                logger.info("PostCommentsView not saved:::");
                 return null;
             }
             return savedPost;
@@ -169,17 +160,7 @@ public class PostService {
         }
         return null;
     }
-    public Post getPostData(String postId){
-        try{
-            logger.info("Getting data of post:::" + postId);
-            Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
-            logger.info(post.getTextrender());
-            return post;
-        }catch (Exception e){
-            logger.error(e.getMessage(),e);
-        }
-        return null;
-    }
+
     private byte[] getImageData(String imageCode) throws IOException {
         try{
             logger.info("Parsing image data:::");
@@ -190,34 +171,33 @@ public class PostService {
         }
         return null;
     }
-    public List<Object[]> getAllTopFivePostsUnderEveryCategory(){
-        try{
-            logger.info("Getting all top five posts under every category:::");
-            List<Object[]> postList = postDAO.getAllTopFivePostsUnderEveryCategory();
-            return postList;
-        }catch (Exception e){
-            logger.error(e.getMessage(),e);
-        }
-        return null;
-    }
-    public Post findPostById(String postId){
+//    public List<Object[]> getAllTopFivePostsUnderEveryCategory(){
+//        try{
+//            logger.info("Getting all top five posts under every category:::");
+//            List<Object[]> postList = postDAO.getAllTopFivePostsUnderEveryCategory();
+//            return postList;
+//        }catch (Exception e){
+//            logger.error(e.getMessage(),e);
+//        }
+//        return null;
+//    }
+    public  Optional<Post> findPostById(String postId){
         try{
             logger.info("Getting post by id:::"+postId);
-            Post post = postRepository.findById(postId).orElseThrow(()->new PostNotFoundException(postId));
-            return post;
+            return postRepository.findByIdPostId(postId);
         }catch (Exception e){
             logger.error(e.getMessage(),e);
         }
         return null;
     }
-    public List<Post> findAllPostByKeyword(String keyword){
-        try{
-            logger.info("Search post via keyword:::"+keyword);
-            List<Post> list = postRepository.findByKeyword(keyword);
-            return list;
-        }catch (Exception e){
-            logger.error(e.getMessage(),e);
-        }
-        return null;
-    }
+//    public List<Post> findAllPostByKeyword(String keyword){
+//        try{
+//            logger.info("Search post via keyword:::"+keyword);
+//            List<Post> list = postRepository.findByKeyword(keyword);
+//            return list;
+//        }catch (Exception e){
+//            logger.error(e.getMessage(),e);
+//        }
+//        return null;
+//    }
 }
