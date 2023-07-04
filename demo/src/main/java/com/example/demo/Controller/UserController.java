@@ -4,6 +4,7 @@ import com.example.demo.DAO.UserDAO;
 import com.example.demo.DTO.LoginDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.DTO.UserPasswordDTO;
+import com.example.demo.Entity.SubCategory;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.*;
 import com.example.demo.Repository.UserRepository;
@@ -27,6 +28,8 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -50,35 +53,59 @@ public class UserController{
         return "got data from backend";
     }
 
-    @GetMapping("/getuser/{id}")
-    public ResponseEntity< ApiResponse<User>> getUserProfileById(@PathVariable String id){
-        try{
-            User user = userService.getUserProfileById(id);
-            ApiResponse<User> apiResponse = ApiResponse.success(user);
-            return ResponseEntity.ok(apiResponse);
-        }catch (Exception e){
-            ApiResponse<User> errorResponse = ApiResponse.error(500, "Internal Server Error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
-    }
+//    @GetMapping("/user/{id}")
+//    public ResponseEntity< ApiResponse<User>> getUserProfileById(@PathVariable String id){
+//        try{
+//            User user = userService.getUserProfileById(id);
+//            ApiResponse<User> apiResponse = ApiResponse.success(user);
+//            return ResponseEntity.ok(apiResponse);
+//        }catch (Exception e){
+//            ApiResponse<User> errorResponse = ApiResponse.error(500, "Internal Server Error", e.getMessage());
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+//        }
+//    }
     @PostMapping("/user/register")
-    public ResponseEntity register (@RequestBody UserDTO userDTO, HttpServletRequest request){
+    public ResponseEntity<ApiResponse<User>> register (@RequestBody UserDTO userDTO, HttpServletRequest request){
+
+        //        if (keyword.getKeyword().trim().isEmpty()) {
+//            ApiResponse errorResponse = ApiResponse.error(400 , "Keyword Cannot Be Empty Or Contain Only Spaces", "Bad Request");
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+//        }
+//        if (!keyword.getKeyword().trim().matches("^[\\p{L}\\p{N}\\s]*$")){
+//            ApiResponse errorResponse = ApiResponse.error(400 , "Keyword Cannot Contain Special Characters Or Emojis", "Bad Request");
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+//        }
+        if(userDTO.getEmail().isBlank() ||  userDTO.getUserName().isBlank()||userDTO.getPassword().isBlank()){
+            ApiResponse errorResponse = ApiResponse.error(406,"Username, Email, Or Password Is Blank","Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }
+        if(userDTO.getUserName().trim().matches("^[\\p{L}\\p{N}\\s]*$")){
+            ApiResponse errorResponse = ApiResponse.error(406,"Username Can't Contain Special Characters","Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }
         String encodedEmail = org.springframework.web.util.HtmlUtils.htmlEscape(userDTO.getEmail());
         userDTO.setEmail(encodedEmail);
         if(userService.checkIfUserRegistered(userDTO)){
-                    ApiResponse<User> errorResponse = ApiResponse.error(409, "User Already Exists", "CONFLICT");
-                    return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-                }else {
-                    if(emailValidationService.processEmailValidation(request,userDTO)){
-                        userService.registerUser(userDTO);
-                        logger.info("User successfully registered:::");
-                        return ResponseEntity.ok().build();
-                    }else{
-                        ApiResponse<User> errorResponse = ApiResponse.error(500, "Verification Link Couldn't Send", "Internal Server Error");
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                    }
-                }
+            ApiResponse<User> errorResponse = ApiResponse.error(409, "User Already Exists", "CONFLICT");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        }else {
+            User user = userService.registerUser(userDTO);
+            if(user!=null){
+                logger.info("User successfully registered:::");
+            }else{
+                ApiResponse<User> errorResponse = ApiResponse.error(500, "Internal Server Error", "Internal Server Error");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            }
+            if(emailValidationService.processEmailValidation(request,userDTO)){
+                logger.info("Email verification link sent:::");
+                ApiResponse<User> apiResponse = ApiResponse.success(user);
+                return ResponseEntity.ok(apiResponse);
+            }else{
+                ApiResponse<User> errorResponse = ApiResponse.error(500, "Verification Link Couldn't Send", "Internal Server Error");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
+}
 
     //------------------------------------------------------------------------------------------
     @PostMapping("/user/login")
@@ -87,24 +114,24 @@ public class UserController{
         //-1---no user
         //0---verify
         //2---wrong username or password
-        if (userService.authenticate(login,request)==1) {
+        Integer res = userService.authenticate(login,request);
+        if(res==1) {
             logger.info("Successfully authenticated::");
             User user = userService.getProfileByUserName(login.getUserName());
             ApiResponse<User> apiResponse = ApiResponse.success(user);
             return ResponseEntity.ok(apiResponse);
         }
-        else if(userService.authenticate(login,request)==-1){
+        if(res==-1){
             ApiResponse<User> errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
-        else if(userService.authenticate(login,request)==0){
-            ApiResponse<User> errorResponse = ApiResponse.error(401, "Account Is Not Verified", "Unauthorized");
+        if(res==0){
+            ApiResponse<User> errorResponse = ApiResponse.error(401, "Account Is Not Verified, Email Verification Link Sent", "Unauthorized");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
-        else{
-            ApiResponse<User> errorResponse = ApiResponse.error(401, "Wrong Username Or Password Entered", "Unauthorized");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-        }
+        ApiResponse<User> errorResponse = ApiResponse.error(401, "Wrong Username Or Password Entered", "Unauthorized");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/register/email_validation")
@@ -131,32 +158,51 @@ public class UserController{
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/update/{userName}")
     public ResponseEntity<ApiResponse<User>> updateUserInfo(@RequestBody UserDTO userDTO, @PathVariable String userName){
-            User user = userService.updateUserInfoByUserName(userDTO,userName);
-            if(user == null){
-                ApiResponse<User> errorResponse = ApiResponse.error(400, "No Changes Were Found", "Bad Request");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-            }else{
-                ApiResponse<User> apiResponse = ApiResponse.success(user);
-                return ResponseEntity.ok(apiResponse);
-            }
+        if(userDTO.getFirstName().isBlank() && userDTO.getLastName().isBlank() && userDTO.getPhone().isBlank()&&userDTO.getMiddleName().isBlank()){
+            ApiResponse<User> errorResponse = ApiResponse.error(406, "No Changes Were Found", "Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }
+        if(userDTO.getFirstName().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")
+                ||userDTO.getMiddleName().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")
+        ||userDTO.getLastName().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")||userDTO.getPhone().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")){
+            ApiResponse<User> errorResponse = ApiResponse.error(406, "Name Or Phone Cannot Contain Special Characters Or Emojis", "Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }
+        User user = userService.updateUserInfoByUserName(userDTO,userName);
+        if(user == null){
+            ApiResponse<User> errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }else{
+            ApiResponse<User> apiResponse = ApiResponse.success(user);
+            return ResponseEntity.ok(apiResponse);
+        }
     }
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/password/update/{userName}")
     public ResponseEntity<ApiResponse<User>> updateUserPassword(@RequestBody UserPasswordDTO userPasswordDTO, @PathVariable String userName){
-        logger.error("userPasswordDTO::"+userPasswordDTO);
         if(userPasswordDTO.getNewPassword().isBlank() || userPasswordDTO.getInputPassword().isBlank()){
-            ApiResponse errorResponse = ApiResponse.error(400, "Old Password Or New Password Is Empty", "Bad Request");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }else{
-            User user = userService.updatePasswordByUserName(userPasswordDTO,userName);
-            if(user == null){
-                ApiResponse errorResponse = ApiResponse.error(400, "Wrong Old Password", "Bad Request");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-            }else{
-                ApiResponse<User> apiResponse = ApiResponse.success(user);
-                return ResponseEntity.ok(apiResponse);
-            }
+            ApiResponse errorResponse = ApiResponse.error(406, "Old Password Or New Password Is Blank", "Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }
+        Integer res = userService.updatePasswordByUserName(userPasswordDTO,userName);
+        //0---no user
+        //1---success
+        //-1---wrong password
+        //null---internal server error
+        if(res == 0){
+            ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists","Not Found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        if(res == -1){
+            ApiResponse errorResponse = ApiResponse.error(400, "Wrong Password Entered","Bad Request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+        if(res == 1){
+            ApiResponse<User> apiResponse = ApiResponse.success(null);
+            return ResponseEntity.ok(apiResponse);
+        }
+        ApiResponse errorResponse = ApiResponse.error(500, "Internal Server Error","Internal Server Error");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/info/{userName}")
@@ -186,6 +232,7 @@ public class UserController{
             try{
                 String resetPasswordLink = siteURL + "/reset_password?token=" + token;
                 if(emailValidationService.sendForgotPasswordLink(encodedEmail,resetPasswordLink)){
+                    logger.info("Email has been sent out:::");
                     return ResponseEntity.ok().build();
                 }
             }catch (UserNotFoundException e){

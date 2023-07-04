@@ -19,7 +19,7 @@ import javax.validation.constraints.Size;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDTO {
-    @NotBlank
+
     @Size(max = 18)
     private String userName;
     @Size(max = 36)
@@ -28,12 +28,12 @@ public class UserDTO {
     private String lastName;
     @Size(max = 36)
     private String middleName;
-    @NotBlank
+
     @Size(max = 45)
     private String email;
     @Size(max = 11)
     private String phone;
-    @NotBlank
+
     @Size(max = 60)
     private String password;
 

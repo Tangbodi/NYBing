@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.Entity.PostCommentsView;
 import com.example.demo.Exception.PostNotFoundException;
 import com.example.demo.Repository.PostsCommentsViewRepository;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class PostCommentsViewService {
 
     @Async("MultiExecutor")
     @Transactional
-    public boolean updatePostComments(String postId){
+    public PostCommentsView updatePostComments(String postId){
         try{
             logger.info("updatePostComments:::postId:::"+postId);
             postsCommentsViewRepository.findById(postId).map(postsCommentsView->{
@@ -29,11 +30,10 @@ public class PostCommentsViewService {
                 return postsCommentsViewRepository.save(postsCommentsView);
             }).orElseThrow(()-> new PostNotFoundException(postId));
             Thread.sleep(1000);
-            return true;
         } catch (InterruptedException | RuntimeException e) {
             logger.error(e.getMessage(),e);
         }
-        return false;
+        return null;
     }
     @Async("MultiExecutor")
     @Transactional

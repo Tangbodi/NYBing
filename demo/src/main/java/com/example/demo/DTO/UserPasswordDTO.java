@@ -18,10 +18,9 @@ import javax.validation.constraints.Size;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserPasswordDTO {
-    @NotBlank
+
     @Size(max = 60)
     private String inputPassword;
-    @NotBlank
     @Size(max = 60)
     private String newPassword;
 

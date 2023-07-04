@@ -44,15 +44,14 @@ public class PostController {
     @Autowired
     private SubCategoryPostMapService subCategoryPostMapService;
 
-    @GetMapping("/categories/{categoryId}/{postId}")
-    public ResponseEntity<ApiResponse<PostWithCommentDTO>> findPostAndCommentByPostId(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId){
+    @GetMapping("/categories/{subCategoryId}/{postId}")
+    public ResponseEntity<ApiResponse<PostWithCommentDTO>> findPostAndCommentByPostId(@PathVariable("subCategoryId")Integer subCategoryId, @PathVariable("postId") String postId){
         PostId id = new PostId();
-        id.setSubCategoryId(categoryId);
+        id.setSubCategoryId(subCategoryId);
         id.setPostId(postId);
-//        Optional<Post> post = postService.findPostById(postId);
         Post post = postRepository.findById(id).orElse(null);
         if(post==null){
-            ApiResponse errorResponse = ApiResponse.error(404 , "Post Not Found", "Not Found");
+            ApiResponse errorResponse = ApiResponse.error(404 , "No Such Post", "Not Found");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }else{
             postCommentsViewService.updatePostViews(postId);
@@ -65,9 +64,12 @@ public class PostController {
         }
     }
     //------------------------------------------------------------------------------------------
-    @PostMapping(value = "/categories/{categoryId}/edit",produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
-    public ResponseEntity editPost(HttpServletRequest request, @RequestBody PostDTO postDTO, @PathVariable Integer categoryId) throws Exception {
-        logger.info("controller postDTO:::"+postDTO.getTextrender());
+    @PostMapping(value = "/categories/{subCategoryId}/post_edit",produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
+    public ResponseEntity<ApiResponse> editPost(HttpServletRequest request, @RequestBody PostDTO postDTO, @PathVariable Integer subCategoryId) throws Exception {
+        if(postDTO.getTitle().isBlank()||postDTO.getTextrender().isBlank()){
+            ApiResponse errorResponse = ApiResponse.error(406,"Title Or Content Is Blank","Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }
         String ipStr = HttpUtils.getRequestIP(request);
         if(ipService.isValidInet4Address(ipStr)){
             String[] ip = ipStr.split("\\.");
@@ -84,22 +86,20 @@ public class PostController {
         else{
             return ResponseEntity.status(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).build();
         }
-        Integer subCategoryId = categoryId;
-        postDTO.setSubCategoryId(categoryId);
-        CategoriesSubCategoriesMapId mapId = new CategoriesSubCategoriesMapId();
-        mapId.setSubCategoryId(subCategoryId);
-        //find categoryId by subCategoryId
-//        Optional<CategoriesSubCategoriesMap> mappingOptional = categorySubCategoryMapRepository.findById(mapId);
-//        Integer categoryid = mappingOptional.get().getId().getCategoryId();
-//        postDTO.setCategoryId(categoryid);
-        if(postDTO.getUserName()!=null){
+        postDTO.setSubCategoryId(subCategoryId);
+        if(!postDTO.getUserName().isBlank()){
             User user = userService.getProfileByUserName(postDTO.getUserName());
             postDTO.setUserName(user.getUserName());
             Post post = postService.savePost(request,postDTO,user);
             if(post!=null) {
-                usersPostsMapService.saveUsersPostsMap(user,post);
-                subCategoryPostMapService.saveSubCategoryPostMap(post,subCategoryId,null);
-                return ResponseEntity.ok().build();
+                if(usersPostsMapService.saveUsersPostsMap(user,post)){
+                    logger.info("userPostsMap saved:::");
+                }
+                if( subCategoryPostMapService.saveSubCategoryPostMap(post,subCategoryId,null)){
+                    logger.info("subCategoryPostMap saved:::");
+                }
+                ApiResponse<Post> apiResponse = ApiResponse.success(post);
+                return ResponseEntity.ok(apiResponse);
             }else{
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
@@ -107,8 +107,11 @@ public class PostController {
             postDTO.setUserName("visitor");
             Post post = postService.savePost(request,postDTO,null);
             if(post!=null) {
-                subCategoryPostMapService.saveSubCategoryPostMap(post,subCategoryId,null);
-                return ResponseEntity.ok().build();
+                if(subCategoryPostMapService.saveSubCategoryPostMap(post,subCategoryId,null)){
+                    logger.info("subCategoryPostMap saved:::");
+                }
+                ApiResponse<Post> apiResponse = ApiResponse.success(post);
+                return ResponseEntity.ok(apiResponse);
             }else{
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
@@ -116,25 +119,27 @@ public class PostController {
     }
     //------------------------------------------------------------------------------------------
     //edit comment
-    @PostMapping("/categories/{categoryId}/{postId}")
-    public ResponseEntity editComment(HttpServletRequest request, @PathVariable("categoryId")Integer categoryId, @PathVariable("postId") String postId, @RequestBody CommentDTO commentDTO) throws Exception {
+    @PostMapping("/categories/{subCategoryId}/{postId}/comment_edit")
+    public ResponseEntity editComment(HttpServletRequest request, @PathVariable("postId") String postId, @RequestBody CommentDTO commentDTO) throws Exception {
+        if(commentDTO.getCommentContent().isBlank()){
+            ApiResponse errorResponse = ApiResponse.error(406,"Content Of Comment Is Blank","Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }
         String ipStr = HttpUtils.getRequestIP(request);
-
-            if(ipService.isValidInet4Address(ipStr)){
-                String[] ip = ipStr.split("\\.");
-                logger.info("ipv4:::"+Arrays.toString(ip));
-                //convert ip from String to Long
-                Long ipv4 = (Long.valueOf(ip[0])<<24) +(Long.valueOf(ip[1])<<16)+(Long.valueOf(ip[2])<<8)+(Long.valueOf(ip[3]));
-                commentDTO.setIpvFour(ipv4);
-            }else if(ipService.isValidInet6Address(ipStr)){
-                String[] ip = ipStr.split(":");
-                logger.info("ipv6:::"+Arrays.toString(ip));
-                commentDTO.setIpvSix(ip.toString());
-            }else{
-                return ResponseEntity.status(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).build();
-            }
-
-        if(commentDTO.getFromName()!=null){
+        if(ipService.isValidInet4Address(ipStr)){
+            String[] ip = ipStr.split("\\.");
+            logger.info("ipv4:::"+Arrays.toString(ip));
+            //convert ip from String to Long
+            Long ipv4 = (Long.valueOf(ip[0])<<24) +(Long.valueOf(ip[1])<<16)+(Long.valueOf(ip[2])<<8)+(Long.valueOf(ip[3]));
+            commentDTO.setIpvFour(ipv4);
+        }else if(ipService.isValidInet6Address(ipStr)){
+            String[] ip = ipStr.split(":");
+            logger.info("ipv6:::"+Arrays.toString(ip));
+            commentDTO.setIpvSix(ip.toString());
+        }else{
+            return ResponseEntity.status(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).build();
+        }
+        if(!commentDTO.getFromName().isBlank()){
             User user = userService.getProfileByUserName(commentDTO.getFromName());
             commentDTO.setFromName(user.getUserName());
             commentDTO.setFromId(user.getId());
@@ -143,8 +148,11 @@ public class PostController {
         }
         Comment comment = commentService.saveComment(commentDTO, postId);
         if(comment!=null){
-            postCommentsViewService.updatePostComments(postId);
-            return ResponseEntity.ok().build();
+            if(postCommentsViewService.updatePostComments(postId)!=null){
+                logger.info("Updated post comments successfully:::");
+            }
+            ApiResponse<Comment> apiResponse = ApiResponse.success(comment);
+            return ResponseEntity.ok(apiResponse);
         }else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

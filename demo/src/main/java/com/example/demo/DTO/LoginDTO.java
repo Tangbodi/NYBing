@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -18,10 +19,10 @@ import java.util.Date;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginDTO {
 
-    @NotEmpty
+    @NotBlank
     @Size(max = 18)
     private String userName ;
-    @NotEmpty
+    @NotBlank
     @Size(max = 60)
     private String password;
 

@@ -41,14 +41,13 @@ public class CommentService {
                 comment.setPublishAt(Instant.now());
                 comment.setPostId(postId);
                 commentRepository.save(comment);
+                logger.info("Comment saved successfully:::");
                 Thread.sleep(1000);
                 return comment;
             }catch (RuntimeException |InterruptedException e){
                 logger.error(e.getMessage(),e);
             }
             return null;
-//            String res = "getFuture return value, delay" + 1000+"ms";
-//            return new AsyncResult<String>(res);
     }
     public List<Comment> findAllCommentsByPostId(String postId){
         try{

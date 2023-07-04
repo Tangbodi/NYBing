@@ -32,7 +32,7 @@ public class UserService {
     @Autowired
     private EmailValidationService emailValidationService;
 
-public Boolean registerUser(UserDTO userDTO){
+public User registerUser(UserDTO userDTO){
     try{
         logger.info("Registering user:::"+ userDTO.getUserName()+"; "+userDTO.getEmail());
         String password = BCrypt.hashpw(userDTO.getPassword(), BCrypt.gensalt());
@@ -42,13 +42,11 @@ public Boolean registerUser(UserDTO userDTO){
         newUser.setPassword(password);
         newUser.setRegisteredAt(Instant.now());
         newUser.setVerified("false");
-        userRepository.save(newUser);
-        Thread.sleep(1000);
-        return true;
+        return userRepository.save(newUser);
     } catch (Exception e) {
         logger.error(e.getMessage(),e);
     }
-    return false;
+    return null;
 }
     public boolean checkIfUserRegistered (UserDTO userDTO) {
         try {
@@ -68,20 +66,17 @@ public Boolean registerUser(UserDTO userDTO){
         User user = null;
         try {
             logger.info("Checking if user authenticate:::"+login.getUserName());
-            user = userRepository.findByUserName(login.getUserName()).orElseThrow(() -> new UserNotFoundException(login.getUserName()));
-
+            user = userRepository.findByUserName(login.getUserName()).orElse(null);
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
         }
         if (user == null) {
             return -1;
         } else {
-//            Boolean pwdCheck = false;
             if (BCrypt.checkpw(login.getPassword(), user.getPassword())) {
                 //cannot use ==
                 if(user.getVerified().equals("true")){
                     return 1;
-//                    pwdCheck = true;
                 }
                 else{
                     //api/user/login/email_validation?token=
@@ -121,42 +116,44 @@ public Boolean registerUser(UserDTO userDTO){
     public User updateUserInfoByUserName(UserDTO userDTO, String userName){
         try{
             logger.info("Updating info of user:::"+userName);
-            User user = userRepository.findByUserName(userName).orElseThrow(() -> new UserNotFoundException(userName));
-            boolean valid =false;
-            if(!userDTO.getFirstName().isBlank()){
-                user.setFirstName(userDTO.getFirstName());
-                valid = true;
-            }
-            if(!userDTO.getLastName().isBlank()){
-                user.setLastName(userDTO.getLastName());
-                valid = true;
-            }
-            if(!userDTO.getPhone().isBlank()){
-                user.setPhone(userDTO.getPhone());
-                valid = true;
-            }
-            if(valid == false){
+            User user = userRepository.findByUserName(userName).orElse(null);
+            if(user == null){
                 return null;
-            }else{
-                return userRepository.save(user);
             }
-        } catch (RuntimeException e){
+            else{
+                if(!userDTO.getFirstName().isBlank()){
+                    user.setFirstName(userDTO.getFirstName());
+                }
+                if(!userDTO.getLastName().isBlank()){
+                    user.setLastName(userDTO.getLastName());
+                }
+                if(!userDTO.getPhone().isBlank()){
+                    user.setPhone(userDTO.getPhone());
+                }
+            }
+            return userRepository.save(user);
+        }catch (RuntimeException e){
             logger.error(e.getMessage(),e);
         }
         return null;
     }
     @Transactional
-    public User updatePasswordByUserName(UserPasswordDTO userPasswordDTO, String userName) {
+    public Integer updatePasswordByUserName(UserPasswordDTO userPasswordDTO, String userName) {
         try {
             logger.info("Updating password of user:::" + userName);
-            User user = userRepository.findByUserName(userName).orElseThrow(() -> new UserNotFoundException(userName));
-            String curPassword = user.getPassword();
-            if (BCrypt.checkpw(userPasswordDTO.getInputPassword(), curPassword)) {
-                String newPassword = BCrypt.hashpw(userPasswordDTO.getNewPassword(), BCrypt.gensalt());
-                user.setPassword(newPassword);
-                return userRepository.save(user);
-            } else {
-                return null;
+            User user = userRepository.findByUserName(userName).orElse(null);
+            if(user ==null){
+                return 0;
+            }else{
+                String curPassword = user.getPassword();
+                if (BCrypt.checkpw(userPasswordDTO.getInputPassword(), curPassword)) {
+                    String newPassword = BCrypt.hashpw(userPasswordDTO.getNewPassword(), BCrypt.gensalt());
+                    user.setPassword(newPassword);
+                    userRepository.save(user);
+                    return 1;
+                }else {
+                    return -1;
+                }
             }
         }catch (RuntimeException e) {
             logger.error(e.getMessage(), e);

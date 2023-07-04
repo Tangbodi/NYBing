@@ -15,4 +15,7 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, PostId> {
     List<Post> findByIdSubCategoryId(Integer subCategoryId);
     Optional<Post> findByIdPostId(String postId);
+    @Query(value = "SELECT * FROM master.posts WHERE textrender LIKE %:keyword% OR title LIKE %:keyword% ORDER BY publishAt DESC",nativeQuery = true)
+    List<Post> findByKeyword(@Param("keyword") String keyword);
+
 }

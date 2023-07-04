@@ -5,6 +5,7 @@ import com.example.demo.Entity.SubCategory;
 import com.example.demo.Repository.PostRepository;
 import com.example.demo.Service.CategoryService;
 import com.example.demo.Service.PostService;
+import com.example.demo.Service.SubCategoryService;
 import com.example.demo.Util.ApiResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -29,9 +30,10 @@ public class CategoryController {
     private CategoryService categoryService;
     @Autowired
     private PostRepository postRepository;
-
     @Autowired
     private ApiResponse apiResponse;
+    @Autowired
+    private SubCategoryService subCategoryService;
 //    @GetMapping("/categories")
 //    public ResponseEntity<ApiResponse< List<Object[]>>> getAllCategory(){
 //        try {
@@ -52,14 +54,13 @@ public class CategoryController {
     //show all posts under specific category
     @GetMapping("/categories/{sub_categoryId}")
     public ResponseEntity<ApiResponse< List<Post>>> findAllPostsBySubCategoryId(HttpServletRequest request,@PathVariable Integer sub_categoryId){
-        try {
-            List<Post> list = postRepository.findByIdSubCategoryId(sub_categoryId);
-            ApiResponse< List<Post>> apiResponse = ApiResponse.success(list);
-            return ResponseEntity.ok(apiResponse);
-        } catch (Exception e) {
-            ApiResponse<List<Post>> errorResponse =ApiResponse.error(500, "Internal Server Error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        if(subCategoryService.findSubCategoryById(sub_categoryId)==null){
+            ApiResponse<List<Post>> errorResponse =ApiResponse.error(404, "No Such Sub Category", "Not Found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
+        List<Post> list = postService.findByIdSubCategoryId(sub_categoryId);
+        ApiResponse<List<Post>> apiResponse = ApiResponse.success(list);
+        return ResponseEntity.ok(apiResponse);
     }
 //    @GetMapping("/categories/getSubCategory")
 //    public Map<String,List<String>>  getSubCategory(){
@@ -75,7 +76,7 @@ public class CategoryController {
 //    }
 
     @GetMapping("/category/sub_category")
-    public ResponseEntity<ApiResponse<Map<Integer, Map<String, List<SubCategory>>>>> getAllSubCategory() {
+    public ResponseEntity<ApiResponse<Map<Integer, Map<String, List<SubCategory>>>>> getAllSubCategories() {
         try {
             Map<Integer, Map<String, List<SubCategory>>> res = categoryService.getAllSubCategory();
             ApiResponse<Map<Integer, Map<String, List<SubCategory>>>> apiResponse = ApiResponse.success(res);

@@ -38,8 +38,6 @@ public class UserDAO {
             resUserName= Math.toIntExact(resultInLong1);
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
-            resEmail = 0;
-            resUserName=0;
         }
 
         System.out.println(resEmail+resUserName);

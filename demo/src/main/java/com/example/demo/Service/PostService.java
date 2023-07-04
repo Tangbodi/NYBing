@@ -171,16 +171,6 @@ public class PostService {
         }
         return null;
     }
-//    public List<Object[]> getAllTopFivePostsUnderEveryCategory(){
-//        try{
-//            logger.info("Getting all top five posts under every category:::");
-//            List<Object[]> postList = postDAO.getAllTopFivePostsUnderEveryCategory();
-//            return postList;
-//        }catch (Exception e){
-//            logger.error(e.getMessage(),e);
-//        }
-//        return null;
-//    }
     public  Optional<Post> findPostById(String postId){
         try{
             logger.info("Getting post by id:::"+postId);
@@ -190,14 +180,17 @@ public class PostService {
         }
         return null;
     }
-//    public List<Post> findAllPostByKeyword(String keyword){
-//        try{
-//            logger.info("Search post via keyword:::"+keyword);
-//            List<Post> list = postRepository.findByKeyword(keyword);
-//            return list;
-//        }catch (Exception e){
-//            logger.error(e.getMessage(),e);
-//        }
-//        return null;
-//    }
+    public List<Post> findByIdSubCategoryId(Integer sub_categoryId){
+        try{
+            List<Post> list = postRepository.findByIdSubCategoryId(sub_categoryId);
+            return list;
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+        }
+        return null;
+    }
+    public List<Post> findAllPostByKeyword(String keyword){
+        logger.info(keyword);
+        return postRepository.findByKeyword(keyword);
+    }
 }

@@ -67,11 +67,9 @@ public class EmailValidationService {
                     + "<a href=\"" + emailValidationLink + "\" style=\"background-color: #c67c4b;padding: 10px 15px;color: white; border-radius: 0.8rem; display: inline-block;text-decoration: none;\">Verify email address</a></p>"
                     + "<br>"
                     + "<p>NYBing</p>";
-
             mimeMessageHelper.setSubject(subject);
             mimeMessageHelper.setText(content,true);
             javaMailSender.send(message);
-            logger.info("Email has been sent out:::");
             return true;
         }catch (MessagingException e) {
             logger.error(e.getMessage(), e);
@@ -96,7 +94,6 @@ public class EmailValidationService {
             mimeMessageHelper.setSubject(subject);
             mimeMessageHelper.setText(content,true);
             javaMailSender.send(message);
-            logger.info("Email has been sent out:::");
             return true;
         }catch (MessagingException e) {
             logger.error(e.getMessage(), e);
