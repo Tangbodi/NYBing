@@ -91,15 +91,15 @@ public class UserController{
 
     //------------------------------------------------------------------------------------------
     @PostMapping("/user/login")
-    public ResponseEntity<ApiResponse<User>> UserLogin(@RequestBody LoginDTO login, HttpServletRequest request)throws IOException {
+    public ResponseEntity<ApiResponse<User>> UserLogin(@RequestBody LoginDTO loginDTO, HttpServletRequest request)throws IOException {
         //1---user
         //-1---no user
         //0---verify
         //2---wrong username or password
-        Integer res = userService.authenticate(login,request);
+        Integer res = userService.authenticate(loginDTO,request);
         if(res==1) {
             logger.info("Successfully authenticated::");
-            User user = userService.getProfileByUserName(login.getUserName());
+            User user = userService.getProfileByUserName(loginDTO.getUserName());
             ApiResponse<User> apiResponse = ApiResponse.success(user);
             return ResponseEntity.ok(apiResponse);
         }
