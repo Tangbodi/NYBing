@@ -20,7 +20,8 @@ public class User {
     @GenericGenerator(name="uuid",strategy = "uuid2")
     @Column(name = "userId", nullable = false, length = 36)
     private String id;
-
+    @Version
+    private Long version;
     @Size(max = 18)
     @NotNull
     @Column(name = "userName", nullable = false, length = 18)
@@ -64,4 +65,11 @@ public class User {
     @Column(name = "verified")
     private String verified;
 
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 }

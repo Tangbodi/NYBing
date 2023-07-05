@@ -7,8 +7,6 @@ import com.example.demo.Service.CategoryService;
 import com.example.demo.Service.PostService;
 import com.example.demo.Service.SubCategoryService;
 import com.example.demo.Util.ApiResponse;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

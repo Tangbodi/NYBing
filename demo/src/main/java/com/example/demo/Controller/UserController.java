@@ -53,33 +53,15 @@ public class UserController{
         return "got data from backend";
     }
 
-//    @GetMapping("/user/{id}")
-//    public ResponseEntity< ApiResponse<User>> getUserProfileById(@PathVariable String id){
-//        try{
-//            User user = userService.getUserProfileById(id);
-//            ApiResponse<User> apiResponse = ApiResponse.success(user);
-//            return ResponseEntity.ok(apiResponse);
-//        }catch (Exception e){
-//            ApiResponse<User> errorResponse = ApiResponse.error(500, "Internal Server Error", e.getMessage());
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-//        }
-//    }
     @PostMapping("/user/register")
     public ResponseEntity<ApiResponse<User>> register (@RequestBody UserDTO userDTO, HttpServletRequest request){
 
-        //        if (keyword.getKeyword().trim().isEmpty()) {
-//            ApiResponse errorResponse = ApiResponse.error(400 , "Keyword Cannot Be Empty Or Contain Only Spaces", "Bad Request");
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-//        }
-//        if (!keyword.getKeyword().trim().matches("^[\\p{L}\\p{N}\\s]*$")){
-//            ApiResponse errorResponse = ApiResponse.error(400 , "Keyword Cannot Contain Special Characters Or Emojis", "Bad Request");
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-//        }
         if(userDTO.getEmail().isBlank() ||  userDTO.getUserName().isBlank()||userDTO.getPassword().isBlank()){
             ApiResponse errorResponse = ApiResponse.error(406,"Username, Email, Or Password Is Blank","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }
-        if(userDTO.getUserName().trim().matches("^[\\p{L}\\p{N}\\s]*$")){
+        if(!userDTO.getUserName().trim().matches("^[\\p{L}\\p{N}\\s]*$")){
+            logger.info("Username is :::"+userDTO.getUserName());
             ApiResponse errorResponse = ApiResponse.error(406,"Username Can't Contain Special Characters","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }
@@ -162,9 +144,10 @@ public class UserController{
             ApiResponse<User> errorResponse = ApiResponse.error(406, "No Changes Were Found", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }
-        if(userDTO.getFirstName().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")
-                ||userDTO.getMiddleName().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")
-        ||userDTO.getLastName().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")||userDTO.getPhone().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")){
+        if(!userDTO.getFirstName().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")
+                ||!userDTO.getMiddleName().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")
+                ||!userDTO.getLastName().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")
+                ||!userDTO.getPhone().trim().matches("\"^[\\\\p{L}\\\\p{N}\\\\s]*$\"")){
             ApiResponse<User> errorResponse = ApiResponse.error(406, "Name Or Phone Cannot Contain Special Characters Or Emojis", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }
