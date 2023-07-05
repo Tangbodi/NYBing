@@ -3,7 +3,6 @@ package com.example.demo.Util;
 import javax.servlet.http.HttpServletRequest;  // or:  jakarta.servlet.http.HttpServletRequest
 
 public final class HttpUtils {
-
     private static final String[] IP_HEADERS = {
             "X-Forwarded-For",
             "Proxy-Client-IP",
@@ -16,14 +15,12 @@ public final class HttpUtils {
             "HTTP_FORWARDED",
             "HTTP_VIA",
             "REMOTE_ADDR"
-
             // you can add more matching headers here ...
     };
 
     private HttpUtils() {
         // nothing here ...
     }
-
     public static String getRequestIP(HttpServletRequest request) {
         for (String header : IP_HEADERS) {
             String value = request.getHeader(header);
