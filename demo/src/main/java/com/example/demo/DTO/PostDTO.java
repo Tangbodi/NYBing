@@ -20,8 +20,6 @@ import java.time.Instant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostDTO {
 
-    private Integer categoryId;
-
     private Integer subCategoryId;
     @NotBlank
     @Size(min = 1,max = 255)
@@ -29,7 +27,6 @@ public class PostDTO {
     @NotBlank
     @Lob
     private String textrender;
-
     private String userName;
     private Long ipvFour;
     private String ipvSix;
@@ -37,7 +34,6 @@ public class PostDTO {
     @java.lang.Override
     public java.lang.String toString() {
         return "PostDTO{" +
-                " categoryId='" + getCategoryId() + "'" +
                 " title='" + getTitle() + "'" +
                 " textrender='" + getTextrender() + "'" +
                 " userName='" + getUserName() + "'" +

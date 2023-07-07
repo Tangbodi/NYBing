@@ -26,16 +26,17 @@ public class UserDAO {
         int resEmail = 0;
         int resUserName=0;
         try {
-            Query query = this.entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = ?1");
-            Query query1 = this.entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.userName = ?1");
-            query.setParameter(1, email);
-            query1.setParameter(1,userName);
-            query.setMaxResults(1);
-            query1.setMaxResults(1);
-            Long resultInLong = (Long) query.getSingleResult();
-            Long resultInLong1=(Long)query.getSingleResult();
-            resEmail = Math.toIntExact(resultInLong);
-            resUserName= Math.toIntExact(resultInLong1);
+
+            Query userQuery = this.entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.userName = ?1");
+            Query emailQuery = this.entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = ?1");
+            emailQuery.setParameter(1, email);
+            userQuery.setParameter(1,userName);
+            emailQuery.setMaxResults(1);
+            userQuery.setMaxResults(1);
+            Long emailResult = (Long) emailQuery.getSingleResult();
+            Long userResult=(Long)userQuery.getSingleResult();
+            resEmail = Math.toIntExact(emailResult);
+            resUserName= Math.toIntExact(userResult);
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
         }

@@ -66,6 +66,7 @@ public class PostController {
     //------------------------------------------------------------------------------------------
     @PostMapping(value = "/categories/{subCategoryId}/post_edit",produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
     public ResponseEntity<ApiResponse> editPost(HttpServletRequest request, @RequestBody PostDTO postDTO, @PathVariable Integer subCategoryId) throws Exception {
+//        logger.info("postDTO:::"+postDTO.toString());
         if(postDTO.getTitle().isBlank()||postDTO.getTextrender().isBlank()){
             ApiResponse errorResponse = ApiResponse.error(406,"Title Or Content Is Blank","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
@@ -87,7 +88,7 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).build();
         }
         postDTO.setSubCategoryId(subCategoryId);
-        if(!postDTO.getUserName().isBlank()){
+        if(postDTO.getUserName()!=null){
             User user = userService.getProfileByUserName(postDTO.getUserName());
             postDTO.setUserName(user.getUserName());
             Post post = postService.savePost(request,postDTO,user);
@@ -121,6 +122,7 @@ public class PostController {
     //edit comment
     @PostMapping("/categories/{subCategoryId}/{postId}/comment_edit")
     public ResponseEntity editComment(HttpServletRequest request, @PathVariable("postId") String postId, @RequestBody CommentDTO commentDTO) throws Exception {
+        logger.info("commentDTO:::"+commentDTO.toString());
         if(commentDTO.getCommentContent().isBlank()){
             ApiResponse errorResponse = ApiResponse.error(406,"Content Of Comment Is Blank","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
@@ -139,7 +141,7 @@ public class PostController {
         }else{
             return ResponseEntity.status(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).build();
         }
-        if(!commentDTO.getFromName().isBlank()){
+        if(commentDTO.getFromName()!=null){
             User user = userService.getProfileByUserName(commentDTO.getFromName());
             commentDTO.setFromName(user.getUserName());
             commentDTO.setFromId(user.getId());

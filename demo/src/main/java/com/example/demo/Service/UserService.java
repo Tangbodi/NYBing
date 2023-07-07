@@ -190,9 +190,8 @@ public User registerUser(UserDTO userDTO){
     public User getByToken(String token){
         try{
             logger.info("Getting user by token:::"+token);
-            User user = userRepository.findByToken(token);
+            User user = userRepository.findByToken(token).orElse(null);
             if(user != null){
-                this.verifyUser(user);
                 return user;
             }else{
                 return null;
@@ -211,11 +210,25 @@ public User registerUser(UserDTO userDTO){
             user.setPassword(password);
             user.setToken(null);
             userRepository.save(user);
+            logger.info("Reset password successfully:::");
+            RemoveToken(user);
             return true;
         }catch (Exception e){
             logger.error(e.getMessage(),e);
         }
         return false;
     }
-
+    @Transactional
+    public boolean RemoveToken(User user){
+        try{
+            logger.info("Removing token of user:::"+user.getUserName());
+            user.setToken(null);
+            userRepository.save(user);
+            logger.info("Removed token successfully:::");
+            return true;
+        }catch (RuntimeException e){
+            logger.error(e.getMessage(),e);
+        }
+        return false;
+    }
 }
