@@ -258,25 +258,21 @@ public class UserController{
         }
     }
 
-        @GetMapping("/user/forgot_password/reset_password")
-        public ModelAndView showResetPasswordForm(@RequestParam(value="token")String token){
-            ModelAndView mv = new ModelAndView();
-
-            if(token==null){
-    //            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-                mv.addObject("message", "Your email address could not be verified.");
-            }
-                User user = userService.getByToken(token);
-                if(user != null) {
-                    mv.addObject("token", token);
-    //                return ResponseEntity.ok().build();
-                }else{
-                    mv.addObject("message", "Your email address could not be verified.");
-    //                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-                }
-                mv.setViewName("reset_password_form");
-                return mv;
+    @GetMapping("/user/forgot_password/reset_password")
+    public ModelAndView showResetPasswordForm(@RequestParam(value="token")String token){
+        ModelAndView mv = new ModelAndView();
+        if(token==null){
+            mv.setViewName("user_not_changed_password");
+            return mv;
         }
+        User user = userService.getByToken(token);
+        if(user != null) {
+            mv.setViewName("user_changed_password");
+        }else{
+            mv.setViewName("user_not_changed_password");
+        }
+        return mv;
+    }
     //    //------------------------------------------------------------------------------------------
     @PostMapping("/user/forgot_password/reset_password")
         public ModelAndView enterPassword(@Param(value="token")String token, @RequestParam("password")String password) {
@@ -285,7 +281,7 @@ public class UserController{
             if (user != null) {
                 if(userService.ResetPassword(user, password)) {
                     mv.setViewName("user_changed_password");
-                } else {
+                }else{
                     mv.setViewName("user_not_changed_password");
                 }
             }
