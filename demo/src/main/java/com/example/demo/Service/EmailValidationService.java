@@ -37,9 +37,11 @@ public class EmailValidationService {
             String token = uuid.toString();
             String siteURL = request.getRequestURL().toString();
             siteURL.replace(request.getServletPath(),"");
+            siteURL = siteURL.replace("http://", "https://");
 
             userService.updateToken(token,email);
             String emailValidationLink = siteURL + "/email_validation?token=" + token;
+            logger.info("emailValidationLink:::"+emailValidationLink);
             if(sendEmailValidationLink(email,emailValidationLink)){;
                 return true;
             }else{
@@ -70,6 +72,7 @@ public class EmailValidationService {
             mimeMessageHelper.setSubject(subject);
             mimeMessageHelper.setText(content,true);
             javaMailSender.send(message);
+            logger.info("sent emailValidationLink:::"+emailValidationLink);
             return true;
         }catch (MessagingException e) {
             logger.error(e.getMessage(), e);
@@ -94,6 +97,7 @@ public class EmailValidationService {
             mimeMessageHelper.setSubject(subject);
             mimeMessageHelper.setText(content,true);
             javaMailSender.send(message);
+            logger.info("sent link:::" + link);
             return true;
         }catch (MessagingException e) {
             logger.error(e.getMessage(), e);

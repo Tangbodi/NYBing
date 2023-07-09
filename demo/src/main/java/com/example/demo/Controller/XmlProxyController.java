@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin(origins = "http://192.168.1.10:3000/")
+//@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class XmlProxyController {
 //    @GetMapping(value = "/rss_xml",produces = "text/plain;charset=UTF-8")
     @GetMapping(value = "/rss_xml",produces = "text/plain;charset=UTF-8")

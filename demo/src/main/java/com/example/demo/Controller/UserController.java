@@ -34,7 +34,7 @@ import java.util.UUID;
 
 
 @RestController
-@CrossOrigin(origins = "http://192.168.1.10:3000/")
+//@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class UserController{
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
@@ -77,24 +77,26 @@ public class UserController{
         }
         //------------------check if user already exists------------------
         if(userService.checkIfUserRegistered(userDTO)){
-            ApiResponse<User> errorResponse = ApiResponse.error(409, "Username or Email Already Exists", "CONFLICT");
+            ApiResponse errorResponse = ApiResponse.error(409, "Username or Email Already Exists", "CONFLICT");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }else {
+            userDTO.setEmail(encodedEmail);
             User user = userService.registerUser(userDTO);
             if(user!=null){
                 logger.info("User successfully registered:::");
+                if(emailValidationService.processEmailValidation(request,userDTO)){
+                    logger.info("Email verification link sent:::");
+                    ApiResponse apiResponse = ApiResponse.success(user);
+                    return ResponseEntity.ok(apiResponse);
+                }else{
+                    ApiResponse<User> errorResponse = ApiResponse.error(500, "Verification Link Couldn't Send", "Internal Server Error");
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+                }
             }else{
-                ApiResponse<User> errorResponse = ApiResponse.error(500, "Internal Server Error", "Internal Server Error");
+                ApiResponse errorResponse = ApiResponse.error(500, "Internal Server Error", "Internal Server Error");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
             }
-            if(emailValidationService.processEmailValidation(request,userDTO)){
-                logger.info("Email verification link sent:::");
-                ApiResponse<User> apiResponse = ApiResponse.success(user);
-                return ResponseEntity.ok(apiResponse);
-            }else{
-                ApiResponse<User> errorResponse = ApiResponse.error(500, "Verification Link Couldn't Send", "Internal Server Error");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-            }
+
         }
 }
 
@@ -113,59 +115,62 @@ public class UserController{
         Integer res = userService.authenticate(loginDTO,request);
         System.out.println(res);
         if(res==1) {
-            logger.info("Successfully authenticated::");
             User user = userService.getProfileByUserName(loginDTO.getUserName());
             ApiResponse<User> apiResponse = ApiResponse.success(user);
             return ResponseEntity.ok(apiResponse);
         }else if(res==-1){
-            ApiResponse<User> errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
+            ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         } else if(res==0){
-            ApiResponse<User> errorResponse = ApiResponse.error(401, "Account Is Not Verified, Email Verification Link Sent", "Unauthorized");
+            ApiResponse errorResponse = ApiResponse.error(401, "Account Is Not Verified, Email Verification Link Sent", "Unauthorized");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }else {
-            ApiResponse<User> errorResponse = ApiResponse.error(401, "Wrong Username Or Password Entered", "Unauthorized");
+            ApiResponse errorResponse = ApiResponse.error(401, "Wrong Username Or Password Entered", "Unauthorized");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/register/email_validation")
-    public ResponseEntity showEmailValidationPageViaRegisterLink(@Param(value="token")String token){
-         if(userService.getByToken(token)==null){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ModelAndView showEmailValidationPageViaRegisterLink(@RequestParam(value="token")String token){
+        ModelAndView mv = new ModelAndView();
+        User user = userService.getByToken(token);
+        if(user==null){
+             mv.setViewName("user_register_not_confirmed");
+         }else{
+            userService.verifyUser(user);
+            mv.setViewName("user_register_confirmed");
          }
-         else{
-             return ResponseEntity.ok().build();
-         }
+         return mv;
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/login/email_validation")
-    public ResponseEntity<ApiResponse<User>> showEmailValidationViaLoginLink(@Param(value="token")String token){
-        if(userService.getByToken(token)==null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ModelAndView showEmailValidationViaLoginLink(@RequestParam(value="token")String token){
+        ModelAndView mv = new ModelAndView();
+        User user = userService.getByToken(token);
+        if(user==null){
+            mv.setViewName("user_login_not_confirmed");
+        }else{
+            userService.verifyUser(user);
+            mv.setViewName("user_login_confirmed");
         }
-        else{
-            User user = userService.getByToken(token);
-            ApiResponse<User> apiResponse = ApiResponse.success(user);
-            return ResponseEntity.ok(apiResponse);
-        }
+        return mv;
     }
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/update/{userName}")
     public ResponseEntity<ApiResponse<User>> updateUserInfo(@RequestBody UserDTO userDTO, @PathVariable String userName){
         //if all are blank
         if(userDTO.getFirstName().isBlank() && userDTO.getLastName().isBlank() && userDTO.getPhone().isBlank()&&userDTO.getMiddleName().isBlank()){
-            ApiResponse<User> errorResponse = ApiResponse.error(406, "No Changes Were Found", "Not Acceptable");
+            ApiResponse errorResponse = ApiResponse.error(406, "No Changes Were Found", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }//return true if name contains special characters or whitespaces
         if(ValidString.verifyName(userDTO.getFirstName())
                 ||ValidString.verifyName(userDTO.getMiddleName())
                 ||ValidString.verifyName(userDTO.getLastName())){
-            ApiResponse<User> errorResponse = ApiResponse.error(406, "Name Cannot Contain Whitespaces Or Special Characters", "Not Acceptable");
+            ApiResponse errorResponse = ApiResponse.error(406, "Name Cannot Contain Whitespaces Or Special Characters", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }//return false if phone number doesn't match regex
         else if(!ValidString.verifyPhoneNumber(userDTO.getPhone())){
-            ApiResponse<User> errorResponse = ApiResponse.error(406, "Invalid phone number", "Not Acceptable");
+            ApiResponse errorResponse = ApiResponse.error(406, "Invalid phone number", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }else{
             userDTO.setFirstName(ValidString.fixUsername(userDTO.getFirstName()));
@@ -174,10 +179,10 @@ public class UserController{
         }
         User user = userService.updateUserInfoByUserName(userDTO,userName);
         if(user == null){
-            ApiResponse<User> errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
+            ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }else{
-            ApiResponse<User> apiResponse = ApiResponse.success(user);
+            ApiResponse apiResponse = ApiResponse.success(user);
             return ResponseEntity.ok(apiResponse);
         }
     }
@@ -219,7 +224,7 @@ public class UserController{
 
             User user = userService.getProfileByUserName(userName);
             if(user == null){
-                ApiResponse<User> errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
+                ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
             }else{
                 ApiResponse<User> apiResponse = ApiResponse.success(user);
@@ -252,129 +257,38 @@ public class UserController{
             }
         }
     }
-    //------------------------------------------------------------------------------------------
-//    @GetMapping("/user/forgot_password/reset_password")
-//    public ResponseEntity  showResetPasswordForm(@Param(value="token")String token){
-//        logger.info("showResetPasswordForm endpoint called");
-//        if(token==null){
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//        }
-//            User user = userService.getByToken(token);
-//            if(user != null) {
-//                return ResponseEntity.ok().build();
-//            }else{
-//
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//            }
-//    }
-    //------------------------------------------------------------------------------------------
-//    @GetMapping("/user/forgot_password/reset_password")
-//    @PostMapping("/user/forgot_password/reset_password")
-//    public ResponseEntity enterPassword(@Param(value="token")String token){
-//        logger.info("enterPassword endpoint called");
-//        if(token==null){
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//        }
-////            User user = userService.getByToken(token);
-////            if(user != null){
-////                if(userService.ResetPassword(user,password)){
-////                    return ResponseEntity.ok().build();
-////                }else{
-////                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-////                }
-////            }else{
-////                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-////            }
-//        return ResponseEntity.ok().build();
-//        }
-        // @PostMapping("/forgot_password")
-    //    public ModelAndView processForgotPassword(HttpServletRequest request,@RequestParam("email")String email) throws MessagingException, UnsupportedEncodingException {
-    //        String encodedEmail =HtmlUtils.htmlEscape(email);
-    //        ModelAndView modelAndView = new ModelAndView();
-    //          if(!ValidString.verifyEmail(encodedEmail)){
-    //                modelAndView.addObject("error","Invalid Email Address");
-    ////            ApiResponse errorResponse = ApiResponse.error(406,"Invalid email address","Not Acceptable");
-    ////            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-    //        }
-    //        UUID uuid = UUID.randomUUID();
-    //        String token = uuid.toString();
-    //        String siteURL = request.getRequestURL().toString();
-    //        siteURL.replace(request.getServletPath(),"");
-    //
-    //        if(!userService.updateToken(token,encodedEmail)) {
-    //            modelAndView.addObject("error","Email Address Not Found");
-    ////            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    //        }else{
-    //            String resetPasswordLink = siteURL + "/reset_password?token=" + token;
-    //            if(emailValidationService.sendForgotPasswordLink(encodedEmail,resetPasswordLink)){
-    //                logger.info("Email has been sent out:::");
-    ////                ApiResponse<String> apiResponse = ApiResponse.success(resetPasswordLink);
-    ////                return ResponseEntity.ok(apiResponse);
-    //                modelAndView.addObject("message","Email Sent Successfully");
-    //            }else{
-    //                modelAndView.addObject("error","Email Sent Failed");
-    ////                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    //            }
-    //        }
-    //        modelAndView.setViewName("forgot_password_form");
-    //        return modelAndView;
-    //    }
-    //    //------------------------------------------------------------------------------------------
-    //    @GetMapping("/forgot_password")
-    //    public ModelAndView showForgotPasswordForm() {
-    //        ModelAndView mv = new ModelAndView("forgot_password_form");
-    //        return mv;
-    //    }
-    //    //------------------------------------------------------------------------------------------
+
         @GetMapping("/user/forgot_password/reset_password")
         public ModelAndView showResetPasswordForm(@RequestParam(value="token")String token){
             ModelAndView mv = new ModelAndView();
 
             if(token==null){
     //            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-                mv.addObject("message", "Invalid Token");
+                mv.addObject("message", "Your email address could not be verified.");
             }
                 User user = userService.getByToken(token);
                 if(user != null) {
                     mv.addObject("token", token);
     //                return ResponseEntity.ok().build();
                 }else{
-                    mv.addObject("message", "Invalid Token");
+                    mv.addObject("message", "Your email address could not be verified.");
     //                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
                 }
                 mv.setViewName("reset_password_form");
                 return mv;
         }
     //    //------------------------------------------------------------------------------------------
-
     @PostMapping("/user/forgot_password/reset_password")
-        public ModelAndView enterPassword(@Param(value="token")String token, @RequestParam("password")String password, Model model) {
-    //        ModelAndView mv = new ModelAndView();
-    //        if(token==null){
-    ////            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    //            model.addAttribute("message", "Invalid Token");
-    //        }
-    //        model.addAttribute("token",token);
+        public ModelAndView enterPassword(@Param(value="token")String token, @RequestParam("password")String password) {
             ModelAndView mv = new ModelAndView();
             User user = userService.getByToken(token);
             if (user != null) {
-                if (userService.ResetPassword(user, password)) {
-    //                    return ResponseEntity.ok().build();
-                    mv.addObject("message", "Password Reset Successfully");
-                    return new ModelAndView("forgot_password_form");
-    //                    return new ModelAndView("forgot_password_form");
+                if(userService.ResetPassword(user, password)) {
+                    mv.setViewName("user_changed_password");
                 } else {
-    //                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-                    mv.addObject("message", "Internal Server Error");
-                    return new ModelAndView("forgot_password_form");
+                    mv.setViewName("user_not_changed_password");
                 }
-    //            }else{
-    ////                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    //                model.addAttribute("message", "Invalid Token");
-    //                return new ModelAndView("forgot_password_form");
-    //            }
             }
-            mv.setViewName("forgot_password_form");
             return mv;
         }
 }
