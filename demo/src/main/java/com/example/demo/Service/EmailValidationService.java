@@ -82,6 +82,7 @@ public class EmailValidationService {
     public boolean sendForgotPasswordLink(String recipientEmail,String link) throws MessagingException,UnsupportedEncodingException{
         logger.info("Editing email sender, receiver, subject, and content:::");
         try{
+            link = link.replace("http://", "https://");
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
             mimeMessageHelper.setFrom("admin@nybing.com","NYBing");

@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 @Getter
@@ -17,18 +15,18 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserPasswordDTO {
-
+public class ResetPasswordDTO {
     @Size(max = 60)
-    private String inputPassword;
+    private String password;
     @Size(max = 60)
-    private String newPassword;
-
+    private String confirmPassword;
+    private String token;
     @java.lang.Override
     public java.lang.String toString() {
-        return "UserPasswordDTO{" +
-                " inputPassword='" + getInputPassword() + "'" +
-                " newPassword='" + getNewPassword() + "'" +
+        return "ResetPasswordDTO{" +
+                " password='" + getPassword() + "'" +
+                " confirmPassword='" + getConfirmPassword() + "'" +
+                " token='" + getToken() + "'" +
                 "}";
     }
 }

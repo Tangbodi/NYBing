@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 @Component
 public class ValidString {
+    private static final String SPECIAL_CHARACTERS_REGEX = "[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]";
 
     public static boolean verifyName(String username){
         boolean hasWhitespace = username.contains(" ");
@@ -30,7 +31,14 @@ public class ValidString {
         }
     }
     public static boolean verifyPassword(String password){
-        return password.contains(" ")? true:false;
+        Pattern pattern= Pattern.compile(SPECIAL_CHARACTERS_REGEX);
+        boolean hasSpecialCharacters = pattern.matcher(password).find();
+        boolean hasWhitespace = password.contains(" ");
+        if(hasSpecialCharacters && !hasWhitespace){
+            return true;
+        }else{
+            return false;
+        }
     }
     public static boolean verifyPhoneNumber(String phoneNumber){
         String phoneRegex = "^(\\+\\d{1,3})?\\s?\\(?(\\d{3})\\)?[-.\\s]?(\\d{3})[-.\\s]?(\\d{4})$";

@@ -3,7 +3,7 @@ package com.example.demo.Service;
 import com.example.demo.DAO.UserDAO;
 import com.example.demo.DTO.LoginDTO;
 import com.example.demo.DTO.UserDTO;
-import com.example.demo.DTO.UserPasswordDTO;
+import com.example.demo.DTO.UpdatePasswordDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.UserRepository;
@@ -138,7 +138,7 @@ public User registerUser(UserDTO userDTO){
         return null;
     }
     @Transactional
-    public Integer updatePasswordByUserName(UserPasswordDTO userPasswordDTO, String userName) {
+    public Integer updatePasswordByUserName(UpdatePasswordDTO updatePasswordDTO, String userName) {
         try {
             logger.info("Updating password of user:::" + userName);
             User user = userRepository.findByUserName(userName).orElse(null);
@@ -146,8 +146,8 @@ public User registerUser(UserDTO userDTO){
                 return 0;
             }else{
                 String curPassword = user.getPassword();
-                if (BCrypt.checkpw(userPasswordDTO.getInputPassword(), curPassword)) {
-                    String newPassword = BCrypt.hashpw(userPasswordDTO.getNewPassword(), BCrypt.gensalt());
+                if (BCrypt.checkpw(updatePasswordDTO.getInputPassword(), curPassword)) {
+                    String newPassword = BCrypt.hashpw(updatePasswordDTO.getNewPassword(), BCrypt.gensalt());
                     user.setPassword(newPassword);
                     userRepository.save(user);
                     return 1;
