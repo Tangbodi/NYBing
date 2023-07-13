@@ -1,6 +1,6 @@
 package com.example.demo.Service;
 
-import com.example.demo.Entity.PostCommentsView;
+import com.example.demo.Entity.PostsCommentsView;
 import com.example.demo.Exception.PostNotFoundException;
 import com.example.demo.Repository.PostsCommentsViewRepository;
 import org.slf4j.Logger;
@@ -11,9 +11,10 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
 @Service
-@Async
 public class PostCommentsViewService {
     private static final Logger logger = LoggerFactory.getLogger(PostCommentsViewService.class);
     @Autowired
@@ -21,7 +22,7 @@ public class PostCommentsViewService {
 
     @Async("MultiExecutor")
     @Transactional
-    public PostCommentsView updatePostComments(String postId){
+    public PostsCommentsView updatePostComments(String postId){
         try{
             logger.info("updatePostComments:::postId:::"+postId);
             postsCommentsViewRepository.findById(postId).map(postsCommentsView->{
@@ -49,4 +50,19 @@ public class PostCommentsViewService {
             logger.error(e.getMessage(),e);
         }
     }
+    public List<PostsCommentsView> findBySubCategoryId(Integer sub_categoryId){
+        try{
+            logger.info("findBySubCategoryId:::sub_categoryId:::"+sub_categoryId);
+            List<PostsCommentsView> list = postsCommentsViewRepository.findBySubCategoryId(sub_categoryId);
+            return list;
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+        }
+        return null;
+    }
+    public List<Map<String,Object>> result (Integer sub_categoryId){
+
+        return postsCommentsViewRepository.combineByTextRender(sub_categoryId);
+    }
+
 }

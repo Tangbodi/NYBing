@@ -22,7 +22,7 @@ public class PostId implements Serializable {
     private String postId;
 
     @NotNull
-    @Column(name = "subCategoryid", nullable = false)
+    @Column(name = "subCategoryId", nullable = false)
     private Integer subCategoryId;
 
     @Override

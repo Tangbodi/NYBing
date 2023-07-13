@@ -18,7 +18,7 @@ public class SubCategoryPostMapId implements Serializable {
     private static final long serialVersionUID = -2204279169775633243L;
     @NotNull
     @Column(name = "sub_categoryId", nullable = false)
-    private Integer subCategoryid;
+    private Integer subCategoryId;
 
     @Size(max = 36)
     @NotNull
@@ -30,13 +30,13 @@ public class SubCategoryPostMapId implements Serializable {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         SubCategoryPostMapId entity = (SubCategoryPostMapId) o;
-        return Objects.equals(this.subCategoryid, entity.subCategoryid) &&
+        return Objects.equals(this.subCategoryId, entity.subCategoryId) &&
                 Objects.equals(this.postId, entity.postId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(subCategoryid, postId);
+        return Objects.hash(subCategoryId, postId);
     }
 
 }

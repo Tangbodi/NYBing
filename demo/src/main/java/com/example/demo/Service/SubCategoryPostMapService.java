@@ -19,7 +19,7 @@ public class SubCategoryPostMapService {
             logger.info("saveSubCategoryPostMap:::");
             SubCategoryPostMap subCategoryPostMap = new SubCategoryPostMap();
             SubCategoryPostMapId subCategoryPostMapId = new SubCategoryPostMapId();
-            subCategoryPostMapId.setSubCategoryid(subCategoryId);
+            subCategoryPostMapId.setSubCategoryId(subCategoryId);
             subCategoryPostMapId.setPostId(post.getId().getPostId());
             subCategoryPostMap.setId(subCategoryPostMapId);
             subCategoryPostMap.setCommentId(commentId);

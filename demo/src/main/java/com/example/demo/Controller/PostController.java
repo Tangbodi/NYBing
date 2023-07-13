@@ -17,10 +17,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.*;
 
 @RestController
-//@CrossOrigin(origins = "http://192.168.1.10:3000/")
+@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class PostController {
     private static final Logger logger = LoggerFactory.getLogger(PostController.class);
     @Autowired
@@ -45,14 +47,14 @@ public class PostController {
     private SubCategoryPostMapService subCategoryPostMapService;
 
     @GetMapping("/categories/{subCategoryId}/{postId}")
-    public ResponseEntity<ApiResponse<PostWithCommentDTO>> findPostAndCommentByPostId(@PathVariable("subCategoryId")Integer subCategoryId, @PathVariable("postId") String postId){
+    public ResponseEntity<ApiResponse<PostWithCommentDTO>> findPostAndCommentByPostId(HttpServletResponse response, @PathVariable("subCategoryId")Integer subCategoryId, @PathVariable("postId") String postId) throws IOException {
         PostId id = new PostId();
         id.setSubCategoryId(subCategoryId);
         id.setPostId(postId);
         Post post = postRepository.findById(id).orElse(null);
         if(post==null){
             ApiResponse errorResponse = ApiResponse.error(404 , "No Such Post", "Not Found");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }else{
             postCommentsViewService.updatePostViews(postId);
             List<Comment> comments = commentService.findAllCommentsByPostId(postId);

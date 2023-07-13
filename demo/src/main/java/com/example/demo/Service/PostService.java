@@ -3,9 +3,8 @@ package com.example.demo.Service;
 import com.example.demo.DAO.PostDAO;
 import com.example.demo.DTO.PostDTO;
 import com.example.demo.Entity.*;
-import com.example.demo.Exception.PostNotFoundException;
 import com.example.demo.Repository.ImageRepository;
-import com.example.demo.Repository.PostRepository;
+import com.example.demo.Repository.PostsRepository;
 
 import com.example.demo.Repository.PostsCommentsViewRepository;
 import org.jsoup.Jsoup;
@@ -31,7 +30,7 @@ public class PostService {
     private static final String IMAGE_FOLDER_PATH="/opt/tomcat/webapps/IMAGE/";
     private static final String IMAGE_URL="/IMAGE/";
     @Autowired
-    private PostRepository postRepository;
+    private PostsRepository postRepository;
     @Autowired
     private ImageRepository imageRepository;
     @Autowired
@@ -141,13 +140,16 @@ public class PostService {
             }
             //--------------------postCommentView------------------
             logger.info("Setting PostView:::"+uuId);
-            PostCommentsView postCommentsView = new PostCommentsView();
+            PostsCommentsView postCommentsView = new PostsCommentsView();
             //Setting PostView entity
             postCommentsView.setId(uuId.toString());
-            postCommentsView.setViews(1);
+            postCommentsView.setSubCategoryId(postDTO.getSubCategoryId());
+            postCommentsView.setViews(0);
             postCommentsView.setLastCommentAt(time);
+            postCommentsView.setTitle(postDTO.getTitle());
+            postCommentsView.setUserName(postDTO.getUserName());
             postCommentsView.setComments(0);
-            PostCommentsView savedPostCommentsView = postsCommentsViewRepository.save(postCommentsView);
+            PostsCommentsView savedPostCommentsView = postsCommentsViewRepository.save(postCommentsView);
             if(savedPostCommentsView!=null){
                 logger.info("PostCommentsView saved successfully:::");
             }else{
@@ -171,26 +173,13 @@ public class PostService {
         }
         return null;
     }
-    public  Optional<Post> findPostById(String postId){
-        try{
-            logger.info("Getting post by id:::"+postId);
-            return postRepository.findByIdPostId(postId);
-        }catch (Exception e){
-            logger.error(e.getMessage(),e);
-        }
-        return null;
-    }
-    public List<Post> findByIdSubCategoryId(Integer sub_categoryId){
-        try{
-            List<Post> list = postRepository.findByIdSubCategoryId(sub_categoryId);
-            return list;
-        }catch (Exception e){
-            logger.error(e.getMessage(),e);
-        }
-        return null;
-    }
+
     public List<Post> findAllPostByKeyword(String keyword){
         logger.info(keyword);
         return postRepository.findByKeyword(keyword);
+    }
+    public List<String> findTextRenderByPostIds(List<String> postIds){
+        List<String> textList = postRepository.findTextRenderByPostIds(postIds);
+        return textList;
     }
 }

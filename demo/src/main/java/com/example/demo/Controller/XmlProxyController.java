@@ -9,13 +9,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-//@CrossOrigin(origins = "http://192.168.1.10:3000/")
+@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class XmlProxyController {
 //    @GetMapping(value = "/rss_xml",produces = "text/plain;charset=UTF-8")
     @GetMapping(value = "/rss_xml",produces = "text/plain;charset=UTF-8")
     public ResponseEntity<String> proxyXml() {
 //        String rssFeedUrl = "https://rsshub.app/ifeng/news";
-        String rssFeedUrl = "https://finance.yahoo.com/rss/topstories";
+        String rssFeedUrl = "http://feeds.foxnews.com/foxnews/national";
+        //"https://moxie.foxnews.com/google-publisher/us.xml";
         try {
                 org.apache.http.client.HttpClient httpClient = HttpClientBuilder.create().build();
                 HttpGet httpGet = new HttpGet(rssFeedUrl);

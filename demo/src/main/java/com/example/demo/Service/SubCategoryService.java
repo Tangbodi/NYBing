@@ -16,7 +16,6 @@ public class SubCategoryService {
         try{
             logger.info("findSubCategoryById:::");
             SubCategory subCategory = subCategoryRepository.findById(subCategoryId).orElse(null);
-            logger.info("SubCategory found successfully:::");
             return subCategory;
         }catch (Exception e){
             logger.error("findSubCategoryById:::Exception:::"+e);

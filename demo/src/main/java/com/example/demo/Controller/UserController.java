@@ -34,7 +34,7 @@ import java.util.UUID;
 
 
 @RestController
-//@CrossOrigin(origins = "http://192.168.1.10:3000/")
+@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class UserController{
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
