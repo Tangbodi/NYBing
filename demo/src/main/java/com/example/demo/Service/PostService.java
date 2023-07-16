@@ -56,12 +56,12 @@ public class PostService {
 //                " <p><img src=\"data:image/png;base64,
 //                FIPtyYnMEp4AAAAASUVORK5CYII=\" alt=\"\" /></p>";
         try{
-            logger.info("Saving post into database:::");
+            logger.info("Parsing post:::");
             boolean finished = false;
             //parsing post content, convert string to html to parse
             Document document = Jsoup.parse(postDTO.getTextrender());
-            logger.info("parsing document:::"+document);
             for(Element imageElement:document.select("img")){
+                logger.info("Parsing image:::");
                 Image image = new Image();
                 //get image info from src
                 String imageCode = imageElement.attr("src");
@@ -69,8 +69,6 @@ public class PostService {
                 //data:image/jpeg;base64, -> jpeg
                 String imageType = imageCode.substring(0,imageCode.indexOf(",")+1);
                 image.setImageType(imageType);
-                logger.info(imageType);
-                logger.info("Saving image data into database:::");
                 byte[] imageData = getImageData(imageCode);
                 //Generate UUID for image
                 String imageId = UUID.randomUUID().toString();
@@ -91,6 +89,7 @@ public class PostService {
                 String imageURL = IMAGE_URL+filename;
                 image.setImageURL(imageURL);
                 Image ima = imageRepository.save(image);
+                logger.info("Saving image data into database:::");
                 if(ima!=null){
                     logger.info("Image saved successfully:::");
                     imageElement.attr("src",imageURL);
@@ -100,37 +99,44 @@ public class PostService {
                     return null;
                 }
             }
-            logger.info("Image completely saved:::");
+
             String updatedHTML = document.html();
-            logger.info("updatedHTML:::"+updatedHTML);
-            logger.info("Creating UUID for post, and post views entity:::");
+            logger.info("HTML updated:::");
+            logger.info("Creating UUID for post, and post_views entity:::");
             UUID uuid = UUID.randomUUID();
             String uuId = uuid.toString();
             //--------------------post-----------------
-            logger.info("Setting Post:::"+uuId);
+            logger.info("Create a new Post:::"+uuId);
             //set postId and subCategoryId
             Post post = new Post();
+            logger.info("Create a new postId:::");
             PostId postId = new PostId();
+            logger.info("Setting Post postId:::");
             postId.setPostId(uuId);
+            logger.info("Setting Post subCategoryId:::");
             postId.setSubCategoryId(postDTO.getSubCategoryId());
+            logger.info("Setting Post id:::");
             post.setId(postId);
+            logger.info("Setting Post title:::");
             post.setTitle(postDTO.getTitle());
 //        post.setTextrender(postDTO.getTextrender());
 //        keep the content between only <body> tag
+            logger.info("Removing tags from updatedHTML:::");
             int start = updatedHTML.indexOf("<body>")+6;
             int end = updatedHTML.lastIndexOf("</body>");
             updatedHTML = updatedHTML.substring(start,end);
-            logger.info("Removed tags from updatedHTML:::"+updatedHTML);
+            logger.info("Removed tags from updatedHTML and setting textRender:::");
             post.setTextrender(updatedHTML);
             Instant time = Instant.now();
-            logger.info("Time:::"+time);
+            logger.info("Setting Post publishAt:::");
             post.setPublishAt(time);
-
+            logger.info("Setting Post IPV4:::");
             post.setIpvFour(postDTO.getIpvFour());
+            logger.info("Setting Post IPV6:::");
             post.setIpvSix(postDTO.getIpvSix());
+            logger.info("Setting Post username:::");
             post.setUserName(postDTO.getUserName());
-
-            logger.info("Saving post:::");
+            logger.info("Saving Post:::");
             Post savedPost = postRepository.save(post);
             if(savedPost!=null){
                 logger.info("Post saved successfully:::");
@@ -142,13 +148,21 @@ public class PostService {
             logger.info("Setting PostView:::"+uuId);
             PostsCommentsView postCommentsView = new PostsCommentsView();
             //Setting PostView entity
+            logger.info("Setting PostsCommentsView uuid:::");
             postCommentsView.setId(uuId.toString());
+            logger.info("Setting PostsCommentsView subCategory:::");
             postCommentsView.setSubCategoryId(postDTO.getSubCategoryId());
+            logger.info("Setting PostsCommentsView views:::");
             postCommentsView.setViews(0);
+            logger.info("Setting PostsCommentsView lastCommentAt:::");
             postCommentsView.setLastCommentAt(time);
+            logger.info("Setting PostsCommentsView title:::");
             postCommentsView.setTitle(postDTO.getTitle());
+            logger.info("Setting PostsCommentsView username:::");
             postCommentsView.setUserName(postDTO.getUserName());
+            logger.info("Setting PostsCommentsView comments:::");
             postCommentsView.setComments(0);
+            logger.info("Saving PostsCommentsView:::");
             PostsCommentsView savedPostCommentsView = postsCommentsViewRepository.save(postCommentsView);
             if(savedPostCommentsView!=null){
                 logger.info("PostCommentsView saved successfully:::");
@@ -175,11 +189,8 @@ public class PostService {
     }
 
     public List<Post> findAllPostByKeyword(String keyword){
-        logger.info(keyword);
+        logger.info("Finding Post by keyword:::");
         return postRepository.findByKeyword(keyword);
     }
-    public List<String> findTextRenderByPostIds(List<String> postIds){
-        List<String> textList = postRepository.findTextRenderByPostIds(postIds);
-        return textList;
-    }
+
 }

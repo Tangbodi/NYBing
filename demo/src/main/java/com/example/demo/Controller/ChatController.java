@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-
 public class ChatController {
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 

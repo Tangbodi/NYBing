@@ -60,7 +60,7 @@ public class PostCommentsViewService {
         }
         return null;
     }
-    public List<Map<String,Object>> result (Integer sub_categoryId){
+    public List<Map<String,Object>> combineByTextRender (Integer sub_categoryId){
 
         return postsCommentsViewRepository.combineByTextRender(sub_categoryId);
     }

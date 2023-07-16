@@ -168,7 +168,7 @@ public class UserController{
     @PutMapping("/user/password/update/{userName}")
     public ResponseEntity<ApiResponse<User>> updateUserPassword(@RequestBody UpdatePasswordDTO updatePasswordDTO, @PathVariable String userName){
         //if all are blank
-        if(updatePasswordDTO.getNewPassword().isBlank() || updatePasswordDTO.getInputPassword().isBlank()){
+        if(updatePasswordDTO.getNewPassword().isBlank() || updatePasswordDTO.getOldPassword().isBlank()){
             ApiResponse errorResponse = ApiResponse.error(406, "Old Password Or New Password Is Blank", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }//return true if password contains whitespaces
@@ -193,6 +193,7 @@ public class UserController{
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
         if(res == 1){
+            logger.info("Password Updated Successfully");
             ApiResponse<User> apiResponse = ApiResponse.success(null);
             return ResponseEntity.ok(apiResponse);
         }

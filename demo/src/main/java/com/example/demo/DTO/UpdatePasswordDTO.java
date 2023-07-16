@@ -18,14 +18,14 @@ import javax.validation.constraints.Size;
 public class UpdatePasswordDTO {
 
     @Size(max = 60)
-    private String inputPassword;
+    private String oldPassword;
     @Size(max = 60)
     private String newPassword;
 
     @java.lang.Override
     public java.lang.String toString() {
         return "UserPasswordDTO{" +
-                " inputPassword='" + getInputPassword() + "'" +
+                " inputPassword='" + getOldPassword() + "'" +
                 " newPassword='" + getNewPassword() + "'" +
                 "}";
     }

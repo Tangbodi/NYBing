@@ -139,26 +139,30 @@ public User registerUser(UserDTO userDTO){
     }
     @Transactional
     public Integer updatePasswordByUserName(UpdatePasswordDTO updatePasswordDTO, String userName) {
+        Integer res =0;
         try {
             logger.info("Updating password of user:::" + userName);
             User user = userRepository.findByUserName(userName).orElse(null);
             if(user ==null){
-                return 0;
+                logger.info("User not found:::" + userName);
             }else{
-                String curPassword = user.getPassword();
-                if (BCrypt.checkpw(updatePasswordDTO.getInputPassword(), curPassword)) {
+                logger.info("Checking if password is correct:::" + updatePasswordDTO.getOldPassword());
+                String oldPassword = user.getPassword();
+                if (BCrypt.checkpw(updatePasswordDTO.getOldPassword(), oldPassword)) {
+                    logger.info("Old password is correct:::" + updatePasswordDTO.getOldPassword());
                     String newPassword = BCrypt.hashpw(updatePasswordDTO.getNewPassword(), BCrypt.gensalt());
                     user.setPassword(newPassword);
                     userRepository.save(user);
-                    return 1;
+                   res = 1;
                 }else {
-                    return -1;
+                    logger.info("Old password is incorrect:::" + updatePasswordDTO.getOldPassword());
+                    res=-1;
                 }
             }
         }catch (RuntimeException e) {
             logger.error(e.getMessage(), e);
         }
-        return null;
+        return res;
     }
     @Transactional
     public boolean updateToken(String token, String email){
@@ -180,6 +184,7 @@ public User registerUser(UserDTO userDTO){
             user.setVerified("true");
             user.setToken(null);
             userRepository.save(user);
+            logger.info("Saved user successfully:::");
             return true;
         }catch (RuntimeException e){
             logger.error(e.getMessage(),e);
@@ -197,7 +202,7 @@ public User registerUser(UserDTO userDTO){
                 return null;
             }
         }catch (UserNotFoundException e){
-            e.getMessage();
+            logger.error(e.getMessage(),e);
         }
         return null;
     }

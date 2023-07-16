@@ -44,7 +44,7 @@ public class CategoryController {
         }
         //get all posts with views under specific sub_category
 //        List<PostsCommentsView> postsCommentsViewList = postCommentsViewService.findBySubCategoryId(sub_categoryId);
-        List<Map<String,Object>> combineByTextRender = postCommentsViewService.result(sub_categoryId);
+        List<Map<String,Object>> combineByTextRender = postCommentsViewService.combineByTextRender(sub_categoryId);
         ApiResponse<List<Map<String,Object>>> apiResponse = ApiResponse.success(combineByTextRender);
         return ResponseEntity.ok(apiResponse);
     }

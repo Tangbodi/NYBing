@@ -34,7 +34,7 @@ public class PostController {
     @Autowired
     private CommentService commentService;
     @Autowired
-    private PostRepository postRepository;
+    private PostsRepository postsRepository;
     @Autowired
     private PostCommentsViewService postCommentsViewService;
     @Autowired
@@ -51,7 +51,7 @@ public class PostController {
         PostId id = new PostId();
         id.setSubCategoryId(subCategoryId);
         id.setPostId(postId);
-        Post post = postRepository.findById(id).orElse(null);
+        Post post = postsRepository.findPostById(id);
         if(post==null){
             ApiResponse errorResponse = ApiResponse.error(404 , "No Such Post", "Not Found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);

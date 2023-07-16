@@ -2,12 +2,11 @@ package com.example.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableAsync
+@EnableScheduling
 @SpringBootApplication
 public class WebApplication{
 
@@ -21,7 +20,7 @@ public class WebApplication{
 
 //@EnableAsync
 //@SpringBootApplication
-//@ComponentScan({"com.example.demo","Controller","Service"})
+//@ComponentScan({"com.example.demo","Controller","Service","Util"})
 //public class WebApplication extends SpringBootServletInitializer{
 ////public class WebApplication{
 //
