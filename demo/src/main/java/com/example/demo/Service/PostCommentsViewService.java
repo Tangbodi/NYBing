@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.DTO.PostDTO;
 import com.example.demo.Entity.PostsCommentsView;
 import com.example.demo.Exception.PostNotFoundException;
 import com.example.demo.Repository.PostsCommentsViewRepository;
@@ -21,7 +22,7 @@ public class PostCommentsViewService {
     private PostsCommentsViewRepository postsCommentsViewRepository;
 
     @Async("MultiExecutor")
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public PostsCommentsView updatePostComments(String postId){
         try{
             logger.info("updatePostComments:::postId:::"+postId);
@@ -32,7 +33,7 @@ public class PostCommentsViewService {
             }).orElseThrow(()-> new PostNotFoundException(postId));
             Thread.sleep(1000);
         } catch (InterruptedException | RuntimeException e) {
-            logger.error(e.getMessage(),e);
+            logger.error("Error while updating comments:::"+e.getMessage(),e);
         }
         return null;
     }
@@ -47,22 +48,44 @@ public class PostCommentsViewService {
             }).orElseThrow(()-> new PostNotFoundException(postId));
             Thread.sleep(1000);
         }catch (RuntimeException | InterruptedException e){
-            logger.error(e.getMessage(),e);
+            logger.error("Error while updating views:::"+e.getMessage(),e);
         }
     }
-    public List<PostsCommentsView> findBySubCategoryId(Integer sub_categoryId){
+    @Transactional
+    public List<Map<String,Object>> combineByTextRender (Integer sub_categoryId){
         try{
-            logger.info("findBySubCategoryId:::sub_categoryId:::"+sub_categoryId);
-            List<PostsCommentsView> list = postsCommentsViewRepository.findBySubCategoryId(sub_categoryId);
-            return list;
-        }catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.info("combineByTextRender:::sub_categoryId:::"+sub_categoryId);
+            return postsCommentsViewRepository.combineByTextRender(sub_categoryId);
+        }catch (RuntimeException e){
+            logger.error("Error while combining text and render:::"+e.getMessage(),e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+    @Transactional(rollbackOn = Exception.class)
+    public PostsCommentsView savePostCommentsView(String uuId, PostDTO postDTO, Instant time){
+        try{
+            logger.info("Setting PostView:::"+uuId);
+            PostsCommentsView postCommentsView = new PostsCommentsView();
+            logger.info("Setting PostsCommentsView uuid:::");
+            postCommentsView.setId(uuId.toString());
+            logger.info("Setting PostsCommentsView subCategory:::");
+            postCommentsView.setSubCategoryId(postDTO.getSubCategoryId());
+            logger.info("Setting PostsCommentsView views:::");
+            postCommentsView.setViews(0);
+            logger.info("Setting PostsCommentsView lastCommentAt:::");
+            postCommentsView.setLastCommentAt(time);
+            logger.info("Setting PostsCommentsView title:::");
+            postCommentsView.setTitle(postDTO.getTitle());
+            logger.info("Setting PostsCommentsView username:::");
+            postCommentsView.setUserName(postDTO.getUserName());
+            logger.info("Setting PostsCommentsView comments:::");
+            postCommentsView.setComments(0);
+            logger.info("Saving PostsCommentsView:::");
+            return postsCommentsViewRepository.save(postCommentsView);
+        }catch (RuntimeException e){
+            logger.error("Error while saving postCommentsView:::"+e.getMessage(),e);
         }
         return null;
-    }
-    public List<Map<String,Object>> combineByTextRender (Integer sub_categoryId){
-
-        return postsCommentsViewRepository.combineByTextRender(sub_categoryId);
     }
 
 }

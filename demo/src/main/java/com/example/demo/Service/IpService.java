@@ -12,11 +12,21 @@ public class IpService {
     private static final Logger logger = LoggerFactory.getLogger(IpService.class);
     private static final InetAddressValidator VALIDATOR = InetAddressValidator.getInstance();
     public boolean isValidInet4Address(String ip){
-        logger.info("Checking if IP is IPV4:::");
-        return VALIDATOR.isValidInet4Address(ip);
+        try{
+            logger.info("Checking if IP is IPV4:::");
+            return VALIDATOR.isValidInet4Address(ip);
+        }catch (Exception e){
+            logger.error("isValidInet4Address:::Exception:::"+e);
+        }
+        return false;
     }
     public boolean isValidInet6Address(String ip){
-        logger.info("Checking if IP is IPV6:::");
-        return VALIDATOR.isValidInet6Address(ip);
+        try{
+            logger.info("Checking if IP is IPV6:::");
+            return VALIDATOR.isValidInet6Address(ip);
+        }catch (Exception e){
+            logger.error("isValidInet6Address:::Exception:::"+e);
+        }
+        return false;
     }
 }

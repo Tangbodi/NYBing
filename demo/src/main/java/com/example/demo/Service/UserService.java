@@ -31,88 +31,74 @@ public class UserService {
     @Lazy
     @Autowired
     private EmailValidationService emailValidationService;
+    @Transactional(rollbackOn = Exception.class)
+    public User registerUser(UserDTO userDTO){
+        try {
+            logger.info("Registering user: {}", userDTO.getUserName());
+            String password = BCrypt.hashpw(userDTO.getPassword(), BCrypt.gensalt());
+            User newUser = new User();
+            newUser.setUserName(userDTO.getUserName());
+            newUser.setEmail(userDTO.getEmail());
+            newUser.setPassword(password);
+            newUser.setRegisteredAt(Instant.now());
+            newUser.setVerified("false");
+            return userRepository.save(newUser);
+        } catch (Exception e) {
+            logger.error("Failed to register user", e);
+            throw new RuntimeException("Failed to register user", e);
+        }
 
-public User registerUser(UserDTO userDTO){
-    try{
-        logger.info("Registering user:::"+ userDTO.getUserName()+"; "+userDTO.getEmail());
-        String password = BCrypt.hashpw(userDTO.getPassword(), BCrypt.gensalt());
-        User newUser = new User();
-        newUser.setUserName(userDTO.getUserName());
-        newUser.setEmail(userDTO.getEmail());
-        newUser.setPassword(password);
-        newUser.setRegisteredAt(Instant.now());
-        newUser.setVerified("false");
-        return userRepository.save(newUser);
-    } catch (Exception e) {
-        logger.error(e.getMessage(),e);
-    }
-    return null;
 }
+
     public boolean checkIfUserRegistered (UserDTO userDTO) {
         try {
             logger.info("Checking if user exists:::" + userDTO.getUserName());
             logger.info("encodedEmail:::" + userDTO.getEmail());
             int res = userDAO.checkIfUserExistsByUsernameAndEmail(userDTO.getUserName(), userDTO.getEmail());
-            if (res > 0) {
-                return true;
-            }
+            return res>0;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Failed to check if user exists", e);
+            throw new RuntimeException("Failed to check if user exists", e);
         }
-        return false;
     }
-    public Integer authenticate(LoginDTO login, HttpServletRequest request)
-    {
-        User user = null;
+
+    public Integer authenticate(LoginDTO login, HttpServletRequest request) {
         try {
-            logger.info("Checking if user authenticate:::"+login.getUserName());
-            user = userRepository.findByUserName(login.getUserName()).orElse(null);
+            logger.info("Checking if user authenticate: {}", login.getUserName());
+            User user = userRepository.findByUserName(login.getUserName()).orElse(null);
+            if (user == null) {
+                return -1;
+            } else {
+                if (BCrypt.checkpw(login.getPassword(), user.getPassword())) {
+                    if ("true".equals(user.getVerified())) {
+                        return 1;
+                    } else {
+                        UserDTO userDTO = new UserDTO();
+                        userDTO.setEmail(user.getEmail());
+                        emailValidationService.processEmailValidation(request, userDTO);
+                        return 0;
+                    }
+                } else {
+                    return 2;
+                }
+            }
         } catch (Exception e) {
-            logger.error(e.getMessage(),e);
-        }
-        if (user == null) {
-            return -1;
-        } else {
-            if (BCrypt.checkpw(login.getPassword(), user.getPassword())) {
-                //cannot use ==
-                if(user.getVerified().equals("true")){
-                    return 1;
-                }
-                else{
-                    //api/user/login/email_validation?token=
-                    UserDTO userDTO = new UserDTO();
-                    userDTO.setEmail(user.getEmail());
-                    emailValidationService.processEmailValidation(request,userDTO);
-                    return 0;
-                }
-            }
-            else{
-                return 2;
-            }
+            logger.error("Failed to authenticate user", e);
+            throw new RuntimeException("Failed to authenticate user", e);
         }
     }
-    public User getProfileByUserName (String userName)
-    {
+
+    public User getProfileByUserName (String userName) {
+        logger.info("Getting user profile by user name:::"+userName);
         try{
-            logger.info("Getting user profile by user name:::"+userName);
             User user = userRepository.findByUserName(userName).orElseThrow(() -> new UserNotFoundException(userName));
             return user;
         }catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error("Failed to get user profile", e);
+            throw new RuntimeException("Failed to get user profile", e);
         }
-        return null;
     }
-    public User getUserProfileById(String id){
-        try{
-            logger.info("Getting user profile by id:::"+id);
-            User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-            return user;
-        }catch (Exception e){
-            logger.error(e.getMessage(),e);
-        }
-        return null;
-    }
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public User updateUserInfoByUserName(UserDTO userDTO, String userName){
         try{
             logger.info("Updating info of user:::"+userName);
@@ -133,11 +119,11 @@ public User registerUser(UserDTO userDTO){
             }
             return userRepository.save(user);
         }catch (RuntimeException e){
-            logger.error(e.getMessage(),e);
+            logger.error("Failed to update user info", e);
+            throw new RuntimeException("Failed to update user info", e);
         }
-        return null;
     }
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public Integer updatePasswordByUserName(UpdatePasswordDTO updatePasswordDTO, String userName) {
         Integer res =0;
         try {
@@ -160,11 +146,12 @@ public User registerUser(UserDTO userDTO){
                 }
             }
         }catch (RuntimeException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Failed to update password", e);
+            throw new RuntimeException("Failed to update password", e);
         }
         return res;
     }
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public boolean updateToken(String token, String email){
         try{
             logger.info("Updating token:::"+token);
@@ -173,11 +160,11 @@ public User registerUser(UserDTO userDTO){
             userRepository.save(user);
             return true;
         }catch (RuntimeException e){
-            logger.error(e.getMessage(),e);
+            logger.error("Failed to update token", e);
+            throw new RuntimeException("Failed to update token", e);
         }
-        return false;
     }
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public boolean verifyUser(User user){
         try{
             logger.info("Verifying user::" +user.getUserName());
@@ -187,27 +174,23 @@ public User registerUser(UserDTO userDTO){
             logger.info("Saved user successfully:::");
             return true;
         }catch (RuntimeException e){
-            logger.error(e.getMessage(),e);
+            logger.error("Failed to verify user", e);
         }
         return false;
     }
-    @Transactional
+
     public User getByToken(String token){
         try{
             logger.info("Getting user by token:::"+token);
             User user = userRepository.findByToken(token).orElse(null);
-            if(user != null){
-                return user;
-            }else{
-                return null;
-            }
+            return user;
         }catch (UserNotFoundException e){
-            logger.error(e.getMessage(),e);
+            logger.error("Failed to get user by token", e);
+            throw new RuntimeException("Failed to get user by token", e);
         }
-        return null;
     }
 
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public boolean ResetPassword(User user, String newPassword){
         try{
             logger.info("Resetting password of user:::"+user.getUserName());
@@ -219,11 +202,11 @@ public User registerUser(UserDTO userDTO){
             RemoveToken(user);
             return true;
         }catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error("Failed to reset password", e);
+            throw new RuntimeException("Failed to reset password", e);
         }
-        return false;
     }
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public boolean RemoveToken(User user){
         try{
             logger.info("Removing token of user:::"+user.getUserName());
@@ -232,7 +215,7 @@ public User registerUser(UserDTO userDTO){
             logger.info("Removed token successfully:::");
             return true;
         }catch (RuntimeException e){
-            logger.error(e.getMessage(),e);
+            logger.error("Failed to remove token", e);
         }
         return false;
     }

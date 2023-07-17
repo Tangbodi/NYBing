@@ -14,7 +14,6 @@ import java.util.List;
 
 @Service
 public class CommentService {
-
     private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
     @Autowired
     private CommentRepository commentRepository;
@@ -26,7 +25,7 @@ public class CommentService {
     private PostCommentsViewService postCommentsViewService;
 
 //    @Async("MultiExecutor") //Async has to return a Future
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public Comment saveComment(CommentDTO commentDTO, String postId) throws Exception {
             try{
                 logger.info("Saving comment:::");
@@ -45,17 +44,18 @@ public class CommentService {
                 Thread.sleep(1000);
                 return comment;
             }catch (RuntimeException |InterruptedException e){
-                logger.error(e.getMessage(),e);
+                logger.error("Error while saving comment:::"+e.getMessage(),e);
+                throw new Exception(e.getMessage());
             }
-            return null;
     }
+    @Transactional
     public List<Comment> findAllCommentsByPostId(String postId){
         try{
             return commentRepository.findAllByPostId(postId);
         }catch (RuntimeException e){
-            logger.error(e.getMessage(),e);
+            logger.error("Error while fetching comments:::"+e.getMessage(),e);
+            throw new RuntimeException(e.getMessage());
         }
-        return null;
     }
 }
 

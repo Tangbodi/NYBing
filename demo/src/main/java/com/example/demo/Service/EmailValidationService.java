@@ -31,7 +31,8 @@ public class EmailValidationService {
     //------------------------------------------------------------------------------------------
     //generate a random token then send validation email via 192.168.1.10:8080/api/user/register/email_validation?token=
     public boolean processEmailValidation(HttpServletRequest request, UserDTO userDTO){
-        try{  logger.info("Generating email validation link and token:::");
+        try{
+            logger.info("Generating email validation link and token:::");
             String email = userDTO.getEmail();
             UUID uuid = UUID.randomUUID();
             String token = uuid.toString();
@@ -42,17 +43,15 @@ public class EmailValidationService {
             userService.updateToken(token,email);
             String emailValidationLink = siteURL + "/email_validation?token=" + token;
             logger.info("emailValidationLink:::"+emailValidationLink);
-            if(sendEmailValidationLink(email,emailValidationLink)){;
-                return true;
-            }else{
-                return false;
-            }
+            return (sendEmailValidationLink(email,emailValidationLink));
+
         }catch (UserNotFoundException e){
-            logger.error(e.getMessage(),e);
+            logger.error("Failed to generate email validation link and token",e);
+            throw new RuntimeException("Failed to generate email validation link and token",e);
         }catch (UnsupportedEncodingException | MessagingException e){
-            logger.error(e.getMessage(),e);
+            logger.error("Failed to send email validation link",e);
+            throw new RuntimeException("Failed to send email validation link",e);
         }
-        return false;
     }
     public boolean sendEmailValidationLink(String recipientEmail,String emailValidationLink) throws MessagingException, UnsupportedEncodingException {
         try{
@@ -75,9 +74,9 @@ public class EmailValidationService {
             logger.info("sent emailValidationLink:::"+emailValidationLink);
             return true;
         }catch (MessagingException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Failed to send email validation link",e);
+            throw new RuntimeException("Failed to send email validation link",e);
         }
-        return false;
     }
     public boolean sendForgotPasswordLink(String recipientEmail,String link) throws MessagingException,UnsupportedEncodingException{
         logger.info("Editing email sender, receiver, subject, and content:::");
@@ -101,8 +100,8 @@ public class EmailValidationService {
             logger.info("sent link:::" + link);
             return true;
         }catch (MessagingException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Failed to send forgot password link",e);
+            throw new RuntimeException("Failed to send forgot password link",e);
         }
-        return false;
     }
 }

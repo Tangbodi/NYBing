@@ -7,11 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
 public class SubCategoryService {
     private static final Logger logger = LoggerFactory.getLogger(SubCategoryService.class);
     @Autowired
     private SubCategoryRepository subCategoryRepository;
+    @Transactional
     public SubCategory findSubCategoryById(Integer subCategoryId){
         try{
             logger.info("findSubCategoryById:::");
@@ -19,8 +22,7 @@ public class SubCategoryService {
             return subCategory;
         }catch (Exception e){
             logger.error("findSubCategoryById:::Exception:::"+e);
+            throw new RuntimeException("Failed to find subCategory by id",e);
         }
-        return null;
     }
-
 }

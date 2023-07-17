@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public class ValidString {
     private static final String SPECIAL_CHARACTERS_REGEX = "[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]";
 
-    public static boolean verifyName(String username){
+    public static boolean verifyUserName(String username){
         boolean hasWhitespace = username.contains(" ");
         boolean hasSpecialCharacters = !username.matches("[A-Za-z0-9 ]*");
 
@@ -60,5 +60,12 @@ public class ValidString {
             return "";
         }
        return fixedUsername;
+    }
+    public static boolean verifySubCategory(Integer subCategoryId){
+        if(subCategoryId==null || subCategoryId > 620 || subCategoryId < 101){
+            return false;
+        }else{
+            return true;
+        }
     }
 }

@@ -20,7 +20,7 @@ public class SearchController {
     @Autowired
     private PostService postService;
     @PostMapping("/search")
-    public ResponseEntity<ApiResponse<List<Post>>> findAllPostByKeyword(@RequestBody SearchKeywordDTO keyword){
+    public ResponseEntity<ApiResponse<List<Post>>> findAllPostByKeyword(@RequestBody SearchKeywordDTO keyword) throws Exception {
 
         if (keyword.getKeyword().trim().isEmpty()) {
             ApiResponse errorResponse = ApiResponse.error(400 , "Keyword Cannot Be Empty Or Contain Only Spaces", "Bad Request");

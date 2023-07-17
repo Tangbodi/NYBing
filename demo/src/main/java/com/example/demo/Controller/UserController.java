@@ -61,7 +61,7 @@ public class UserController{
             ApiResponse errorResponse = ApiResponse.error(406,"Username, Email, Or Password Is Blank","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }//return true if name contains special characters or whitespaces
-        else if(ValidString.verifyName(userDTO.getUserName())){
+        else if(ValidString.verifyUserName(userDTO.getUserName())){
             ApiResponse errorResponse = ApiResponse.error(406,"Username Can't Contain Special Characters, Or Whitespaces","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }//return false if email doesn't match regex
@@ -141,9 +141,9 @@ public class UserController{
             ApiResponse errorResponse = ApiResponse.error(406, "No Changes Were Found", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }//return true if name contains special characters or whitespaces
-        if(ValidString.verifyName(userDTO.getFirstName())
-                ||ValidString.verifyName(userDTO.getMiddleName())
-                ||ValidString.verifyName(userDTO.getLastName())){
+        if(ValidString.verifyUserName(userDTO.getFirstName())
+                ||ValidString.verifyUserName(userDTO.getMiddleName())
+                ||ValidString.verifyUserName(userDTO.getLastName())){
             ApiResponse errorResponse = ApiResponse.error(406, "Name Cannot Contain Whitespaces Or Special Characters", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }//return false if phone number doesn't match regex
@@ -202,16 +202,20 @@ public class UserController{
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/info/{userName}")
-    public ResponseEntity<ApiResponse<User>> getUserByUserName(HttpServletRequest request, @PathVariable String userName) {
-
-            User user = userService.getProfileByUserName(userName);
-            if(user == null){
+    public ResponseEntity<ApiResponse<User>> getUserByUserName(@PathVariable String userName) {
+        if(userName.isBlank()||ValidString.verifyUserName(userName)){
                 ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-            }else{
-                ApiResponse<User> apiResponse = ApiResponse.success(user);
-                return ResponseEntity.ok(apiResponse);
-            }
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }
+        userName = ValidString.fixUsername(userName);
+        User user = userService.getProfileByUserName(userName);
+        if(user == null){
+            ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }else{
+            ApiResponse<User> apiResponse = ApiResponse.success(user);
+            return ResponseEntity.ok(apiResponse);
+        }
     }
     //------------------------------------------------------------------------------------------
     @PostMapping("/user/forgot_password")

@@ -9,11 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
 public class UsersPostsMapService {
     private static final Logger logger = LoggerFactory.getLogger(UsersPostsMapService.class);
     @Autowired
     private UsersPostsMapRepository usersPostsMapRepository;
+    @Transactional(rollbackOn = Exception.class)
     public boolean saveUsersPostsMap(User user, Post post){
         try{
             logger.info("save UsersPostsMap:::");

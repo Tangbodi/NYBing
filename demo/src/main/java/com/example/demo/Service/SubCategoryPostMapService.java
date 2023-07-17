@@ -9,11 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
 public class SubCategoryPostMapService {
     private static final Logger logger = LoggerFactory.getLogger(SubCategoryPostMapService.class);
     @Autowired
     private SubCategoryPostMapRepository subCategoryPostMapRepository;
+    @Transactional(rollbackOn = Exception.class)
     public boolean saveSubCategoryPostMap(Post post,Integer subCategoryId,String commentId){
         try{
             logger.info("saveSubCategoryPostMap:::");

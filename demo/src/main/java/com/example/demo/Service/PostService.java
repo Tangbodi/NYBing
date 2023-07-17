@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -34,23 +35,21 @@ public class PostService {
     @Autowired
     private ImageRepository imageRepository;
     @Autowired
-    private IpService ipService;
-    @Autowired
-    private PostsCommentsViewRepository postsCommentsViewRepository;
-    @Autowired
-    private PostDAO postDAO;
+    private PostCommentsViewService postCommentsViewService;
 
+    @Transactional(rollbackOn = Exception.class)
     public Post savePost(HttpServletRequest request, PostDTO postDTO, User user) throws Exception {
             try{
                 logger.info("Setting post:::");
                 logger.info("postDTO:::"+postDTO.getTextrender());
                 return settingPost(postDTO,user,request);
             }catch (Exception e){
-                logger.error(e.getMessage(),e);
+                logger.error("Error occurred while saving post",e);
+                throw new Exception("Failed to save post",e);
             }
-            return null;
-    }
 
+    }
+    @Transactional(rollbackOn = Exception.class)
     public Post settingPost(PostDTO postDTO, User user, HttpServletRequest request) throws IOException {
 //        String input = "<p><strong><span style=\"color: #e03e2d;\">adfasdf</span></strong></p>\n" +
 //                " <p><img src=\"data:image/png;base64,
@@ -89,7 +88,7 @@ public class PostService {
                 String imageURL = IMAGE_URL+filename;
                 image.setImageURL(imageURL);
                 Image ima = imageRepository.save(image);
-                logger.info("Saving image data into database:::");
+                logger.info("Saving image data into MySQL:::");
                 if(ima!=null){
                     logger.info("Image saved successfully:::");
                     imageElement.attr("src",imageURL);
@@ -99,7 +98,6 @@ public class PostService {
                     return null;
                 }
             }
-
             String updatedHTML = document.html();
             logger.info("HTML updated:::");
             logger.info("Creating UUID for post, and post_views entity:::");
@@ -145,52 +143,35 @@ public class PostService {
                 return null;
             }
             //--------------------postCommentView------------------
-            logger.info("Setting PostView:::"+uuId);
-            PostsCommentsView postCommentsView = new PostsCommentsView();
-            //Setting PostView entity
-            logger.info("Setting PostsCommentsView uuid:::");
-            postCommentsView.setId(uuId.toString());
-            logger.info("Setting PostsCommentsView subCategory:::");
-            postCommentsView.setSubCategoryId(postDTO.getSubCategoryId());
-            logger.info("Setting PostsCommentsView views:::");
-            postCommentsView.setViews(0);
-            logger.info("Setting PostsCommentsView lastCommentAt:::");
-            postCommentsView.setLastCommentAt(time);
-            logger.info("Setting PostsCommentsView title:::");
-            postCommentsView.setTitle(postDTO.getTitle());
-            logger.info("Setting PostsCommentsView username:::");
-            postCommentsView.setUserName(postDTO.getUserName());
-            logger.info("Setting PostsCommentsView comments:::");
-            postCommentsView.setComments(0);
-            logger.info("Saving PostsCommentsView:::");
-            PostsCommentsView savedPostCommentsView = postsCommentsViewRepository.save(postCommentsView);
-            if(savedPostCommentsView!=null){
+            if(postCommentsViewService.savePostCommentsView(uuId,postDTO,time)!=null){
                 logger.info("PostCommentsView saved successfully:::");
-            }else{
-                logger.info("PostCommentsView not saved:::");
-                return null;
             }
             return savedPost;
         }catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Error occurred while setting post", e);
+            throw new IOException("Failed to set post", e);
         }
-        return null;
     }
-
+    @Transactional
     private byte[] getImageData(String imageCode) throws IOException {
         try{
             logger.info("Parsing image data:::");
             String base64Image = imageCode.substring(imageCode.indexOf(",") + 1);
             return Base64.getDecoder().decode(base64Image);
         }catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error("Error occurred while parsing image data", e);
         }
         return null;
     }
+    @Transactional(rollbackOn = Exception.class)
+    public List<Post> findAllPostByKeyword(String keyword) throws Exception {
+        try{
+            logger.info("Finding Post by keyword:::");
+            return postRepository.findByKeyword(keyword);
+        }catch (Exception e){
+            logger.error("Error occurred while finding posts by keyword", e);
+            throw new Exception("Failed to find posts by keyword", e);
+        }
 
-    public List<Post> findAllPostByKeyword(String keyword){
-        logger.info("Finding Post by keyword:::");
-        return postRepository.findByKeyword(keyword);
     }
-
 }

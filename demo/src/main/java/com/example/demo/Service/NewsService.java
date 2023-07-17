@@ -2,18 +2,23 @@ package com.example.demo.Service;
 
 import com.example.demo.Entity.News;
 import com.example.demo.Repository.NewsRepository;
+import com.example.demo.Util.RedisCache;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import redis.clients.jedis.Jedis;
-
+import javax.transaction.Transactional;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -24,21 +29,39 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class NewsService {
     private static final Logger logger = LoggerFactory.getLogger(NewsService.class);
-    private static final String FoxNews = "Fox News";
-    private static final String CACHE_KEY = "FOX_NEWS";
-    private static final int CACHE_EXPIRATION_SECONDS = 3 * 60 * 60 + 30 * 60; // Three and a half hours
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String FoxNews = "Fox_News";
+    private static final String rssFeedUrl = "http://feeds.foxnews.com/foxnews/national";
+    @Autowired
+    private RedisCache redisCache;
     @Autowired
     private NewsRepository newsRepository;
-    public void saveNewsXmlToDatabase(String rssFeed){
+    public void proxyXml() throws IOException {
+        try{
+            logger.info("Parsing rss feed from rssFeedUrl:::");
+            HttpClient httpClient = HttpClientBuilder.create().build();
+            logger.info("HttpClient created:::");
+            HttpGet httpGet = new HttpGet(rssFeedUrl);
+            logger.info("HttpGet created:::");
+            HttpResponse response = httpClient.execute(httpGet);
+            logger.info("httpClient executed:::");
+            if (response.getStatusLine().getStatusCode() == HttpStatus.OK.value()) {
+                logger.info("response was ok:::");
+                String rssFeed = EntityUtils.toString(response.getEntity(),"UTF-8");
+                saveNewsXmlToDatabase(rssFeed);
+            }
+        }catch (Exception e){
+            logger.error("Error in proxyXml:::",e);
+        }
+    }
+    @Transactional(rollbackOn = Exception.class)
+    public News saveNewsXmlToDatabase(String rssFeed){
         //parse xml string
         try{
+            logger.info("saving News Xml to MySQL:::");
             // Create a ByteArrayInputStream from the XML string
             logger.info("Create a ByteArrayInputStream from the XML string:::");
             ByteArrayInputStream inputStream = new ByteArrayInputStream(rssFeed.getBytes());
@@ -111,8 +134,7 @@ public class NewsService {
                 Instant run_time = Instant.now();
                 System.out.println(run_time);
                 news.setRunTime(run_time);
-                newsRepository.save(news);
-                logger.info("News saved successfully:::");
+                return newsRepository.save(news);
             }
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
@@ -121,24 +143,18 @@ public class NewsService {
         } catch (SAXException e) {
             throw new RuntimeException(e);
         }
+        return null;
     }
-    public List<News> getNewsByPublishDate() throws JsonProcessingException {
-        Jedis jedis = new Jedis();
-        // Check if the news list is already stored in Redis cache
-//        jedis.flushAll();
-        String cache = jedis.get(CACHE_KEY);
-        if (cache != null) {
-            // If yes, return the news list from the cache
-            logger.info("News list returned from Redis cache:::");
-            return objectMapper.readValue(cache, List.class);
-        }else{
-            logger.info("News list returned from database:::");
+    @Transactional
+    public List<News> getAllNewsByPublishDate() throws JsonProcessingException {
+        try{
+            logger.info("Getting all News by publish date:::");
             List<News> newsList = newsRepository.findNewsByPublishDate();
-            String json = objectMapper.writeValueAsString(newsList);
-            // Store the news list in Redis cache
-            jedis.set(CACHE_KEY, json);
-            jedis.expire(CACHE_KEY, 60); // Set the cache expiration to 1 hour
+            redisCache.updateNewsCache(newsList);
             return newsList;
+        }catch (Exception e){
+            logger.error("Error in getAllNewsByPublishDate:::",e);
+            throw new RuntimeException(e);
         }
     }
 }
