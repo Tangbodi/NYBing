@@ -58,7 +58,7 @@ public class UserController{
         String encodedEmail = HtmlUtils.htmlEscape(userDTO.getEmail());
         //if all are blank
         if(!ValidString.UserNameEmpty(userDTO.getUserName()) || !ValidString.PasswordEmpty(userDTO.getPassword()) || !ValidString.EmailEmpty(encodedEmail)){
-            ApiResponse errorResponse = ApiResponse.error(406,"Username, Email, Or Password Is Blank:::","Not Acceptable");
+            ApiResponse errorResponse = ApiResponse.error(406,"Username, Email, Or Password Is Blank","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }//return false if name is too long or too short
         else if(!ValidString.UserNameLength(userDTO.getUserName())){
