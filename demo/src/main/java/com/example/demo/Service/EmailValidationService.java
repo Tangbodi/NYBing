@@ -58,7 +58,7 @@ public class EmailValidationService {
             logger.info("Editing email sender, receiver, subject, and content:::");
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
-            mimeMessageHelper.setFrom("admin@nybing.com","NYBing");
+            mimeMessageHelper.setFrom("contactus@nybing.com","NYBing");
             mimeMessageHelper.setTo(recipientEmail);
             String subject = " Verify your email to start using NYBing";
             String content = "<p>Hello,</p>"
@@ -84,7 +84,7 @@ public class EmailValidationService {
             link = link.replace("http://", "https://");
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message);
-            mimeMessageHelper.setFrom("admin@nybing.com","NYBing");
+            mimeMessageHelper.setFrom("contactus@nybing.com","NYBing");
             mimeMessageHelper.setTo(recipientEmail);
             String subject = "Here's the link to reset your password";
             String content = "<p>Hello,</p>"

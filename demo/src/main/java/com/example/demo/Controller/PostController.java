@@ -9,6 +9,7 @@ import com.example.demo.Repository.*;
 import com.example.demo.Service.*;
 import com.example.demo.Util.ApiResponse;
 import com.example.demo.Util.HttpUtils;
+import com.example.demo.Validator.ValidString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RestController
-@CrossOrigin(origins = "http://192.168.1.10:3000/")
+//@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class PostController {
     private static final Logger logger = LoggerFactory.getLogger(PostController.class);
     @Autowired
@@ -48,6 +49,18 @@ public class PostController {
 
     @GetMapping("/categories/{subCategoryId}/{postId}")
     public ResponseEntity<ApiResponse<PostWithCommentDTO>> findPostAndCommentByPostId(HttpServletResponse response, @PathVariable("subCategoryId")Integer subCategoryId, @PathVariable("postId") String postId) throws IOException {
+        if(!ValidString.SubCategoryIdEmpty(subCategoryId) || !ValidString.PostIdEmpty(postId)){
+            ApiResponse errorResponse = ApiResponse.error(404 , "No Such Post", "Not Found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }else if(!ValidString.SubCategoryIdLength(subCategoryId) || !ValidString.PostIdLength(postId)){
+            ApiResponse errorResponse = ApiResponse.error(404 , "No Such Post", "Not Found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } else if (!ValidString.validPostId(postId)) {
+            ApiResponse errorResponse = ApiResponse.error(404 , "No Such Post", "Not Found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }else {
+            //NEVER TOUCH THIS
+        }
         PostId id = new PostId();
         id.setSubCategoryId(subCategoryId);
         id.setPostId(postId);
@@ -68,10 +81,19 @@ public class PostController {
     //------------------------------------------------------------------------------------------
     @PostMapping(value = "/categories/{subCategoryId}/post_edit",produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
     public ResponseEntity<ApiResponse> editPost(HttpServletRequest request, @RequestBody PostDTO postDTO, @PathVariable Integer subCategoryId) throws Exception {
+        if(!ValidString.SubCategoryIdEmpty(subCategoryId) || !ValidString.SubCategoryIdLength(subCategoryId)){
+            ApiResponse errorResponse = ApiResponse.error(404 , "No Such Category", "Not Found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
 //        logger.info("postDTO:::"+postDTO.toString());
-        if(postDTO.getTitle().isBlank()||postDTO.getTextrender().isBlank()){
+        else if(!ValidString.TitleEmpty(postDTO.getTitle()) || !ValidString.TextRenderEmpty(postDTO.getTextrender())){
             ApiResponse errorResponse = ApiResponse.error(406,"Title Or Content Is Blank","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }else if(!ValidString.TitleLength(postDTO.getTitle()) || !ValidString.TextRenderLength(postDTO.getTextrender())){
+            ApiResponse errorResponse = ApiResponse.error(406,"Title Or Content Length Error","Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }else {
+            //NEVER TOUCH THIS
         }
         String ipStr = HttpUtils.getRequestIP(request);
         if(ipService.isValidInet4Address(ipStr)){
@@ -123,9 +145,16 @@ public class PostController {
     //------------------------------------------------------------------------------------------
     //edit comment
     @PostMapping("/categories/{subCategoryId}/{postId}/comment_edit")
-    public ResponseEntity editComment(HttpServletRequest request, @PathVariable("postId") String postId, @RequestBody CommentDTO commentDTO) throws Exception {
+    public ResponseEntity editComment(HttpServletRequest request, @PathVariable("postId") String postId, @PathVariable("subCategoryId") Integer subCategoryId, @RequestBody CommentDTO commentDTO) throws Exception {
+        if(!ValidString.SubCategoryIdEmpty(subCategoryId) || !ValidString.PostIdEmpty(postId)){
+            ApiResponse errorResponse = ApiResponse.error(404 , "No Such Post", "Not Found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } else if (!ValidString.SubCategoryIdLength(subCategoryId) || !ValidString.validPostId(postId)) {
+            ApiResponse errorResponse = ApiResponse.error(404 , "No Such Post", "Not Found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
         logger.info("commentDTO:::"+commentDTO.toString());
-        if(commentDTO.getCommentContent().isBlank()){
+        if(!ValidString.CommentEmpty(commentDTO.getCommentContent()) || !ValidString.CommentLength(commentDTO.getCommentContent())){
             ApiResponse errorResponse = ApiResponse.error(406,"Content Of Comment Is Blank","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }

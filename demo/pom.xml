@@ -133,8 +133,13 @@
 			<artifactId>jedis</artifactId>
 			<version>3.9.0</version>
 		</dependency>
-		<!-- for InvalidDefinitionException  occurs because Java 8 date/time types,
-		such as java.time.LocalDate, are not supported by default in Jackson serialization and deserialization-->
+		<!-- check if the string is a valid Base64 string -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.16.0</version>
+		</dependency>
+
 
 
 	</dependencies>

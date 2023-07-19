@@ -8,6 +8,7 @@ import com.example.demo.Entity.User;
 import com.example.demo.Exception.UserNotFoundException;
 import com.example.demo.Repository.UserRepository;
 
+import com.example.demo.Validator.ValidString;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,13 +108,15 @@ public class UserService {
                 return null;
             }
             else{
-                if(!userDTO.getFirstName().isBlank()){
+                if(!ValidString.UserNameEmpty(userDTO.getFirstName())){
                     user.setFirstName(userDTO.getFirstName());
+                }if(!ValidString.UserNameEmpty(userDTO.getLastName())){
+                    user.setFirstName(userDTO.getLastName());
                 }
-                if(!userDTO.getLastName().isBlank()){
-                    user.setLastName(userDTO.getLastName());
+                if(!ValidString.UserNameEmpty(userDTO.getMiddleName())){
+                    user.setFirstName(userDTO.getMiddleName());
                 }
-                if(!userDTO.getPhone().isBlank()){
+                if(!ValidString.PhoneNumberEmpty(userDTO.getPhone())){
                     user.setPhone(userDTO.getPhone());
                 }
             }

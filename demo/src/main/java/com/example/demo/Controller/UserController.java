@@ -34,7 +34,7 @@ import java.util.UUID;
 
 
 @RestController
-@CrossOrigin(origins = "http://192.168.1.10:3000/")
+//@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class UserController{
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
@@ -57,27 +57,36 @@ public class UserController{
     public ResponseEntity<ApiResponse<User>> register (@RequestBody UserDTO userDTO, HttpServletRequest request){
         String encodedEmail = HtmlUtils.htmlEscape(userDTO.getEmail());
         //if all are blank
-        if(userDTO.getEmail().isBlank() || userDTO.getUserName().isBlank()||userDTO.getPassword().isBlank()){
-            ApiResponse errorResponse = ApiResponse.error(406,"Username, Email, Or Password Is Blank","Not Acceptable");
+        if(!ValidString.UserNameEmpty(userDTO.getUserName()) || !ValidString.PasswordEmpty(userDTO.getPassword()) || !ValidString.EmailEmpty(encodedEmail)){
+            ApiResponse errorResponse = ApiResponse.error(406,"Username, Email, Or Password Is Blank:::","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        }//return true if name contains special characters or whitespaces
-        else if(ValidString.verifyUserName(userDTO.getUserName())){
+        }//return false if name is too long or too short
+        else if(!ValidString.UserNameLength(userDTO.getUserName())){
+            ApiResponse errorResponse = ApiResponse.error(406,"Username Needs To Be Between 1 To 18 Characters","Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }//return false if name contains special characters or whitespaces
+        else if(!ValidString.validUsername(userDTO.getUserName())){
             ApiResponse errorResponse = ApiResponse.error(406,"Username Can't Contain Special Characters, Or Whitespaces","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        }//return false if email doesn't match regex
-        else if(!ValidString.verifyEmail(encodedEmail)){
+        }else if(!ValidString.EmailLength(encodedEmail)){
             ApiResponse errorResponse = ApiResponse.error(406,"Invalid email address","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        }//return true if password contains whitespaces
-        else if(!ValidString.verifyPassword(userDTO.getPassword())){
-            ApiResponse errorResponse = ApiResponse.error(406,"Password Can't Contain Whitespaces And Must Has At Least 1 Special Character","Not Acceptable");
+        }
+        else if(!ValidString.validEmail(encodedEmail)){
+            ApiResponse errorResponse = ApiResponse.error(406,"Invalid email address","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }
-        else if(userDTO.getPassword().length()<8){
-            ApiResponse errorResponse = ApiResponse.error(406,"Password Must Be At Least 8 Characters Long","Not Acceptable");
+        else if(!ValidString.PasswordLength(userDTO.getPassword())){
+            ApiResponse errorResponse = ApiResponse.error(406,"Password Must Be Between 8 Characters And 30 Characters Long","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        }else{
-            userDTO.setUserName(ValidString.fixUsername(userDTO.getUserName()));
+        }
+            //return false if password contains whitespaces
+        else if(!ValidString.validPassword(userDTO.getPassword())){
+            ApiResponse errorResponse = ApiResponse.error(406,"Password Must Has At Least 1 Special Character","Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }
+        else{
+            userDTO.setUserName(ValidString.fixName(userDTO.getUserName()));
         }
         //------------------check if user already exists------------------
         if(userService.checkIfUserRegistered(userDTO)){
@@ -111,9 +120,15 @@ public class UserController{
         //-1---no user
         //0---verify
         //2---wrong username or password
-        if(loginDTO.getUserName().isBlank()||loginDTO.getPassword().isBlank()){
+        if(!ValidString.UserNameEmpty(loginDTO.getUserName()) || !ValidString.PasswordEmpty(loginDTO.getPassword())){
             ApiResponse errorResponse = ApiResponse.error(406,"Username Or Password Is Blank","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }else if(!ValidString.validUsername(loginDTO.getUserName())) {
+            ApiResponse errorResponse = ApiResponse.error(404, "User Doesn't Exist", "Not Found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }else if(!ValidString.validPassword(loginDTO.getPassword())){
+            ApiResponse errorResponse = ApiResponse.error(400, "Wrong Username Or Password Entered", "Bad Request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
         Integer res = userService.authenticate(loginDTO,request);
         if(res==1) {
@@ -121,14 +136,14 @@ public class UserController{
             ApiResponse<User> apiResponse = ApiResponse.success(user);
             return ResponseEntity.ok(apiResponse);
         }else if(res==-1){
-            ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
+            ApiResponse errorResponse = ApiResponse.error(404, "User Doesn't Exist", "Not Found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         } else if(res==0){
             ApiResponse errorResponse = ApiResponse.error(401, "Account Is Not Verified, Email Verification Link Sent", "Unauthorized");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }else {
-            ApiResponse errorResponse = ApiResponse.error(401, "Wrong Username Or Password Entered", "Unauthorized");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            ApiResponse errorResponse = ApiResponse.error(400, "Wrong Username Or Password Entered", "Bad Request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 
@@ -137,27 +152,41 @@ public class UserController{
     @PutMapping("/user/update/{userName}")
     public ResponseEntity<ApiResponse<User>> updateUserInfo(@RequestBody UserDTO userDTO, @PathVariable String userName){
         //if all are blank
-        if(userDTO.getFirstName().isBlank() && userDTO.getLastName().isBlank() && userDTO.getPhone().isBlank()&&userDTO.getMiddleName().isBlank()){
-            ApiResponse errorResponse = ApiResponse.error(406, "No Changes Were Found", "Not Acceptable");
+        if(!ValidString.UserNameEmpty(userDTO.getFirstName())
+                && !ValidString.UserNameEmpty(userDTO.getMiddleName())
+                && !ValidString.UserNameEmpty(userDTO.getLastName())
+                && !ValidString.PhoneNumberEmpty(userDTO.getPhone())){
+            ApiResponse errorResponse = ApiResponse.error(400, "No Changes Were Found", "Bad Request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }else if((ValidString.UserNameEmpty(userDTO.getFirstName()) && !ValidString.UserNameLength(userDTO.getFirstName()))
+                || (ValidString.UserNameEmpty(userDTO.getMiddleName()) && !ValidString.UserNameLength(userDTO.getMiddleName()))
+                || (ValidString.UserNameEmpty(userDTO.getLastName()) && !ValidString.UserNameLength(userDTO.getLastName()))) {
+            ApiResponse errorResponse = ApiResponse.error(406,"Name Needs To Be Between 1 To 18 Characters","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        }//return true if name contains special characters or whitespaces
-        if(ValidString.verifyUserName(userDTO.getFirstName())
-                ||ValidString.verifyUserName(userDTO.getMiddleName())
-                ||ValidString.verifyUserName(userDTO.getLastName())){
+        }
+        //return true if name contains special characters or whitespaces
+        else if((ValidString.UserNameEmpty(userDTO.getFirstName()) && !ValidString.validUsername(userDTO.getFirstName()))
+                || (ValidString.UserNameEmpty(userDTO.getMiddleName()) && !ValidString.validUsername(userDTO.getMiddleName()))
+                || (ValidString.UserNameEmpty(userDTO.getLastName()) && !ValidString.validUsername(userDTO.getLastName()))){
             ApiResponse errorResponse = ApiResponse.error(406, "Name Cannot Contain Whitespaces Or Special Characters", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        }//return false if phone number doesn't match regex
-        else if(!ValidString.verifyPhoneNumber(userDTO.getPhone())){
+        }
+        //return false if phone number doesn't match regex
+        else if((ValidString.PhoneNumberEmpty(userDTO.getPhone()) && !ValidString.PhoneNumberLength(userDTO.getPhone()))){
             ApiResponse errorResponse = ApiResponse.error(406, "Invalid phone number", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        }else{
-            userDTO.setFirstName(ValidString.fixUsername(userDTO.getFirstName()));
-            userDTO.setMiddleName(ValidString.fixUsername(userDTO.getMiddleName()));
-            userDTO.setLastName(ValidString.fixUsername(userDTO.getLastName()));
+        }else if((ValidString.PhoneNumberEmpty(userDTO.getPhone()) && !ValidString.validPhoneNumber(userDTO.getPhone()))){
+            ApiResponse errorResponse = ApiResponse.error(406, "Invalid phone number", "Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }
+        else{
+            userDTO.setFirstName(ValidString.fixName(userDTO.getFirstName()));
+            userDTO.setMiddleName(ValidString.fixName(userDTO.getMiddleName()));
+            userDTO.setLastName(ValidString.fixName(userDTO.getLastName()));
         }
         User user = userService.updateUserInfoByUserName(userDTO,userName);
         if(user == null){
-            ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
+            ApiResponse errorResponse = ApiResponse.error(404, "User Doesn't Exist", "Not Found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }else{
             ApiResponse apiResponse = ApiResponse.success(user);
@@ -167,17 +196,19 @@ public class UserController{
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/password/update/{userName}")
     public ResponseEntity<ApiResponse<User>> updateUserPassword(@RequestBody UpdatePasswordDTO updatePasswordDTO, @PathVariable String userName){
-        //if all are blank
-        if(updatePasswordDTO.getNewPassword().isBlank() || updatePasswordDTO.getOldPassword().isBlank()){
-            ApiResponse errorResponse = ApiResponse.error(406, "Old Password Or New Password Is Blank", "Not Acceptable");
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        }//return true if password contains whitespaces
-        else if(!ValidString.verifyPassword(updatePasswordDTO.getNewPassword())){
-            ApiResponse errorResponse = ApiResponse.error(406, "Password Can't Contain Whitespaces And Must Has At Least 1 Special Character", "Not Acceptable");
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        }else if(updatePasswordDTO.getNewPassword().length()<8){
+
+        if(!ValidString.PasswordEmpty(updatePasswordDTO.getOldPassword()) || !ValidString.PasswordEmpty(updatePasswordDTO.getNewPassword())){
+            ApiResponse errorResponse = ApiResponse.error(400, "Old Password Or New Password Is Blank", "Bad Request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }else if(!ValidString.PasswordLength(updatePasswordDTO.getOldPassword()) || !ValidString.PasswordLength(updatePasswordDTO.getNewPassword())){
             ApiResponse errorResponse = ApiResponse.error(406, "Password Must Be At Least 8 Characters Long", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }//return true if password contains whitespaces
+        else if(!ValidString.validPassword(updatePasswordDTO.getOldPassword()) || !ValidString.validPassword(updatePasswordDTO.getNewPassword())){
+            ApiResponse errorResponse = ApiResponse.error(406, "Password Must Has At Least 1 Special Character And Can't Contain Whitespaces", "Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }else {
+            //NEVER TOUCH THIS
         }
         Integer res = userService.updatePasswordByUserName(updatePasswordDTO,userName);
         //0---no user
@@ -185,17 +216,17 @@ public class UserController{
         //-1---wrong password
         //null---internal server error
         if(res == 0){
-            ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists","Not Found");
+            ApiResponse errorResponse = ApiResponse.error(404, "User Doesn't Exist","Not Found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        if(res == -1){
+        }else if(res == -1){
             ApiResponse errorResponse = ApiResponse.error(400, "Wrong Password Entered","Bad Request");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
-        if(res == 1){
+        }else if(res == 1){
             logger.info("Password Updated Successfully");
             ApiResponse<User> apiResponse = ApiResponse.success(null);
             return ResponseEntity.ok(apiResponse);
+        }else {
+            //NEVER TOUCH THIS
         }
         ApiResponse errorResponse = ApiResponse.error(500, "Internal Server Error","Internal Server Error");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -203,14 +234,14 @@ public class UserController{
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/info/{userName}")
     public ResponseEntity<ApiResponse<User>> getUserByUserName(@PathVariable String userName) {
-        if(userName.isBlank()||ValidString.verifyUserName(userName)){
+        if(!ValidString.UserNameEmpty(userName) || !ValidString.UserNameLength(userName) || !ValidString.validUsername(userName)){
                 ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
                 return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }
-        userName = ValidString.fixUsername(userName);
+        userName = ValidString.fixName(userName);
         User user = userService.getProfileByUserName(userName);
         if(user == null){
-            ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
+            ApiResponse errorResponse = ApiResponse.error(404, "User Doesn't Exist", "Not Found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }else{
             ApiResponse<User> apiResponse = ApiResponse.success(user);
@@ -220,18 +251,19 @@ public class UserController{
     //------------------------------------------------------------------------------------------
     @PostMapping("/user/forgot_password")
     public ResponseEntity<ApiResponse<String>> processForgotPassword(HttpServletRequest request,@RequestBody UserDTO userDTO) throws MessagingException, UnsupportedEncodingException {
-        String encodedEmail =HtmlUtils.htmlEscape(userDTO.getEmail());
-          if(!ValidString.verifyEmail(encodedEmail)){
-            ApiResponse errorResponse = ApiResponse.error(406,"Invalid email address","Not Acceptable");
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+          if(!ValidString.EmailEmpty(userDTO.getEmail()) || !ValidString.EmailLength(userDTO.getEmail()) || !ValidString.validEmail(userDTO.getEmail())){
+            ApiResponse errorResponse = ApiResponse.error(404,"User Doesn't Exist","Not Found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
+        String encodedEmail =HtmlUtils.htmlEscape(userDTO.getEmail());
         UUID uuid = UUID.randomUUID();
         String token = uuid.toString();
         String siteURL = request.getRequestURL().toString();
         siteURL.replace(request.getServletPath(),"");
 
         if(!userService.updateToken(token,encodedEmail)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            ApiResponse errorResponse = ApiResponse.error(404, "User Doesn't Exist", "Not Found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }else{
             String resetPasswordLink = siteURL + "/reset_password?token=" + token;
             if(emailValidationService.sendForgotPasswordLink(encodedEmail,resetPasswordLink)){
@@ -247,33 +279,31 @@ public class UserController{
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/forgot_password/enter_password")
     public ResponseEntity<ApiResponse> enterPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
-
+        if(!ValidString.PasswordEmpty(resetPasswordDTO.getPassword()) || !ValidString.PasswordEmpty(resetPasswordDTO.getConfirmPassword())){
+            ApiResponse errorResponse = ApiResponse.error(400, "Password Or Confirm Password Is Blank", "Bad Request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }else if(!ValidString.PasswordLength(resetPasswordDTO.getPassword()) || !ValidString.PasswordLength(resetPasswordDTO.getConfirmPassword())){
+            ApiResponse errorResponse = ApiResponse.error(406, "Password Must Be At Least 8 Characters Long", "Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }//return true if password contains whitespaces
+        else if(!ValidString.validPassword(resetPasswordDTO.getPassword()) || !ValidString.validPassword(resetPasswordDTO.getConfirmPassword())){
+            ApiResponse errorResponse = ApiResponse.error(406, "Password Must Has At Least 1 Special Character And Can't Contain Whitespaces", "Not Acceptable");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+        }
         String password = resetPasswordDTO.getPassword();
         String confirmPassword = resetPasswordDTO.getConfirmPassword();
         logger.info("password is:::"+password);
         logger.info("confirmPassword is:::"+confirmPassword);
         logger.info("token is:::"+resetPasswordDTO.getToken());
         User user = userService.getByToken(resetPasswordDTO.getToken());
-        if(password.isBlank() || confirmPassword.isBlank()||password==null||confirmPassword==null){
-            ApiResponse errorResponse = ApiResponse.error(406, "Password Cannot Be Blank", "Not Acceptable");
-        }
-        else if(!ValidString.verifyPassword(password)){
-            ApiResponse errorResponse = ApiResponse.error(406, "Password Can't Contain Whitespaces And Must Has At Least 1 Special Character", "Not Acceptable");
-        }
-        else if(!password.equals(confirmPassword)) {
-            ApiResponse errorResponse = ApiResponse.error(406, "Password And Confirm Password Do Not Match", "Not Acceptable");
-        }else if(password.length()<8){
-            ApiResponse errorResponse = ApiResponse.error(406, "Password Must Be At Least 8 Characters Long", "Not Acceptable");
+        if(userService.ResetPassword(user, password)) {
+            ApiResponse<User> apiResponse = ApiResponse.success(null);
+            return ResponseEntity.ok(apiResponse);
         }else{
-            if(userService.ResetPassword(user, password)) {
-                ApiResponse<User> apiResponse = ApiResponse.success(null);
-                return ResponseEntity.ok(apiResponse);
-            }else{
-                ApiResponse errorResponse = ApiResponse.error(500, "Internal Server Error","Internal Server Error");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
+            ApiResponse errorResponse = ApiResponse.error(500, "Internal Server Error","Internal Server Error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
-        return null;
+
     }
 
 }

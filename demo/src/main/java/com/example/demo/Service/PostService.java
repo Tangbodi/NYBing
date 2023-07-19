@@ -19,10 +19,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.*;
+import org.apache.commons.codec.binary.Base64;
 
 @Service
 public class PostService {
@@ -68,6 +70,12 @@ public class PostService {
                 //data:image/jpeg;base64, -> jpeg
                 String imageType = imageCode.substring(0,imageCode.indexOf(",")+1);
                 image.setImageType(imageType);
+                // Check if imageCode is a valid Base64 string
+                if (!Base64.isBase64(imageCode)) {
+                    logger.info("Invalid Base64 string::: " + imageCode);
+                    logger.info("Skipping getImageData():::");
+                    continue; // Skip processing this image
+                }
                 byte[] imageData = getImageData(imageCode);
                 //Generate UUID for image
                 String imageId = UUID.randomUUID().toString();
@@ -145,6 +153,8 @@ public class PostService {
             //--------------------postCommentView------------------
             if(postCommentsViewService.savePostCommentsView(uuId,postDTO,time)!=null){
                 logger.info("PostCommentsView saved successfully:::");
+            }else {
+                //NEVER TOUCH THIS
             }
             return savedPost;
         }catch (Exception e) {
@@ -157,7 +167,7 @@ public class PostService {
         try{
             logger.info("Parsing image data:::");
             String base64Image = imageCode.substring(imageCode.indexOf(",") + 1);
-            return Base64.getDecoder().decode(base64Image);
+            return java.util.Base64.getDecoder().decode(base64Image.getBytes(StandardCharsets.UTF_8));
         }catch (Exception e){
             logger.error("Error occurred while parsing image data", e);
         }

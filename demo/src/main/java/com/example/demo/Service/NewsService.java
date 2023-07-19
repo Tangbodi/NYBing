@@ -39,6 +39,7 @@ public class NewsService {
     private RedisCache redisCache;
     @Autowired
     private NewsRepository newsRepository;
+
     public void proxyXml() throws IOException {
         try{
             logger.info("Parsing rss feed from rssFeedUrl:::");
@@ -57,8 +58,8 @@ public class NewsService {
             logger.error("Error in proxyXml:::",e);
         }
     }
-    @Transactional(rollbackOn = Exception.class)
-    public News saveNewsXmlToDatabase(String rssFeed){
+    @Transactional
+    public void saveNewsXmlToDatabase(String rssFeed){
         //parse xml string
         try{
             logger.info("saving News Xml to MySQL:::");
@@ -83,45 +84,45 @@ public class NewsService {
             logger.info("Iterate through the 'item' nodes:::");
             for(int i = 0; i < itemNodes.getLength(); i++){
                 Element item = (Element) itemNodes.item(i);
-                logger.info("create a new News entity:::");
+                logger.info("Creating a new News entity:::");
                 News news = new News();
                 String identifier =item.getElementsByTagName("category").item(0).getTextContent();
 
                 System.out.println("Identifier Number: " + identifier);
                 news.setId(identifier);
-                logger.info("set title for news:::");
+                logger.info("Setting title for news:::");
                 String title = item.getElementsByTagName("title").item(0).getTextContent();
                 System.out.println(title);
                 news.setTitle(title);
 
-                logger.info("set today's date for news:::");
+                logger.info("Setting today's date for news:::");
                 LocalDate today = LocalDate.now();
                 news.setDate(today);
 
-                logger.info("set source for news:::");
+                logger.info("Setting source for news:::");
                 news.setSource(FoxNews);
 
-                logger.info("set item_link for news:::");
+                logger.info("Setting item_link for news:::");
                 String link = item.getElementsByTagName("guid").item(0).getTextContent();
                 System.out.println(link);
                 news.setItemLink(link);
 
-                logger.info("set description for news:::");
+                logger.info("Setting description for news:::");
                 String description = item.getElementsByTagName("description").item(0).getTextContent();
                 System.out.println(description);
                 news.setDescription(description);
 
-                logger.info("set content_encoded for news:::");
+                logger.info("Setting content_encoded for news:::");
                 String contentEncoded = item.getElementsByTagName("content:encoded").item(0).getTextContent();
                 System.out.println(contentEncoded);
                 news.setContentEncoded(contentEncoded);
 
-                logger.info("set media_content_url for news:::");
+                logger.info("Setting media_content_url for news:::");
                 String mediaContentUrl = item.getElementsByTagName("media:content").item(0).getAttributes().getNamedItem("url").getTextContent();
                 System.out.println(mediaContentUrl);
                 news.setMediaContentUrl(mediaContentUrl);
 
-                logger.info("set pubDate for news:::");
+                logger.info("Setting pubDate for news:::");
                 String pubDate = item.getElementsByTagName("pubDate").item(0).getTextContent();
                 System.out.println("pubDate:::"+pubDate);
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z");
@@ -130,11 +131,12 @@ public class NewsService {
                 System.out.println("publish_date:::"+publish_date);
                 news.setPubDate(publish_date);
 
-                logger.info("set run_time for news:::");
+                logger.info("Setting run_time for news:::");
                 Instant run_time = Instant.now();
                 System.out.println(run_time);
                 news.setRunTime(run_time);
-                return newsRepository.save(news);
+                newsRepository.save(news);
+                logger.info("News saved to MySQL:::");
             }
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
@@ -143,9 +145,8 @@ public class NewsService {
         } catch (SAXException e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
-    @Transactional
+
     public List<News> getAllNewsByPublishDate() throws JsonProcessingException {
         try{
             logger.info("Getting all News by publish date:::");
@@ -156,5 +157,8 @@ public class NewsService {
             logger.error("Error in getAllNewsByPublishDate:::",e);
             throw new RuntimeException(e);
         }
+    }
+    public News getNewsByNewsId(String newsId){
+        return newsRepository.findById(newsId).orElseThrow(null);
     }
 }

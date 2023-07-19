@@ -3,6 +3,7 @@ package com.example.demo.Util;
 import com.example.demo.Entity.News;
 import com.example.demo.Repository.NewsRepository;
 import com.example.demo.Service.NewsService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -36,28 +38,22 @@ public class NewsScheduler {
     private NewsRepository newsRepository;
     @Autowired
     private RedisCache redisCache;
-    @Scheduled(cron = "0 0 */3 * * *")//every 3 hours
+    @Scheduled(cron = "0 0 * * * *")//every 1 hour
     public void NewsSchedulerTask() {
         try {
             logger.info("NewsSchedulerTask started:::");
-            logger.info("Parsing rss feed from rssFeedUrl:::");
-            HttpClient httpClient = HttpClientBuilder.create().build();
-            logger.info("HttpClient created:::");
-            HttpGet httpGet = new HttpGet(rssFeedUrl);
-            logger.info("HttpGet created:::");
-            HttpResponse response = httpClient.execute(httpGet);
-            logger.info("httpClient executed:::");
-            if (response.getStatusLine().getStatusCode() == HttpStatus.OK.value()) {
-                logger.info("response was ok:::");
-                String rssFeed = EntityUtils.toString(response.getEntity(),"UTF-8");
-                if(newsService.saveNewsXmlToDatabase(rssFeed)!=null){
-                    logger.info("News saved successfully:::");
-                    //every time save news to database, update redis cache
-                    List<News> newsList = newsService.getAllNewsByPublishDate();
-                    redisCache.updateNewsCache(newsList);
-                }
+            logger.info("Catching News from rssFeedUrl:::");
+            newsService.proxyXml();
+            List<News> newsList = newsService.getAllNewsByPublishDate();
+            if(newsList!=null){
+                //every time save news to database, update redis cache
+                logger.info("Updating redis NEWS cache:::");
+                redisCache.updateNewsCache(newsList);
             }
-            logger.info("NewsSchedulerTask ended:::");
+        } catch (JsonProcessingException ex) {
+            throw new RuntimeException(ex);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         } catch (Exception e) {
             logger.error("NewsSchedulerTask:::Exception:::" + e);
         }

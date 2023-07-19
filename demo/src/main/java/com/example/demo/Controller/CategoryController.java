@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RestController
-@CrossOrigin(origins = "http://192.168.1.10:3000/")
+//@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class CategoryController {
     private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -65,7 +65,7 @@ public class CategoryController {
     //show all posts under specific category
     @GetMapping("/categories/{sub_categoryId}")
     public ResponseEntity<ApiResponse<List<Map<String,Object>>>> PostsCommentsViewWithSubCategoryId(@PathVariable Integer sub_categoryId) throws IOException {
-        if(ValidString.verifySubCategory(sub_categoryId)==false){
+        if(!ValidString.SubCategoryIdEmpty(sub_categoryId) || !ValidString.SubCategoryIdLength(sub_categoryId)){
             ApiResponse errorResponse =ApiResponse.error(404, "No Such Sub Category", "Not Found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }else if(subCategoryService.findSubCategoryById(sub_categoryId)==null){
