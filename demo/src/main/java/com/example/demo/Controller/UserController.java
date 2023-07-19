@@ -1,12 +1,10 @@
 package com.example.demo.Controller;
 
-import com.example.demo.DAO.UserDAO;
 import com.example.demo.DTO.LoginDTO;
 import com.example.demo.DTO.ResetPasswordDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.DTO.UpdatePasswordDTO;
 import com.example.demo.Entity.User;
-import com.example.demo.Repository.UserRepository;
 import com.example.demo.Service.EmailValidationService;
 import com.example.demo.Service.UserService;
 
@@ -17,17 +15,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
 
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
@@ -37,28 +31,25 @@ import java.util.UUID;
 //@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class UserController{
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private JavaMailSender mailSender;
+
     @Autowired
     private EmailValidationService emailValidationService;
 
-    @Autowired
-    private UserDAO userDAO;
+
     @GetMapping("/getData")
     public String getData(){
         return "got data from backend";
     }
 
     @PostMapping("/user/register")
-    public ResponseEntity<ApiResponse<User>> register (@RequestBody UserDTO userDTO, HttpServletRequest request){
+    public ResponseEntity register (@RequestBody UserDTO userDTO, HttpServletRequest request){
         String encodedEmail = HtmlUtils.htmlEscape(userDTO.getEmail());
         //if all are blank
         if(!ValidString.UserNameEmpty(userDTO.getUserName()) || !ValidString.PasswordEmpty(userDTO.getPassword()) || !ValidString.EmailEmpty(encodedEmail)){
-            ApiResponse errorResponse = ApiResponse.error(406,"Username, Email, Or Password Is Blank","Not Acceptable");
+            ApiResponse errorResponse = ApiResponse.error(406,"Username, Email, Or Password Is Blank:::","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }//return false if name is too long or too short
         else if(!ValidString.UserNameLength(userDTO.getUserName())){
@@ -115,7 +106,7 @@ public class UserController{
 
     //------------------------------------------------------------------------------------------
     @PostMapping("/user/login")
-    public ResponseEntity<ApiResponse<User>> UserLogin(@RequestBody LoginDTO loginDTO, HttpServletRequest request)throws IOException {
+    public ResponseEntity UserLogin(@RequestBody LoginDTO loginDTO, HttpServletRequest request){
         //1---user
         //-1---no user
         //0---verify
@@ -150,7 +141,7 @@ public class UserController{
 
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/update/{userName}")
-    public ResponseEntity<ApiResponse<User>> updateUserInfo(@RequestBody UserDTO userDTO, @PathVariable String userName){
+    public ResponseEntity updateUserInfo(@RequestBody UserDTO userDTO, @PathVariable String userName){
         //if all are blank
         if(!ValidString.UserNameEmpty(userDTO.getFirstName())
                 && !ValidString.UserNameEmpty(userDTO.getMiddleName())
@@ -195,7 +186,7 @@ public class UserController{
     }
     //------------------------------------------------------------------------------------------
     @PutMapping("/user/password/update/{userName}")
-    public ResponseEntity<ApiResponse<User>> updateUserPassword(@RequestBody UpdatePasswordDTO updatePasswordDTO, @PathVariable String userName){
+    public ResponseEntity updateUserPassword(@RequestBody UpdatePasswordDTO updatePasswordDTO, @PathVariable String userName){
 
         if(!ValidString.PasswordEmpty(updatePasswordDTO.getOldPassword()) || !ValidString.PasswordEmpty(updatePasswordDTO.getNewPassword())){
             ApiResponse errorResponse = ApiResponse.error(400, "Old Password Or New Password Is Blank", "Bad Request");
@@ -233,7 +224,7 @@ public class UserController{
     }
     //------------------------------------------------------------------------------------------
     @GetMapping("/user/info/{userName}")
-    public ResponseEntity<ApiResponse<User>> getUserByUserName(@PathVariable String userName) {
+    public ResponseEntity getUserByUserName(@PathVariable String userName) {
         if(!ValidString.UserNameEmpty(userName) || !ValidString.UserNameLength(userName) || !ValidString.validUsername(userName)){
                 ApiResponse errorResponse = ApiResponse.error(404, "User Not Exists", "Not Found");
                 return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
@@ -250,7 +241,7 @@ public class UserController{
     }
     //------------------------------------------------------------------------------------------
     @PostMapping("/user/forgot_password")
-    public ResponseEntity<ApiResponse<String>> processForgotPassword(HttpServletRequest request,@RequestBody UserDTO userDTO) throws MessagingException, UnsupportedEncodingException {
+    public ResponseEntity processForgotPassword(HttpServletRequest request, @RequestBody UserDTO userDTO) throws MessagingException, UnsupportedEncodingException {
           if(!ValidString.EmailEmpty(userDTO.getEmail()) || !ValidString.EmailLength(userDTO.getEmail()) || !ValidString.validEmail(userDTO.getEmail())){
             ApiResponse errorResponse = ApiResponse.error(404,"User Doesn't Exist","Not Found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
