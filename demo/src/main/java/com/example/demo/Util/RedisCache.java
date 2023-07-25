@@ -6,9 +6,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
@@ -32,7 +29,7 @@ public class RedisCache {
     //When you use jedis.set, you set the value of a specific key to a specific value.
     //If the key already exists, the existing value is overwritten with the new value. If the key does not exist, a new key-value pair is created.
 
-    public Map<Integer, Map<String, List<SubCategory>>> updateCategorySubCategory(Map<Integer, Map<String, List<SubCategory>>> CategorySubCategory) {
+    public Map<Byte, Map<String, List<SubCategory>>> updateCategorySubCategory(Map<Byte, Map<String, List<SubCategory>>> CategorySubCategory) {
         Jedis jedis = new Jedis("localhost");
         try {
             logger.info("Updating the CATEGORY_SUB_CATEGORY cache:::");

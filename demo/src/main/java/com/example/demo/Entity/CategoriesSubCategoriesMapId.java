@@ -14,27 +14,27 @@ import java.util.Objects;
 @Setter
 @Embeddable
 public class CategoriesSubCategoriesMapId implements Serializable {
-    private static final long serialVersionUID = -7883908919098044998L;
+    private static final long serialVersionUID = -3080433323446309424L;
     @NotNull
     @Column(name = "categoryId", nullable = false)
-    private Integer categoryId;
+    private Byte categoryId;
 
     @NotNull
     @Column(name = "sub_categoryId", nullable = false)
-    private Integer subCategoryId;
+    private Short subCategoryid;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         CategoriesSubCategoriesMapId entity = (CategoriesSubCategoriesMapId) o;
-        return Objects.equals(this.subCategoryId, entity.subCategoryId) &&
+        return Objects.equals(this.subCategoryid, entity.subCategoryid) &&
                 Objects.equals(this.categoryId, entity.categoryId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(subCategoryId, categoryId);
+        return Objects.hash(subCategoryid, categoryId);
     }
 
 }

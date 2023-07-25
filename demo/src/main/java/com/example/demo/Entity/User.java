@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 
-
 @Getter
 @Setter
 @Entity
@@ -23,35 +22,35 @@ public class User {
     private String id;
     @Version
     private Long version;
-    @Size(max = 18)
+    @Size(max = 31)
     @NotNull
-    @Column(name = "userName", nullable = false, length = 18)
+    @Column(name = "userName", nullable = false, length = 31)
     private String userName;
 
-    @Size(max = 36)
-    @Column(name = "firstName", length = 36)
+    @Size(max = 31)
+    @Column(name = "firstName", length = 31)
     private String firstName;
 
-    @Size(max = 36)
-    @Column(name = "middleName", length = 36)
+    @Size(max = 31)
+    @Column(name = "middleName", length = 31)
     private String middleName;
 
-    @Size(max = 36)
-    @Column(name = "lastName", length = 36)
+    @Size(max = 31)
+    @Column(name = "lastName", length = 31)
     private String lastName;
 
     @Size(max = 11)
     @Column(name = "phone", length = 11)
     private String phone;
 
-    @Size(max = 45)
+    @Size(max = 63)
     @NotNull
-    @Column(name = "email", nullable = false, length = 45)
+    @Column(name = "email", nullable = false, length = 63)
     private String email;
 
-    @Size(max = 60)
+    @Size(max = 63)
     @NotNull
-    @Column(name = "password", nullable = false, length = 60)
+    @Column(name = "password", nullable = false, length = 63)
     private String password;
 
     @NotNull
@@ -66,6 +65,7 @@ public class User {
     @Column(name = "verified")
     private String verified;
 
+
     public Long getVersion() {
         return version;
     }
@@ -73,4 +73,5 @@ public class User {
     public void setVersion(Long version) {
         this.version = version;
     }
+
 }

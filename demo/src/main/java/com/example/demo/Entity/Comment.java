@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 
-
 @Getter
 @Setter
 @Entity
@@ -22,14 +21,16 @@ public class Comment {
     @Column(name = "commentId", nullable = false, length = 36)
     private String id;
 
+    @Size(max = 4095)
     @NotNull
-    @Lob
-    @Column(name = "commentContent", nullable = false)
+    @Column(name = "commentContent", nullable = false, length = 4095)
     private String commentContent;
+
 
     @Size(max = 36)
     @Column(name = "fromId", length = 36)
     private String fromId;
+
 
     @Size(max = 36)
     @Column(name = "toId", length = 36)
@@ -42,13 +43,14 @@ public class Comment {
     @Column(name = "from_ipvSix", length = 16)
     private String fromIpvsix;
 
-    @Size(max = 18)
+    @Size(max = 31)
     @NotNull
-    @Column(name = "fromName", nullable = false, length = 18)
+    @Column(name = "fromName", nullable = false, length = 31)
     private String fromName;
 
-    @Size(max = 18)
-    @Column(name = "toName", length = 18)
+
+    @Size(max = 31)
+    @Column(name = "toName", length = 31)
     private String toName;
 
     @NotNull

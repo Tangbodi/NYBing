@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Getter
@@ -16,9 +17,11 @@ import javax.validation.constraints.Size;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResetPasswordDTO {
-    @Size(max = 60)
+    @NotBlank
+    @Size(min = 8,max = 63)
     private String password;
-    @Size(max = 60)
+    @NotBlank
+    @Size(min = 8,max = 63)
     private String confirmPassword;
     private String token;
     @java.lang.Override

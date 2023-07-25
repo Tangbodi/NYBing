@@ -10,7 +10,6 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-
 @Getter
 @Setter
 @Entity
@@ -21,19 +20,19 @@ public class Image {
     @Column(name = "imageId", nullable = false, length = 36)
     private String id;
 
-    @Size(max = 45)
+    @Size(max = 31)
     @NotNull
-    @Column(name = "imageType", nullable = false, length = 45)
+    @Column(name = "imageType", nullable = false, length = 31)
     private String imageType;
 
-    @Size(max = 90)
+    @Size(max = 127)
     @NotNull
-    @Column(name = "imagePath", nullable = false, length = 90)
+    @Column(name = "imagePath", nullable = false, length = 127)
     private String imagePath;
 
-    @Size(max = 90)
+    @Size(max = 63)
     @NotNull
-    @Column(name = "imageURL", nullable = false, length = 90)
+    @Column(name = "imageURL", nullable = false, length = 63)
     private String imageURL;
 
 }

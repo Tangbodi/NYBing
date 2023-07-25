@@ -4,8 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import org.springframework.data.redis.core.RedisHash;
+
 @Getter
 @Setter
 @Entity
@@ -14,10 +15,11 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "categoryId", nullable = false)
-    private Integer id;
+    private Byte id;
 
-    @Size(max = 60)
-    @Column(name = "categoryName", length = 60)
+    @NotNull
+    @Size(max = 63)
+    @Column(name = "categoryName", length = 63)
     private String categoryName;
 
 }

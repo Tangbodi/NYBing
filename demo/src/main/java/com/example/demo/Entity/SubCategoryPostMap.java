@@ -2,7 +2,6 @@ package com.example.demo.Entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.redis.core.RedisHash;
 
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;

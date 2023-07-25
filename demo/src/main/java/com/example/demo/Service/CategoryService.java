@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.*;
 
 @Service
@@ -28,27 +27,27 @@ public class CategoryService {
         private RedisCache redisCache;
 
 
-        public Map<Integer,Map<String, List<SubCategory>>> getAllSubCategories(){
+        public Map<Byte,Map<String, List<SubCategory>>> getAllSubCategories(){
                 try{
                         logger.info("Getting all sub categories:::");
                         logger.info("Getting all sub category sub map ids:::");
-                        Map<Integer,List<Integer>> getAllCategorySubMapIds = getAllCategorySubMapIds();
+                        Map<Byte,List<Short>> getAllCategorySubMapIds = getAllCategorySubMapIds();
                         List<SubCategory> subCategories = subCategoryRepository.findAll();
                         logger.info("Create linked list of sub categories:::");
                         LinkedList<SubCategory> subCategoryLinkedList = new LinkedList<>(subCategories);
                         logger.info("Find all categories:::");
                         List<Category> categories = findAllCategories();
                         logger.info("Create map of category name and sub category list:::");
-                        Map<Integer,Map<String,List<SubCategory>>> res = new HashMap();
-                        for(Integer categoryId : getAllCategorySubMapIds.keySet()){
+                        Map<Byte,Map<String,List<SubCategory>>> res = new HashMap();
+                        for(Byte categoryId : getAllCategorySubMapIds.keySet()){
                                 Integer index = categoryId -1;
                                 String categoryName = categories.get(index).getCategoryName();
-                                List<Integer> subCategoryIds = getAllCategorySubMapIds.get(categoryId);
+                                List<Short> subCategoryIds = getAllCategorySubMapIds.get(categoryId);
 
                                 Map<String, List<SubCategory>> categoryNameMap = new HashMap<>();
                                 List<SubCategory> subCategoryList= new ArrayList<>();
 
-                                for(Integer subCategoryId: subCategoryIds){
+                                for(Short subCategoryId: subCategoryIds){
                                         for(SubCategory subCategory : subCategoryLinkedList){
                                                 if(subCategory.getId().equals(subCategoryId)){
                                                         logger.info("subCategoryList.add(subCategory)");
@@ -73,15 +72,15 @@ public class CategoryService {
                 }
         }
 
-        public Map<Integer,List<Integer>> getAllCategorySubMapIds() {
+        public Map<Byte,List<Short>> getAllCategorySubMapIds() {
                 try{
                         logger.info("Getting all category sub map ids:::");
                         List<CategoriesSubCategoriesMap>categorySubMaps = categorySubCategoryMapRepository.findAll();
-                        Map<Integer,List<Integer>> subCategoryWithSameCategoryId = new HashMap<>();
+                        Map<Byte,List<Short>> subCategoryWithSameCategoryId = new HashMap<>();
                         for (CategoriesSubCategoriesMap categorySubMap : categorySubMaps) {
-                                List<Integer> list = new ArrayList<>();
-                                Integer categoryId = categorySubMap.getId().getCategoryId(); //1
-                                Integer subCategoryId = categorySubMap.getId().getSubCategoryId();//101
+                                List<Short> list = new ArrayList<>();
+                                Byte categoryId = categorySubMap.getId().getCategoryId(); //1
+                                Short subCategoryId = categorySubMap.getId().getSubCategoryid();//101
                                 if(!subCategoryWithSameCategoryId.containsKey(categoryId)){
                                         list.add(subCategoryId);
                                         subCategoryWithSameCategoryId.put(categoryId,list);
@@ -105,7 +104,7 @@ public class CategoryService {
                         throw new RuntimeException(e.getMessage(),e);
                 }
         }
-        public void updateCategorySubCategoryRedisCache(Map<Integer,Map<String, List<SubCategory>>> res){
+        public void updateCategorySubCategoryRedisCache(Map<Byte,Map<String, List<SubCategory>>> res){
                 redisCache.updateCategorySubCategory(res);
         }
 

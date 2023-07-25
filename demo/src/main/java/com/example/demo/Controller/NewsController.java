@@ -4,13 +4,7 @@ import com.example.demo.DTO.NewsDTO;
 import com.example.demo.Entity.News;
 import com.example.demo.Service.NewsService;
 import com.example.demo.Util.ApiResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController

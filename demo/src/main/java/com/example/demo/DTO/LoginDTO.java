@@ -20,10 +20,10 @@ import java.util.Date;
 public class LoginDTO {
 
     @NotBlank
-    @Size(max = 18)
+    @Size(min = 1,max = 31)
     private String userName ;
     @NotBlank
-    @Size(max = 60)
+    @Size(min = 8,max = 63)
     private String password;
 
     @java.lang.Override

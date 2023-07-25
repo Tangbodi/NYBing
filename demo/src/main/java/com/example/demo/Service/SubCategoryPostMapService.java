@@ -17,12 +17,12 @@ public class SubCategoryPostMapService {
     @Autowired
     private SubCategoryPostMapRepository subCategoryPostMapRepository;
     @Transactional(rollbackOn = Exception.class)
-    public boolean saveSubCategoryPostMap(Post post,Integer subCategoryId,String commentId){
+    public boolean saveSubCategoryPostMap(Post post, Short subCategoryId, String commentId){
         try{
             logger.info("saveSubCategoryPostMap:::");
             SubCategoryPostMap subCategoryPostMap = new SubCategoryPostMap();
             SubCategoryPostMapId subCategoryPostMapId = new SubCategoryPostMapId();
-            subCategoryPostMapId.setSubCategoryId(subCategoryId);
+            subCategoryPostMapId.setSubCategoryid(subCategoryId);
             subCategoryPostMapId.setPostId(post.getId().getPostId());
             subCategoryPostMap.setId(subCategoryPostMapId);
             subCategoryPostMap.setCommentId(commentId);

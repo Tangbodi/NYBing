@@ -23,16 +23,21 @@ import java.time.Instant;
 public class CommentDTO {
     @NotBlank
     @Lob
+    @Size(max = 4095)
     private String commentContent;
+    @Size(max = 36)
     private String fromId;
+    @Size(max = 36)
     private String toId;
-    @Size(min = 1,max = 18)
+    @Size(min = 1,max = 31)
     private String fromName;
-    @Size(min = 1,max = 18)
+    @Size(min = 1,max = 31)
     private String toName;
     private Long ipvFour;
     private String ipvSix;
+    @Size(max = 36)
     private String parentId;
+    @Size(max = 36)
     private String postId;
     private Instant PublishAt;
     @java.lang.Override

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Getter
@@ -17,9 +18,11 @@ import javax.validation.constraints.Size;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UpdatePasswordDTO {
 
-    @Size(max = 60)
+    @NotBlank
+    @Size(min = 8, max = 63)
     private String oldPassword;
-    @Size(max = 60)
+    @NotBlank
+    @Size(min = 8, max = 63)
     private String newPassword;
 
     @java.lang.Override

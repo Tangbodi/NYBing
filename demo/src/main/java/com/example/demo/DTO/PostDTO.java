@@ -20,13 +20,14 @@ import java.time.Instant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostDTO {
 
-    private Integer subCategoryId;
+    private Short subCategoryId;
     @NotBlank
     @Size(min = 1,max = 255)
     private String title;
     @NotBlank
     @Lob
     private String textrender;
+    @Size(min = 1,max = 31)
     private String userName;
     private Long ipvFour;
     private String ipvSix;

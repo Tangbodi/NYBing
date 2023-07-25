@@ -15,10 +15,10 @@ import java.util.Objects;
 @Setter
 @Embeddable
 public class SubCategoryPostMapId implements Serializable {
-    private static final long serialVersionUID = -2204279169775633243L;
+    private static final long serialVersionUID = 780699168058881646L;
     @NotNull
     @Column(name = "sub_categoryId", nullable = false)
-    private Integer subCategoryId;
+    private Short subCategoryid;
 
     @Size(max = 36)
     @NotNull
@@ -30,13 +30,13 @@ public class SubCategoryPostMapId implements Serializable {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         SubCategoryPostMapId entity = (SubCategoryPostMapId) o;
-        return Objects.equals(this.subCategoryId, entity.subCategoryId) &&
+        return Objects.equals(this.subCategoryid, entity.subCategoryid) &&
                 Objects.equals(this.postId, entity.postId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(subCategoryId, postId);
+        return Objects.hash(subCategoryid, postId);
     }
 
 }

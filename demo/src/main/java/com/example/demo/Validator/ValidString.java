@@ -134,14 +134,14 @@ public class ValidString {
         }
     }
     //--------------------SUBCATEGORY--------------------
-    public static boolean SubCategoryIdEmpty(Integer subCategoryId){
+    public static boolean SubCategoryIdEmpty(Short subCategoryId){
         if (subCategoryId == null){
             return false;
         }else {
             return true;
         }
     }
-    public static boolean SubCategoryIdLength(Integer subCategoryId){
+    public static boolean SubCategoryIdLength(Short subCategoryId){
         if(subCategoryId>=SUBCATEGORY_MIN_VALUE && subCategoryId<=SUBCATEGORY_MAX_VALUE){
             return true;
         }else{

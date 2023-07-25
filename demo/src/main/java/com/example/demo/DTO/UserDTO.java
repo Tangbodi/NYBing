@@ -20,21 +20,22 @@ import javax.validation.constraints.Size;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDTO {
 
-    @Size(max = 18)
+    @Size(min = 1, max = 31)
     private String userName;
-    @Size(max = 36)
+    @Size(min = 1, max = 31)
     private String firstName;
-    @Size(max = 36)
+    @Size(min = 1, max = 31)
     private String lastName;
-    @Size(max = 36)
+    @Size(min = 1, max = 31)
     private String middleName;
 
-    @Size(max = 45)
+    @Size(max = 63)
     private String email;
     @Size(max = 11)
     private String phone;
 
-    @Size(max = 60)
+
+    @Size(min = 8, max = 63)
     private String password;
 
     @java.lang.Override

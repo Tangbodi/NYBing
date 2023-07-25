@@ -12,7 +12,7 @@ import java.util.Map;
 @Repository
 public interface PostsCommentsViewRepository extends JpaRepository<PostsCommentsView,String> {
     @Query(value = "SELECT * FROM posts_comments_views  WHERE subCategoryId = :subCategoryId",nativeQuery = true)
-    List<PostsCommentsView> findBySubCategoryId(@Param("subCategoryId") Integer subCategoryId);
+    List<PostsCommentsView> findBySubCategoryId(@Param("subCategoryId") Short subCategoryId);
 //    @Query(value = "SELECT a.postId, a.categoryId, title, publishAt, userName, userId, b.views, b.last_comment\n" +
 //            "FROM master.posts a\n" +
 //            "LEFT JOIN master.post_views_comments b\n" +
@@ -23,5 +23,5 @@ public interface PostsCommentsViewRepository extends JpaRepository<PostsComments
             "FROM posts_comments_views\n" +
             "LEFT JOIN posts ON posts_comments_views.postId = posts.postId\n" +
             "WHERE posts.subCategoryId =:subCategoryId",nativeQuery = true)
-    List<Map<String,Object>> combineByTextRender(@Param("subCategoryId") Integer subCategoryId);
+    List<Map<String,Object>> combineByTextRender(@Param("subCategoryId") Short subCategoryId);
 }

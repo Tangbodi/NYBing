@@ -120,7 +120,7 @@ public class PostService {
             logger.info("Setting Post postId:::");
             postId.setPostId(uuId);
             logger.info("Setting Post subCategoryId:::");
-            postId.setSubCategoryId(postDTO.getSubCategoryId());
+            postId.setSubCategoryid(postDTO.getSubCategoryId());
             logger.info("Setting Post id:::");
             post.setId(postId);
             logger.info("Setting Post title:::");

@@ -6,6 +6,7 @@ import com.example.demo.DTO.UserDTO;
 import com.example.demo.DTO.UpdatePasswordDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Service.EmailValidationService;
+
 import com.example.demo.Service.UserService;
 
 import com.example.demo.Util.ApiResponse;
@@ -22,7 +23,6 @@ import org.springframework.web.util.HtmlUtils;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
@@ -257,13 +257,15 @@ public class UserController{
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }else{
             String resetPasswordLink = siteURL + "/reset_password?token=" + token;
+//            kafkaPasswordResetProducerService.sendPasswordResetRequest(encodedEmail);
             if(emailValidationService.sendForgotPasswordLink(encodedEmail,resetPasswordLink)){
                 logger.info("Email has been sent out:::");
                 ApiResponse<String> apiResponse = ApiResponse.success(resetPasswordLink);
                 return ResponseEntity.ok(apiResponse);
-            }else{
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
+
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
         }
     }
 

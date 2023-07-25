@@ -15,7 +15,7 @@ public class SubCategoryService {
     @Autowired
     private SubCategoryRepository subCategoryRepository;
     @Transactional
-    public SubCategory findSubCategoryById(Integer subCategoryId){
+    public SubCategory findSubCategoryById(Short subCategoryId){
         try{
             logger.info("findSubCategoryById:::");
             SubCategory subCategory = subCategoryRepository.findById(subCategoryId).orElse(null);

@@ -52,7 +52,7 @@ public class PostCommentsViewService {
         }
     }
     @Transactional
-    public List<Map<String,Object>> combineByTextRender (Integer sub_categoryId){
+    public List<Map<String,Object>> combineByTextRender (Short sub_categoryId){
         try{
             logger.info("combineByTextRender:::sub_categoryId:::"+sub_categoryId);
             return postsCommentsViewRepository.combineByTextRender(sub_categoryId);

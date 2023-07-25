@@ -8,7 +8,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 
-
 @Getter
 @Setter
 @Entity
@@ -24,16 +23,16 @@ public class Post {
 
     @NotNull
     @Lob
-    @Column(name = "textrender", nullable = false)
+    @Column(name = "textrender")
     private String textrender;
 
     @NotNull
     @Column(name = "publishAt", nullable = false)
     private Instant publishAt;
 
-    @Size(max = 18)
+    @Size(max = 31)
     @NotNull
-    @Column(name = "userName", nullable = false, length = 18)
+    @Column(name = "userName", nullable = false, length = 31)
     private String userName;
 
     @Column(name = "ipvFour", columnDefinition = "INT UNSIGNED")

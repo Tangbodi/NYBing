@@ -48,7 +48,7 @@ public class PostController {
     private SubCategoryPostMapService subCategoryPostMapService;
 
     @GetMapping("/categories/{subCategoryId}/{postId}")
-    public ResponseEntity<ApiResponse<PostWithCommentDTO>> findPostAndCommentByPostId(HttpServletResponse response, @PathVariable("subCategoryId")Integer subCategoryId, @PathVariable("postId") String postId) throws IOException {
+    public ResponseEntity<ApiResponse<PostWithCommentDTO>> findPostAndCommentByPostId(HttpServletResponse response, @PathVariable("subCategoryId")Short subCategoryId, @PathVariable("postId") String postId) throws IOException {
         if(!ValidString.SubCategoryIdEmpty(subCategoryId) || !ValidString.PostIdEmpty(postId)){
             ApiResponse errorResponse = ApiResponse.error(404 , "No Such Post", "Not Found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -62,7 +62,7 @@ public class PostController {
             //NEVER TOUCH THIS
         }
         PostId id = new PostId();
-        id.setSubCategoryId(subCategoryId);
+        id.setSubCategoryid(subCategoryId);
         id.setPostId(postId);
         Post post = postsRepository.findPostById(id);
         if(post==null){
@@ -80,7 +80,7 @@ public class PostController {
     }
     //------------------------------------------------------------------------------------------
     @PostMapping(value = "/categories/{subCategoryId}/post_edit",produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
-    public ResponseEntity<ApiResponse> editPost(HttpServletRequest request, @RequestBody PostDTO postDTO, @PathVariable Integer subCategoryId) throws Exception {
+    public ResponseEntity<ApiResponse> editPost(HttpServletRequest request, @RequestBody PostDTO postDTO, @PathVariable Short subCategoryId) throws Exception {
         if(!ValidString.SubCategoryIdEmpty(subCategoryId) || !ValidString.SubCategoryIdLength(subCategoryId)){
             ApiResponse errorResponse = ApiResponse.error(404 , "No Such Category", "Not Found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -145,7 +145,7 @@ public class PostController {
     //------------------------------------------------------------------------------------------
     //edit comment
     @PostMapping("/categories/{subCategoryId}/{postId}/comment_edit")
-    public ResponseEntity editComment(HttpServletRequest request, @PathVariable("postId") String postId, @PathVariable("subCategoryId") Integer subCategoryId, @RequestBody CommentDTO commentDTO) throws Exception {
+    public ResponseEntity editComment(HttpServletRequest request, @PathVariable("postId") String postId, @PathVariable("subCategoryId") Short subCategoryId, @RequestBody CommentDTO commentDTO) throws Exception {
         if(!ValidString.SubCategoryIdEmpty(subCategoryId) || !ValidString.PostIdEmpty(postId)){
             ApiResponse errorResponse = ApiResponse.error(404 , "No Such Post", "Not Found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);

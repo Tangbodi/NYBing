@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 
-
 @Getter
 @Setter
 @Entity
@@ -24,16 +23,16 @@ public class PostsCommentsView {
 
     @NotNull
     @Column(name = "subCategoryId", nullable = false)
-    private Integer subCategoryId;
+    private Short subCategoryId;
 
     @Size(max = 255)
     @NotNull
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Size(max = 18)
+    @Size(max = 31)
     @NotNull
-    @Column(name = "userName", nullable = false, length = 18)
+    @Column(name = "userName", nullable = false, length = 31)
     private String userName;
 
     @NotNull
