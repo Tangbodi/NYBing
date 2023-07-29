@@ -26,8 +26,6 @@ public class UserDTO {
     private String firstName;
     @Size(min = 1, max = 31)
     private String lastName;
-    @Size(min = 1, max = 31)
-    private String middleName;
 
     @Size(max = 63)
     private String email;
@@ -44,7 +42,6 @@ public class UserDTO {
                 " userName='" + getUserName() + "'" +
                 " firstName='" + getFirstName() + "'" +
                 " lastName='" + getLastName() + "'" +
-                " middleName='" + getMiddleName() + "'" +
                 " email='" + getEmail() + "'" +
                 " phone='" + getPhone() + "'" +
                 "}";

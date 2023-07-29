@@ -22,6 +22,6 @@ public class SubCategory {
     @NotNull
     @Size(max = 63)
     @Column(name = "sub_categoryName", length = 63)
-    private String subCategoryname;
+    private String subCategoryName;
 
 }

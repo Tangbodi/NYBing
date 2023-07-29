@@ -23,7 +23,7 @@ public class PostId implements Serializable {
 
     @NotNull
     @Column(name = "subCategoryid", nullable = false)
-    private Short subCategoryid;
+    private Short subCategoryId;
 
     @Override
     public boolean equals(Object o) {
@@ -31,12 +31,12 @@ public class PostId implements Serializable {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         PostId entity = (PostId) o;
         return Objects.equals(this.postId, entity.postId) &&
-                Objects.equals(this.subCategoryid, entity.subCategoryid);
+                Objects.equals(this.subCategoryId, entity.subCategoryId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(postId, subCategoryid);
+        return Objects.hash(postId, subCategoryId);
     }
 
 }

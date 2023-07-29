@@ -102,21 +102,18 @@ public class UserService {
     @Transactional(rollbackOn = Exception.class)
     public User updateUserInfoByUserName(UserDTO userDTO, String userName){
         try{
-            logger.info("Updating info of user:::"+userName);
+            logger.info("Updating info of user:::"+userName + ":::" + userDTO.getFirstName() + ":::" + userDTO.getLastName() + ":::" + userDTO.getPhone());
             User user = userRepository.findByUserName(userName).orElse(null);
             if(user == null){
                 return null;
             }
             else{
-                if(!ValidString.UserNameEmpty(userDTO.getFirstName())){
+                if(ValidString.UserNameEmpty(userDTO.getFirstName())){
                     user.setFirstName(userDTO.getFirstName());
-                }if(!ValidString.UserNameEmpty(userDTO.getLastName())){
-                    user.setFirstName(userDTO.getLastName());
+                }if(ValidString.UserNameEmpty(userDTO.getLastName())){
+                    user.setLastName(userDTO.getLastName());
                 }
-                if(!ValidString.UserNameEmpty(userDTO.getMiddleName())){
-                    user.setFirstName(userDTO.getMiddleName());
-                }
-                if(!ValidString.PhoneNumberEmpty(userDTO.getPhone())){
+                if(ValidString.PhoneNumberEmpty(userDTO.getPhone())){
                     user.setPhone(userDTO.getPhone());
                 }
             }
@@ -154,7 +151,7 @@ public class UserService {
         }
         return res;
     }
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional
     public boolean updateToken(String token, String email){
         try{
             logger.info("Updating token:::"+token);
@@ -167,7 +164,7 @@ public class UserService {
             throw new RuntimeException("Failed to update token", e);
         }
     }
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional
     public boolean verifyUser(User user){
         try{
             logger.info("Verifying user::" +user.getUserName());
@@ -193,7 +190,7 @@ public class UserService {
         }
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional
     public boolean ResetPassword(User user, String newPassword){
         try{
             logger.info("Resetting password of user:::"+user.getUserName());
@@ -209,7 +206,7 @@ public class UserService {
             throw new RuntimeException("Failed to reset password", e);
         }
     }
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional
     public boolean RemoveToken(User user){
         try{
             logger.info("Removing token of user:::"+user.getUserName());

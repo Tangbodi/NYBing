@@ -144,20 +144,17 @@ public class UserController{
     public ResponseEntity updateUserInfo(@RequestBody UserDTO userDTO, @PathVariable String userName){
         //if all are blank
         if(!ValidString.UserNameEmpty(userDTO.getFirstName())
-                && !ValidString.UserNameEmpty(userDTO.getMiddleName())
                 && !ValidString.UserNameEmpty(userDTO.getLastName())
                 && !ValidString.PhoneNumberEmpty(userDTO.getPhone())){
             ApiResponse errorResponse = ApiResponse.error(400, "No Changes Were Found", "Bad Request");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }else if((ValidString.UserNameEmpty(userDTO.getFirstName()) && !ValidString.UserNameLength(userDTO.getFirstName()))
-                || (ValidString.UserNameEmpty(userDTO.getMiddleName()) && !ValidString.UserNameLength(userDTO.getMiddleName()))
                 || (ValidString.UserNameEmpty(userDTO.getLastName()) && !ValidString.UserNameLength(userDTO.getLastName()))) {
             ApiResponse errorResponse = ApiResponse.error(406,"Name Needs To Be Between 1 To 18 Characters","Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }
         //return true if name contains special characters or whitespaces
         else if((ValidString.UserNameEmpty(userDTO.getFirstName()) && !ValidString.validUsername(userDTO.getFirstName()))
-                || (ValidString.UserNameEmpty(userDTO.getMiddleName()) && !ValidString.validUsername(userDTO.getMiddleName()))
                 || (ValidString.UserNameEmpty(userDTO.getLastName()) && !ValidString.validUsername(userDTO.getLastName()))){
             ApiResponse errorResponse = ApiResponse.error(406, "Name Cannot Contain Whitespaces Or Special Characters", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
@@ -166,13 +163,13 @@ public class UserController{
         else if((ValidString.PhoneNumberEmpty(userDTO.getPhone()) && !ValidString.PhoneNumberLength(userDTO.getPhone()))){
             ApiResponse errorResponse = ApiResponse.error(406, "Invalid phone number", "Not Acceptable");
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
-        }else if((ValidString.PhoneNumberEmpty(userDTO.getPhone()) && !ValidString.validPhoneNumber(userDTO.getPhone()))){
-            ApiResponse errorResponse = ApiResponse.error(406, "Invalid phone number", "Not Acceptable");
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
         }
+//        else if((ValidString.PhoneNumberEmpty(userDTO.getPhone()) && !ValidString.validPhoneNumber(userDTO.getPhone()))){
+//            ApiResponse errorResponse = ApiResponse.error(406, "Invalid phone number", "Not Acceptable");
+//            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+//        }
         else{
             userDTO.setFirstName(ValidString.fixName(userDTO.getFirstName()));
-            userDTO.setMiddleName(ValidString.fixName(userDTO.getMiddleName()));
             userDTO.setLastName(ValidString.fixName(userDTO.getLastName()));
         }
         User user = userService.updateUserInfoByUserName(userDTO,userName);

@@ -62,7 +62,7 @@ public class PostController {
             //NEVER TOUCH THIS
         }
         PostId id = new PostId();
-        id.setSubCategoryid(subCategoryId);
+        id.setSubCategoryId(subCategoryId);
         id.setPostId(postId);
         Post post = postsRepository.findPostById(id);
         if(post==null){
