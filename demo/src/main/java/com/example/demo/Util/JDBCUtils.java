@@ -1,12 +1,12 @@
 package com.example.demo.Util;
 
-import com.example.demo.Service.CategoryService;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
+
 //The purpose of this class is to provide database connection pooling functionality in Java applications
 public class JDBCUtils {
     private static final Logger logger = LoggerFactory.getLogger(JDBCUtils.class);

@@ -71,11 +71,11 @@ public class PostService {
                 String imageType = imageCode.substring(0,imageCode.indexOf(",")+1);
                 image.setImageType(imageType);
                 // Check if imageCode is a valid Base64 string
-                if (!Base64.isBase64(imageCode)) {
-                    logger.info("Invalid Base64 string::: " + imageCode);
-                    logger.info("Skipping getImageData():::");
-                    continue; // Skip processing this image
-                }
+//                if (!Base64.isBase64(imageCode)) {
+//                    logger.info("Invalid Base64 string::: " + imageCode);
+//                    logger.info("Skipping getImageData():::");
+//                    continue; // Skip processing this image//
+//                }
                 byte[] imageData = getImageData(imageCode);
                 //Generate UUID for image
                 String imageId = UUID.randomUUID().toString();
