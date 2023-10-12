@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RestController
-//@CrossOrigin(origins = "http://192.168.1.10:3000/")
+@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class PostController {
     private static final Logger logger = LoggerFactory.getLogger(PostController.class);
     @Autowired
@@ -81,6 +81,8 @@ public class PostController {
     //------------------------------------------------------------------------------------------
     @PostMapping(value = "/categories/{subCategoryId}/post_edit",produces = {"application/json;charset=UTF-8", "text/html;charset=UTF-8"})
     public ResponseEntity<ApiResponse> editPost(HttpServletRequest request, @RequestBody PostDTO postDTO, @PathVariable Short subCategoryId) throws Exception {
+        logger.info("postDTO:::"+postDTO.getTitle() );
+        logger.info("postDTO:::"+postDTO.getTextrender() );
         if(!ValidString.SubCategoryIdEmpty(subCategoryId) || !ValidString.SubCategoryIdLength(subCategoryId)){
             ApiResponse errorResponse = ApiResponse.error(404 , "No Such Category", "Not Found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);

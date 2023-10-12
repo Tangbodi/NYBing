@@ -15,7 +15,7 @@ import java.util.List;
 
 @Component
 public class NewsScheduler {
-//"0 0 * * * *"
+    //"0 0 * * * *"
 // | | | | | |
 // | | | | | +-- Day of the week (0 - 7) (Sunday is 0 and 7)
 // | | | | +---- Month (1 - 12)
@@ -32,6 +32,7 @@ public class NewsScheduler {
     private NewsRepository newsRepository;
     @Autowired
     private RedisCache redisCache;
+
     @Scheduled(cron = "0 0 * * * *")//every 1 hour
     public void NewsSchedulerTask() {
         try {
@@ -39,11 +40,11 @@ public class NewsScheduler {
             logger.info("Catching News from rssFeedUrl:::");
             newsService.proxyXml();
             List<News> newsList = newsService.getAllNewsByPublishDate();
-            if(newsList!=null){
-                //every time save news to database, update redis cache
-                logger.info("Updating redis NEWS cache:::");
-                redisCache.updateNewsCache(newsList);
-            }
+
+            //every time save news to database, update redis cache
+            logger.info("Updating redis NEWS cache:::");
+            redisCache.updateNewsCache(newsList);
+
         } catch (JsonProcessingException ex) {
             throw new RuntimeException(ex);
         } catch (IOException ex) {

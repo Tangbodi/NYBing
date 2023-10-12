@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RestController
-//@CrossOrigin(origins = "http://192.168.1.10:3000/")
+@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class CategoryController {
     private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();

@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-//@CrossOrigin(origins = "http://192.168.1.10:3000/")
+@CrossOrigin(origins = "http://192.168.1.10:3000/")
 public class NewsController {
     private static final Logger logger = LoggerFactory.getLogger(NewsController.class);
     private static final String rssFeedUrl = "http://feeds.foxnews.com/foxnews/national";
