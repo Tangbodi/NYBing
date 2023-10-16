@@ -125,7 +125,7 @@ public class NewsService {
                 logger.info("Setting pubDate for news:::");
                 String pubDate = item.getElementsByTagName("pubDate").item(0).getTextContent();
                 System.out.println("pubDate:::"+pubDate);
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z");
                 TemporalAccessor temporalAccessor = formatter.parse(pubDate);
                 Instant publish_date = Instant.from(temporalAccessor);
                 System.out.println("publish_date:::"+publish_date);
