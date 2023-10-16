@@ -40,11 +40,11 @@ public class NewsScheduler {
             logger.info("Catching News from rssFeedUrl:::");
             newsService.proxyXml();
             List<News> newsList = newsService.getAllNewsByPublishDate();
-
-            //every time save news to database, update redis cache
-            logger.info("Updating redis NEWS cache:::");
-            redisCache.updateNewsCache(newsList);
-
+            if(newsList!=null){
+                //every time save news to database, update redis cache
+                logger.info("Updating redis NEWS cache:::");
+                redisCache.updateNewsCache(newsList);
+            }
         } catch (JsonProcessingException ex) {
             throw new RuntimeException(ex);
         } catch (IOException ex) {

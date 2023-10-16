@@ -4,6 +4,7 @@ import com.example.demo.DTO.NewsDTO;
 import com.example.demo.Entity.News;
 import com.example.demo.Service.NewsService;
 import com.example.demo.Util.ApiResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +71,18 @@ public class NewsController {
             return ResponseEntity.ok(apiResponse);
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(404, "News Not Found", "Not Found"));
+    }
+    @GetMapping("/reset-news")
+    public ResponseEntity resetNews() throws IOException {
+        logger.info("Resetting NEWS");
+        newsService.proxyXml();
+        List<News> NewsList= newsService.getAllNewsByPublishDate();
+        if(NewsList!=null){
+            ApiResponse<List<News>> apiResponse = ApiResponse.success(NewsList);
+            return ResponseEntity.ok(apiResponse);
+        }
+        ApiResponse errorResponse = ApiResponse.error(500, "Internal Server Error", "Internal Server Error");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 }
 
